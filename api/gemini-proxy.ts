@@ -148,7 +148,43 @@ export default async function handler(req: Request) {
 
   } catch (error) {
     console.error('Error in Gemini proxy:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    return new Response(JSON.stringify({ error: `An error occurred while processing your request: ${errorMessage}` }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+
+    let userMessage = 'Đã xảy ra lỗi không mong muốn khi xử lý yêu cầu của bạn. Vui lòng thử lại sau.';
+    let statusCode = 500;
+    
+    // Helper to gracefully extract the innermost error details
+    const getInnermostError = (e: any): any => {
+        if (e instanceof Error && e.message.includes('{')) {
+            try {
+                // Handle cases where the error message is a JSON string
+                const jsonPart = e.message.substring(e.message.indexOf('{'));
+                const parsed = JSON.parse(jsonPart);
+                return parsed.error || parsed;
+            } catch {
+                return null; // Parsing failed
+            }
+        }
+        // Handle structured error objects from the SDK
+        return e?.error || e;
+    };
+
+    const apiError = getInnermostError(error);
+
+    if (apiError && apiError.message) {
+        if (apiError.status === 'UNAVAILABLE' || apiError.code === 503) {
+            userMessage = 'Hệ thống AI hiện đang quá tải. Xin vui lòng thử lại sau giây lát.';
+            statusCode = 503;
+        } else {
+            userMessage = `Lỗi từ hệ thống AI: ${apiError.message}`;
+            statusCode = apiError.code || 500;
+        }
+    } else if (error instanceof Error) {
+        userMessage = error.message;
+    }
+    
+    return new Response(JSON.stringify({ error: userMessage }), { 
+        status: statusCode, 
+        headers: { 'Content-Type': 'application/json' } 
+    });
   }
 }
