@@ -1,12 +1,12 @@
 // This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
-// FIX: Changed BlockReason to BlockedReason as it is the correct exported member.
 import { GoogleGenAI, Type, BlockedReason } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
 import type { BirthInfo } from '../types';
 
-export const config = {
-  runtime: 'edge',
-};
+// By removing the `export const config = { runtime: 'edge' };`, this function
+// will default to the standard Node.js serverless runtime, which has a longer
+// timeout. This is necessary because Gemini API calls for complex tasks can
+// exceed the short timeout of the Edge runtime, causing a 504 error.
 
 // --- Schemas for Gemini API response validation ---
 const palaceSchema = {
@@ -76,7 +76,7 @@ Yêu cầu:
 export default async function handler(req: Request) {
   const headers = {
     'Content-Type': 'application/json',
-    'X-Proxy-Version': '1.1-enhanced',
+    'X-Proxy-Version': '1.2-nodejs',
   };
 
   if (req.method !== 'POST') {
@@ -134,7 +134,6 @@ export default async function handler(req: Request) {
       console.error('Gemini response was blocked or empty. Feedback:', JSON.stringify(feedback, null, 2));
       let userMessage = 'Không thể tạo nội dung. Phản hồi từ AI trống hoặc đã bị chặn bởi bộ lọc an toàn.';
       if (feedback?.blockReason) {
-// FIX: Changed BlockReason to BlockedReason as it is the correct exported member.
         const reason = feedback.blockReason === BlockedReason.SAFETY ? 'an toàn' : `khác (${feedback.blockReason})`;
         userMessage = `Yêu cầu của bạn đã bị chặn vì lý do ${reason}. Vui lòng thử lại với thông tin khác.`;
       }
