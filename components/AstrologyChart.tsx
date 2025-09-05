@@ -179,7 +179,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                         </div>
                     ))}
 
-                    <div className="p-2 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-700/80 flex flex-col justify-center text-center" style={{gridArea: 'center'}}>
+                    <div className="p-2 sm:p-4 bg-gray-900/70 rounded-lg border border-yellow-500/30 flex flex-col justify-center text-center shadow-[0_0_20px_rgba(250,204,21,0.2)]" style={{gridArea: 'center'}}>
                         <div className="flex-grow flex flex-col justify-center">
                             <h2 className="text-lg sm:text-2xl font-bold text-yellow-400 font-serif">{birthInfo.name}</h2>
                             <p className="text-gray-300 text-xs sm:text-sm">{birthInfo.gender} - {`Ngày ${birthInfo.day}/${birthInfo.month}/${birthInfo.year}`}</p>

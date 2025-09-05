@@ -1,12 +1,12 @@
 // @ts-ignore
-import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
+import type { GenerateContentResponse } from "@google/genai";
 import type { BirthInfo } from '../types';
 
 // This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
-// Create a folder named 'api' in your project root and place this file inside it.
 
 export const config = {
-  runtime: 'edge', // Use the Vercel Edge runtime for speed
+  runtime: 'edge', 
 };
 
 // --- Schemas for Gemini API response validation ---
@@ -76,17 +76,17 @@ Yêu cầu:
 
 // --- Main Handler ---
 export default async function handler(req: Request) {
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
-  }
-
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    const errorMessage = 'API Key chưa được cấu hình trên máy chủ. Vui lòng kiểm tra lại biến môi trường `API_KEY` trong cài đặt dự án và triển khai lại (redeploy).';
-    return new Response(JSON.stringify({ error: errorMessage }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-  }
-
   try {
+    if (req.method !== 'POST') {
+      return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      const errorMessage = 'API Key chưa được cấu hình trên máy chủ. Vui lòng kiểm tra lại biến môi trường `API_KEY` trong cài đặt dự án và triển khai lại (redeploy).';
+      return new Response(JSON.stringify({ error: errorMessage }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+
     const ai = new GoogleGenAI({ apiKey });
     const { operation, payload } = await req.json();
 
@@ -163,19 +163,17 @@ export default async function handler(req: Request) {
     let userMessage = 'Đã xảy ra lỗi không mong muốn khi xử lý yêu cầu của bạn.';
     let statusCode = 500;
     
-    const errorDetails = (error as any)?.details || (error as any)?.message || '';
-    const errorString = (typeof errorDetails === 'string' ? errorDetails : JSON.stringify(errorDetails)).toLowerCase();
-
-    if (errorString.includes('api key not valid')) {
-        userMessage = 'Lỗi xác thực API Key. Vui lòng kiểm tra lại giá trị API Key trên máy chủ.';
-        statusCode = 401;
-    } else if (errorString.includes('503') || errorString.includes('unavailable')) {
-        userMessage = 'Hệ thống AI hiện đang quá tải. Xin vui lòng thử lại sau giây lát.';
-        statusCode = 503;
-    } else if (error instanceof Error) {
-        userMessage = `Lỗi từ hệ thống AI: ${error.message}`;
-    } else if (errorString) {
-        userMessage = `Lỗi từ hệ thống AI: ${errorString}`;
+    if (error instanceof Error) {
+        const errorString = error.message.toLowerCase();
+        if (errorString.includes('api key not valid')) {
+            userMessage = 'Lỗi xác thực API Key. Vui lòng kiểm tra lại giá trị API Key trên máy chủ.';
+            statusCode = 401;
+        } else if (errorString.includes('503') || errorString.includes('unavailable')) {
+            userMessage = 'Hệ thống AI hiện đang quá tải. Xin vui lòng thử lại sau giây lát.';
+            statusCode = 503;
+        } else {
+            userMessage = `Lỗi từ hệ thống AI: ${error.message}`;
+        }
     }
     
     return new Response(JSON.stringify({ error: userMessage }), { 

@@ -13,14 +13,16 @@
         font-family: 'Quicksand', sans-serif;
         background-color: #0c0a1a;
         background-image: 
+          radial-gradient(ellipse at top, #1b2735 0%, #090a0f 100%),
           radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
           radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
           radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px),
           radial-gradient(rgba(255,255,255,.4) 2px, transparent 30px);
-        background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
+        background-attachment: fixed;
+        background-size: 100% 100%, 550px 550px, 350px 350px, 250px 250px, 150px 150px;
         background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
         color: #e5e7eb; /* default text-gray-200 */
-        animation: move-twinkles 200s linear infinite;
+        animation: move-twinkles 300s linear infinite;
       }
       .font-serif {
         font-family: 'Playfair Display', serif;
@@ -68,14 +70,27 @@
       /* Animations */
       @keyframes move-twinkles {
           from { background-position: 0 0, 40px 60px, 130px 270px, 70px 100px; }
-          to { background-position: -550px 0, -310px 60px, -30px 270px, -80px 100px; }
+          to { background-position: -1000px 500px, -960px 540px, -870px 270px, -930px 600px; }
       }
       @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from { opacity: 0; }
+        to { opacity: 1; }
       }
       .animate-fade-in {
         animation: fadeIn 0.8s ease-out forwards;
+      }
+      @keyframes slide-in-up {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+      }
+      .animate-slide-in-up {
+        animation: slide-in-up 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
       }
       @keyframes fadeInDown {
         from {

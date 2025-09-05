@@ -37,7 +37,6 @@ const App: React.FC = () => {
       const storedCharts = localStorage.getItem('astrologyCharts');
       if (storedCharts) {
         const parsedCharts = JSON.parse(storedCharts);
-        // Validate data structure before setting state to prevent crashes from corrupted data
         if (Array.isArray(parsedCharts) && parsedCharts.every(c => c.id && c.birthInfo && c.chartData)) {
             setSavedCharts(parsedCharts);
             if (parsedCharts.length > 0) {
@@ -63,6 +62,10 @@ const App: React.FC = () => {
         setVisitCount(1);
     }
   }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [appState]);
 
   useEffect(() => {
     if (appState === AppState.SAVED_CHARTS && savedCharts.length === 0) {
@@ -231,20 +234,20 @@ const App: React.FC = () => {
         {MemoizedHeader}
         <main className="container mx-auto px-4 py-8 flex-grow">
           {error && (
-            <div className="bg-red-800 border border-red-600 text-white px-4 py-3 rounded-lg relative mb-6 flex items-center justify-between animate-fade-in" role="alert" aria-live="assertive">
-              <div className="flex items-center">
-                <svg className="w-6 h-6 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div className="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-3 rounded-lg relative mb-6 flex items-start justify-between animate-fade-in" role="alert" aria-live="assertive">
+              <div className="flex items-start">
+                <svg className="w-6 h-6 mr-3 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 <div>
-                  <strong className="font-bold">Đã xảy ra lỗi!</strong>
-                  <span className="block sm:inline sm:ml-2">{error}</span>
+                  <strong className="font-bold text-red-300">Đã xảy ra lỗi!</strong>
+                  <span className="block mt-1">{error}</span>
                 </div>
               </div>
-              <button onClick={() => setError(null)} className="p-1 rounded-full hover:bg-red-700 transition-colors" aria-label="Đóng thông báo lỗi">
+              <button onClick={() => setError(null)} className="p-1 rounded-full hover:bg-red-500/20 transition-colors ml-4" aria-label="Đóng thông báo lỗi">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
           )}
-          <div className="animate-fade-in">
+          <div key={appState} className="animate-slide-in-up">
             {content}
           </div>
         </main>

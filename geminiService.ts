@@ -8,8 +8,15 @@ async function callProxy(operation: string, payload: object): Promise<any> {
     });
 
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Đã xảy ra lỗi không xác định khi đọc phản hồi từ máy chủ.' }));
-        throw new Error(errorData.error || 'Không thể kết nối đến máy chủ. Vui lòng thử lại.');
+        let errorMsg = 'Đã xảy ra lỗi không xác định khi đọc phản hồi từ máy chủ.';
+        try {
+            const errorData = await response.json();
+            errorMsg = errorData.error || `Lỗi máy chủ: ${response.statusText || response.status}`;
+        } catch (e) {
+            // This catches cases where the response is not JSON, e.g., a Vercel 500 error page.
+            errorMsg = `Không thể xử lý phản hồi từ máy chủ (Mã lỗi: ${response.status}). Vui lòng thử lại.`;
+        }
+        throw new Error(errorMsg);
     }
 
     return response.json();
@@ -22,7 +29,6 @@ export const generateAstrologyChart = async (info: BirthInfo): Promise<Astrology
   } catch (error) {
     console.error("Lỗi khi tạo lá số tử vi:", error);
     if (error instanceof Error) {
-        // Preserve specific user-facing errors from the proxy
         throw error;
     }
     throw new Error("Không thể tạo lá số do lỗi kết nối hoặc sự cố từ máy chủ. Vui lòng thử lại.");
@@ -36,7 +42,6 @@ export const analyzePhysiognomy = async (base64Image: string): Promise<Physiogno
   } catch (error) {
     console.error("Lỗi khi phân tích nhân tướng:", error);
     if (error instanceof Error) {
-        // Preserve specific user-facing errors from the proxy
         throw error;
     }
     throw new Error("Không thể phân tích nhân tướng do lỗi kết nối hoặc sự cố từ máy chủ. Vui lòng thử lại.");
