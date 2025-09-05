@@ -138,23 +138,19 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
                     const containerRatio = containerWidth / containerHeight;
 
                     let visibleVideoWidth = videoWidth;
-                    let visibleVideoHeight = videoHeight;
-                    let cropX = 0;
                     
-                    // Calculate visible area of video due to 'object-cover'
-                    if (videoRatio > containerRatio) { // Video wider than container, cropped sides
+                    // The video element uses 'object-cover', which means it might be cropped.
+                    // We need to calculate the actual visible area of the video to determine
+                    // if the face is centered in the user's view.
+                    if (videoRatio > containerRatio) { // Video is wider than its container (cropped left/right)
                         const scale = containerHeight / videoHeight;
                         visibleVideoWidth = containerWidth / scale;
-                        cropX = (videoWidth - visibleVideoWidth) / 2;
-                    } else { // Video taller than container, cropped top/bottom
-                        const scale = containerWidth / videoWidth;
-                        visibleVideoHeight = containerHeight / scale;
-                        // cropY is not needed for centering logic as it's symmetrical
-                    }
+                    } 
+                    // If video is taller, vertical centering is symmetrical so we don't need to adjust Y calcs.
                     
-                    const smallerDim = Math.min(visibleVideoWidth, visibleVideoHeight);
-                    const targetSize = smallerDim * 0.45;
-                    const tolerance = 0.25; // Relaxed tolerance
+                    const smallerDim = Math.min(visibleVideoWidth, videoHeight);
+                    const targetSize = smallerDim * 0.45; // Ideal face size relative to the visible area.
+                    const tolerance = 0.25; // How much deviation from the ideal size is acceptable.
 
                     const faceCenterX = face.x + face.width / 2;
                     const faceCenterY = face.y + face.height / 2;
@@ -163,7 +159,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
                     const frameCenterY = videoHeight / 2;
                     
                     const distance = Math.sqrt(Math.pow(faceCenterX - frameCenterX, 2) + Math.pow(faceCenterY - frameCenterY, 2));
-                    const positionOffset = distance / smallerDim;
+                    const positionOffset = distance / smallerDim; // How far from the center the face is.
                     
                     const faceSize = (face.width + face.height) / 2;
                     
@@ -171,7 +167,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
                         newFeedback = 'Vui lòng tiến lại gần hơn một chút.';
                     } else if (faceSize > targetSize * (1 + tolerance)) {
                         newFeedback = 'Vui lòng lùi ra xa hơn một chút.';
-                    } else if (positionOffset > 0.20) { // Relaxed position offset
+                    } else if (positionOffset > 0.20) { // Check if face is reasonably centered.
                         newFeedback = 'Căn khuôn mặt vào giữa khung hình.';
                     } else {
                         isPositionGood = true;

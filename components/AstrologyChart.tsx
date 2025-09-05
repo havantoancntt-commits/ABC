@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import type { AstrologyChartData, BirthInfo, Palace } from '../types';
 import Button from './Button';
 
@@ -63,6 +63,18 @@ const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; o
 });
 
 const PalaceDetailModal: React.FC<{ palace: Palace; onClose: () => void; }> = ({ palace, onClose }) => {
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                onClose();
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [onClose]);
+
     return (
         <div 
             className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 transition-opacity p-4 animate-fade-in"
@@ -82,7 +94,7 @@ const PalaceDetailModal: React.FC<{ palace: Palace; onClose: () => void; }> = ({
                         </h2>
                         <p className="font-semibold text-purple-300 mt-2">{palace.stars.join(', ')}</p>
                     </div>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white">&times;</button>
+                    <button onClick={onClose} className="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
                 </div>
                 <div className="max-h-[60vh] overflow-y-auto pr-4 -mr-4">
                     <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{palace.interpretation}</p>

@@ -3,12 +3,12 @@ import type { BirthInfo, AstrologyChartData, PhysiognomyData } from './types';
 
 // Helper function to lazily initialize the AI client and handle missing API key
 const getAiClient = () => {
-    // Khóa API phải được lấy từ biến môi trường process.env.API_KEY.
+    // API key must be obtained from process.env.API_KEY environment variable.
     const apiKey = process.env.API_KEY;
     
     if (!apiKey) {
-        // Lỗi này sẽ được bắt bởi khối try/catch của hàm gọi
-        throw new Error("Lỗi cấu hình: Biến môi trường API_KEY chưa được thiết lập.");
+        // This specific error message is caught and handled in the calling functions.
+        throw new Error("CONFIG_ERROR_API_KEY_MISSING");
     }
     return new GoogleGenAI({ apiKey: apiKey });
 };
@@ -106,10 +106,13 @@ export const generateAstrologyChart = async (info: BirthInfo): Promise<Astrology
     return JSON.parse(jsonText) as AstrologyChartData;
   } catch (error) {
     console.error("Lỗi khi tạo lá số tử vi:", error);
-    if (error instanceof Error && (error.message.includes("cấu hình") || error.message.toLowerCase().includes("api key"))) {
+    if (error instanceof Error && error.message === "CONFIG_ERROR_API_KEY_MISSING") {
         throw new Error("Dịch vụ đang gặp lỗi cấu hình. Vui lòng quay lại sau.");
     }
-    throw new Error("Không thể tạo lá số do lỗi kết nối. Vui lòng kiểm tra lại mạng và thử lại.");
+    if (error instanceof SyntaxError) { // This happens if JSON.parse fails
+        throw new Error("Dịch vụ trả về dữ liệu không hợp lệ. Vui lòng thử lại.");
+    }
+    throw new Error("Không thể tạo lá số do lỗi kết nối hoặc sự cố từ máy chủ. Vui lòng thử lại.");
   }
 };
 
@@ -161,9 +164,12 @@ export const analyzePhysiognomy = async (base64Image: string): Promise<Physiogno
         return JSON.parse(jsonText) as PhysiognomyData;
     } catch (error) {
         console.error("Lỗi khi phân tích nhân tướng:", error);
-        if (error instanceof Error && (error.message.includes("cấu hình") || error.message.toLowerCase().includes("api key"))) {
+        if (error instanceof Error && error.message === "CONFIG_ERROR_API_KEY_MISSING") {
             throw new Error("Dịch vụ đang gặp lỗi cấu hình. Vui lòng quay lại sau.");
         }
-        throw new Error("Không thể phân tích nhân tướng do lỗi kết nối. Vui lòng kiểm tra lại mạng và thử lại.");
+        if (error instanceof SyntaxError) { // This happens if JSON.parse fails
+            throw new Error("Dịch vụ trả về dữ liệu không hợp lệ. Vui lòng thử lại.");
+        }
+        throw new Error("Không thể phân tích nhân tướng do lỗi kết nối hoặc sự cố từ máy chủ. Vui lòng thử lại.");
     }
 };

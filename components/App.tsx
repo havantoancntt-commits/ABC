@@ -37,13 +37,19 @@ const App: React.FC = () => {
       const storedCharts = localStorage.getItem('astrologyCharts');
       if (storedCharts) {
         const parsedCharts = JSON.parse(storedCharts);
-        if (Array.isArray(parsedCharts) && parsedCharts.length > 0) {
+        // Validate data structure before setting state to prevent crashes from corrupted data
+        if (Array.isArray(parsedCharts) && parsedCharts.every(c => c.id && c.birthInfo && c.chartData)) {
             setSavedCharts(parsedCharts);
-            setAppState(AppState.SAVED_CHARTS);
+            if (parsedCharts.length > 0) {
+               setAppState(AppState.SAVED_CHARTS);
+            }
+        } else {
+            console.warn("Dữ liệu lá số trong localStorage không hợp lệ, đang xóa...");
+            localStorage.removeItem('astrologyCharts');
         }
       }
     } catch (e) {
-      console.error("Failed to load charts from localStorage", e);
+      console.error("Không thể tải lá số từ localStorage", e);
       localStorage.removeItem('astrologyCharts');
     }
 
@@ -225,9 +231,17 @@ const App: React.FC = () => {
         {MemoizedHeader}
         <main className="container mx-auto px-4 py-8 flex-grow">
           {error && (
-            <div className="bg-red-800 border border-red-600 text-white px-4 py-3 rounded-lg relative mb-6 text-center animate-fade-in" role="alert">
-              <strong className="font-bold">Lỗi!</strong>
-              <span className="block sm:inline ml-2">{error}</span>
+            <div className="bg-red-800 border border-red-600 text-white px-4 py-3 rounded-lg relative mb-6 flex items-center justify-between animate-fade-in" role="alert" aria-live="assertive">
+              <div className="flex items-center">
+                <svg className="w-6 h-6 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                  <strong className="font-bold">Đã xảy ra lỗi!</strong>
+                  <span className="block sm:inline sm:ml-2">{error}</span>
+                </div>
+              </div>
+              <button onClick={() => setError(null)} className="p-1 rounded-full hover:bg-red-700 transition-colors" aria-label="Đóng thông báo lỗi">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
             </div>
           )}
           <div className="animate-fade-in">

@@ -77,6 +77,7 @@ const BirthInfoForm: React.FC<Props> = ({ onSubmit }) => {
               }}
               className={`w-full bg-gray-900/50 border rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all ${errors.name ? 'border-red-500' : 'border-gray-600'}`}
               placeholder="Ví dụ: Nguyễn Văn A"
+              required
               aria-required="true"
               aria-invalid={!!errors.name}
               aria-describedby={errors.name ? "name-error" : undefined}
