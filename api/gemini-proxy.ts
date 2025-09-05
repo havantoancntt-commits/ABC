@@ -1,12 +1,11 @@
-// @ts-ignore
-import { GoogleGenAI, Type } from "@google/genai";
+// This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
+// FIX: Changed BlockReason to BlockedReason as it is the correct exported member.
+import { GoogleGenAI, Type, BlockedReason } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
 import type { BirthInfo } from '../types';
 
-// This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
-
 export const config = {
-  runtime: 'edge', 
+  runtime: 'edge',
 };
 
 // --- Schemas for Gemini API response validation ---
@@ -73,112 +72,106 @@ Yêu cầu:
 3. Phân tích chi tiết Ngũ Quan (Mắt, Mũi, Miệng, Tai, Lông mày).
 4. Đưa ra lời khuyên hữu ích, mang tính xây dựng và tích cực dựa trên phân tích.`;
 
-
 // --- Main Handler ---
 export default async function handler(req: Request) {
-  try {
-    if (req.method !== 'POST') {
-      return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
-    }
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-Proxy-Version': '1.1-enhanced',
+  };
 
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers });
+  }
+
+  try {
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
-      const errorMessage = 'API Key chưa được cấu hình trên máy chủ. Vui lòng kiểm tra lại biến môi trường `API_KEY` trong cài đặt dự án và triển khai lại (redeploy).';
-      return new Response(JSON.stringify({ error: errorMessage }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      console.error("API_KEY environment variable not set on Vercel.");
+      const errorMessage = 'API Key chưa được cấu hình trên máy chủ. Quản trị viên cần kiểm tra lại biến môi trường `API_KEY` trong cài đặt dự án và triển khai lại (redeploy).';
+      return new Response(JSON.stringify({ error: errorMessage }), { status: 500, headers });
     }
 
-    const ai = new GoogleGenAI({ apiKey });
     const { operation, payload } = await req.json();
-
+    const ai = new GoogleGenAI({ apiKey });
     let response: GenerateContentResponse;
 
     if (operation === 'generateAstrologyChart') {
-        const info: BirthInfo = payload.info;
-        const hourString = info.hour === -1 ? 'Không rõ' : `${info.hour} giờ`;
-        const userPrompt = `Lập lá số tử vi chi tiết cho người có thông tin sau:\n- Tên: ${info.name}\n- Giới tính: ${info.gender}\n- Ngày sinh (Dương Lịch): ${info.day}/${info.month}/${info.year}\n- Giờ sinh: ${hourString}`;
-        
-        response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: userPrompt,
-            config: {
-                systemInstruction: ASTROLOGY_SYSTEM_INSTRUCTION,
-                responseMimeType: "application/json",
-                responseSchema: astrologySchema,
-                temperature: 0.7,
-            },
-        });
-
+      const info: BirthInfo = payload.info;
+      const hourString = info.hour === -1 ? 'Không rõ' : `${info.hour} giờ`;
+      const userPrompt = `Lập lá số tử vi chi tiết cho người có thông tin sau:\n- Tên: ${info.name}\n- Giới tính: ${info.gender}\n- Ngày sinh (Dương Lịch): ${info.day}/${info.month}/${info.year}\n- Giờ sinh: ${hourString}`;
+      response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: userPrompt,
+        config: {
+          systemInstruction: ASTROLOGY_SYSTEM_INSTRUCTION,
+          responseMimeType: "application/json",
+          responseSchema: astrologySchema,
+          temperature: 0.7,
+        },
+      });
     } else if (operation === 'analyzePhysiognomy') {
-        const { base64Image } = payload;
-        const promptText = "Phân tích nhân tướng học cho khuôn mặt trong ảnh này.";
-        const imagePart = { inlineData: { mimeType: 'image/jpeg', data: base64Image } };
-        response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: { parts: [imagePart, { text: promptText }] },
-            config: {
-                systemInstruction: PHYSIOGNOMY_SYSTEM_INSTRUCTION,
-                responseMimeType: "application/json",
-                responseSchema: physiognomySchema,
-                temperature: 0.6,
-            },
-        });
+      const { base64Image } = payload;
+      const promptText = "Phân tích nhân tướng học cho khuôn mặt trong ảnh này.";
+      const imagePart = { inlineData: { mimeType: 'image/jpeg', data: base64Image } };
+      response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: { parts: [imagePart, { text: promptText }] },
+        config: {
+          systemInstruction: PHYSIOGNOMY_SYSTEM_INSTRUCTION,
+          responseMimeType: "application/json",
+          responseSchema: physiognomySchema,
+          temperature: 0.6,
+        },
+      });
     } else {
-        return new Response(JSON.stringify({ error: 'Invalid operation' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: 'Invalid operation specified' }), { status: 400, headers });
     }
-    
+
     const responseText = response.text;
 
     if (!responseText) {
-        const feedback = response.promptFeedback;
-        console.error('Gemini response was blocked or empty.', feedback);
-        let userMessage = 'Không thể tạo nội dung. Phản hồi từ AI trống hoặc đã bị chặn bởi bộ lọc an toàn.';
-        if (feedback?.blockReason) {
-            userMessage = `Yêu cầu của bạn đã bị chặn vì lý do an toàn (${feedback.blockReason}). Vui lòng thử lại với thông tin khác.`;
-        }
-        return new Response(JSON.stringify({ error: userMessage }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' },
-        });
+      const feedback = response.promptFeedback;
+      console.error('Gemini response was blocked or empty. Feedback:', JSON.stringify(feedback, null, 2));
+      let userMessage = 'Không thể tạo nội dung. Phản hồi từ AI trống hoặc đã bị chặn bởi bộ lọc an toàn.';
+      if (feedback?.blockReason) {
+// FIX: Changed BlockReason to BlockedReason as it is the correct exported member.
+        const reason = feedback.blockReason === BlockedReason.SAFETY ? 'an toàn' : `khác (${feedback.blockReason})`;
+        userMessage = `Yêu cầu của bạn đã bị chặn vì lý do ${reason}. Vui lòng thử lại với thông tin khác.`;
+      }
+      return new Response(JSON.stringify({ error: userMessage }), { status: 400, headers });
     }
 
     try {
-        JSON.parse(responseText);
+      JSON.parse(responseText);
     } catch (e) {
-        console.error('Gemini response is not valid JSON:', responseText);
-        const userMessage = 'Hệ thống AI đã trả về một định dạng dữ liệu không hợp lệ. Xin lỗi vì sự bất tiện này, vui lòng thử lại.';
-        return new Response(JSON.stringify({ error: userMessage }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
+      console.error('Gemini response is not valid JSON:', responseText);
+      const userMessage = 'Hệ thống AI đã trả về một định dạng dữ liệu không hợp lệ. Đây có thể là sự cố tạm thời, vui lòng thử lại.';
+      return new Response(JSON.stringify({ error: userMessage }), { status: 500, headers });
     }
 
-    return new Response(responseText, {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(responseText, { status: 200, headers });
 
   } catch (error: unknown) {
-    console.error('Error in Gemini proxy:', error);
-
+    console.error('Critical error in Gemini proxy function:', error);
     let userMessage = 'Đã xảy ra lỗi không mong muốn khi xử lý yêu cầu của bạn.';
     let statusCode = 500;
-    
-    if (error instanceof Error) {
-        const errorString = error.message.toLowerCase();
-        if (errorString.includes('api key not valid')) {
-            userMessage = 'Lỗi xác thực API Key. Vui lòng kiểm tra lại giá trị API Key trên máy chủ.';
-            statusCode = 401;
-        } else if (errorString.includes('503') || errorString.includes('unavailable')) {
-            userMessage = 'Hệ thống AI hiện đang quá tải. Xin vui lòng thử lại sau giây lát.';
-            statusCode = 503;
-        } else {
-            userMessage = `Lỗi từ hệ thống AI: ${error.message}`;
-        }
+
+    if (error instanceof SyntaxError && error.message.includes('JSON')) {
+      userMessage = 'Yêu cầu gửi lên máy chủ có định dạng không hợp lệ.';
+      statusCode = 400;
+    } else if (error instanceof Error) {
+      const errorString = error.toString().toLowerCase();
+      if (errorString.includes('api key not valid')) {
+        userMessage = 'Lỗi xác thực API Key. Vui lòng kiểm tra lại giá trị API Key trên máy chủ.';
+        statusCode = 401;
+      } else if (errorString.includes('503') || errorString.includes('unavailable') || errorString.includes('resource has been exhausted')) {
+        userMessage = 'Hệ thống AI hiện đang quá tải hoặc đã hết tài nguyên. Xin vui lòng thử lại sau giây lát.';
+        statusCode = 503;
+      } else {
+        userMessage = `Đã xảy ra lỗi phía máy chủ. Vui lòng thử lại sau. (Chi tiết: ${error.message})`;
+      }
     }
-    
-    return new Response(JSON.stringify({ error: userMessage }), { 
-        status: statusCode, 
-        headers: { 'Content-Type': 'application/json' } 
-    });
+
+    return new Response(JSON.stringify({ error: userMessage }), { status: statusCode, headers });
   }
 }
