@@ -126,8 +126,10 @@ export default async function handler(req: Request) {
         return new Response(JSON.stringify({ error: 'Invalid operation' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
     
-    if (!response || !response.text) {
-        const feedback = response?.promptFeedback;
+    const responseText = response.text;
+
+    if (!responseText) {
+        const feedback = response.promptFeedback;
         console.error('Gemini response was blocked or empty.', feedback);
         let userMessage = 'Không thể tạo nội dung. Phản hồi từ AI trống hoặc đã bị chặn bởi bộ lọc an toàn.';
         if (feedback?.blockReason) {
@@ -139,7 +141,18 @@ export default async function handler(req: Request) {
         });
     }
 
-    return new Response(response.text, {
+    try {
+        JSON.parse(responseText);
+    } catch (e) {
+        console.error('Gemini response is not valid JSON:', responseText);
+        const userMessage = 'Hệ thống AI đã trả về một định dạng dữ liệu không hợp lệ. Xin lỗi vì sự bất tiện này, vui lòng thử lại.';
+        return new Response(JSON.stringify({ error: userMessage }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+
+    return new Response(responseText, {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
