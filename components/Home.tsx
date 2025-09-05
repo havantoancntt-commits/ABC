@@ -15,16 +15,19 @@ const FeatureCard: React.FC<{
     onClick: () => void;
     buttonVariant: 'primary' | 'special';
 }> = ({ title, description, buttonText, icon, onClick, buttonVariant }) => (
-    <Card className="flex flex-col text-center items-center transform transition-transform duration-300 hover:scale-105 hover:shadow-yellow-500/20">
-        <div className="p-4 bg-gray-900/50 rounded-full mb-4">
-            {icon}
-        </div>
-        <h3 className="text-2xl font-bold font-serif text-yellow-300 mb-3">{title}</h3>
-        <p className="text-gray-300 flex-grow mb-6">{description}</p>
-        <Button onClick={onClick} variant={buttonVariant} className="w-full mt-auto">
-            {buttonText}
-        </Button>
-    </Card>
+    <div className="group relative">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-600 to-purple-600 rounded-2xl blur opacity-0 group-hover:opacity-75 transition duration-500"></div>
+        <Card className="relative flex flex-col text-center items-center h-full">
+            <div className="p-4 bg-gray-900/50 rounded-full mb-4">
+                {icon}
+            </div>
+            <h3 className="text-2xl font-bold font-serif text-yellow-300 mb-3">{title}</h3>
+            <p className="text-gray-300 flex-grow mb-6">{description}</p>
+            <Button onClick={onClick} variant={buttonVariant} className="w-full mt-auto">
+                {buttonText}
+            </Button>
+        </Card>
+    </div>
 );
 
 

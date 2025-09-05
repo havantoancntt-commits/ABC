@@ -17,13 +17,13 @@ const Button: React.FC<Props> = ({
   className = '',
   ...props
 }) => {
-  const baseClasses = 'flex items-center justify-center gap-2 font-bold rounded-lg transition-all duration-300 shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100';
+  const baseClasses = 'flex items-center justify-center gap-2 font-bold rounded-lg transition-all duration-300 shadow-lg transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900';
 
   const variantClasses: Record<ButtonVariant, string> = {
-    primary: 'bg-gradient-to-r from-yellow-500 to-amber-600 text-gray-900 hover:from-yellow-600 hover:to-amber-700',
-    secondary: 'bg-gray-600 text-white hover:bg-gray-700',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
-    special: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600',
+    primary: 'bg-gradient-to-r from-yellow-500 to-amber-600 text-gray-900 hover:from-yellow-600 hover:to-amber-700 focus-visible:ring-yellow-400',
+    secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus-visible:ring-gray-400',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-400',
+    special: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 focus-visible:ring-purple-400',
   };
 
   const sizeClasses: Record<ButtonSize, string> = {

@@ -31,7 +31,7 @@ const PalaceIcon: React.FC<{ palaceName: string }> = ({ palaceName }) => {
     return icons[palaceName] || null;
 };
 
-const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; }> = React.memo(({ palace, isMenh, isThan }) => {
+const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; onClick: () => void; }> = React.memo(({ palace, isMenh, isThan, onClick }) => {
     const borderClass = isMenh 
         ? 'border-yellow-400 border-2 shadow-[0_0_20px_rgba(250,204,21,0.5)]' 
         : isThan 
@@ -46,7 +46,7 @@ const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; }
     };
 
     return (
-        <div className={`relative bg-gray-900/50 rounded-lg p-2 sm:p-3 text-[10px] sm:text-xs border ${borderClass} h-full flex flex-col transition-all duration-300`}>
+        <button onClick={onClick} className={`w-full h-full relative bg-gray-900/50 rounded-lg p-2 sm:p-3 text-[10px] sm:text-xs border ${borderClass} flex flex-col transition-all duration-300 hover:bg-gray-900 hover:shadow-lg hover:-translate-y-1`}>
             {isMenh && <span className="absolute top-1 right-1 text-[10px] sm:text-xs font-bold text-yellow-300 bg-black/50 px-1.5 py-0.5 rounded">MỆNH</span>}
             {isThan && !isMenh && <span className="absolute top-1 right-1 text-[10px] sm:text-xs font-bold text-fuchsia-300 bg-black/50 px-1.5 py-0.5 rounded">THÂN</span>}
             
@@ -56,14 +56,41 @@ const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; }
                 <PalaceIcon palaceName={palace.name} />
                 {palace.name.replace('Cung ', '')}
             </h3>
-            <div className="text-center text-purple-300 font-semibold mb-2 flex-grow min-h-[2.5rem] sm:min-h-[3rem] flex items-center justify-center">{palace.stars.join(', ')}</div>
-            <details className="text-gray-400 cursor-pointer z-10">
-                <summary className="text-center text-yellow-500 hover:text-yellow-400 list-none">Luận giải</summary>
-                <p className="mt-2 text-left leading-relaxed text-gray-300">{palace.interpretation}</p>
-            </details>
-        </div>
+            <div className="text-center text-purple-300 font-semibold flex-grow min-h-[2.5rem] sm:min-h-[3rem] flex items-center justify-center break-words">{palace.stars.join(', ')}</div>
+            <div className="mt-auto text-center text-yellow-500 hover:text-yellow-400 text-xs font-semibold">Chi tiết</div>
+        </button>
     );
 });
+
+const PalaceDetailModal: React.FC<{ palace: Palace; onClose: () => void; }> = ({ palace, onClose }) => {
+    return (
+        <div 
+            className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 transition-opacity p-4 animate-fade-in"
+            onClick={onClose}
+            aria-modal="true"
+            role="dialog"
+        >
+            <div 
+                className="max-w-2xl w-full p-8 rounded-xl bg-gray-900/70 backdrop-blur-lg border border-yellow-400/30 shadow-2xl shadow-black/50"
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 className="text-3xl font-bold text-yellow-300 font-serif flex items-center gap-3">
+                            <PalaceIcon palaceName={palace.name} />
+                            {palace.name}
+                        </h2>
+                        <p className="font-semibold text-purple-300 mt-2">{palace.stars.join(', ')}</p>
+                    </div>
+                    <button onClick={onClose} className="text-gray-400 hover:text-white">&times;</button>
+                </div>
+                <div className="max-h-[60vh] overflow-y-auto pr-4 -mr-4">
+                    <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{palace.interpretation}</p>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const palaceToGridArea: Record<string, string> = {
     'Cung Quan Lộc': 'quan-loc', 'Cung Nô Bộc': 'no-boc', 'Cung Thiên Di': 'thien-di', 'Cung Tật Ách': 'tat-ach',
@@ -74,6 +101,7 @@ const palaceToGridArea: Record<string, string> = {
 
 const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonationModal }) => {
     const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+    const [viewingPalace, setViewingPalace] = useState<Palace | null>(null);
 
     const allPalaces = useMemo(() => [
         data.cungMenh, data.cungPhuMau, data.cungPhucDuc, data.cungDienTrach,
@@ -134,6 +162,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                                 palace={palace} 
                                 isMenh={palace.name === data.cungMenh.name} 
                                 isThan={palace.name === data.tongQuan.thanCungName}
+                                onClick={() => setViewingPalace(palace)}
                             />
                         </div>
                     ))}
@@ -174,6 +203,8 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                     <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{data.tongKet}</p>
                 </div>
             </div>
+
+            {viewingPalace && <PalaceDetailModal palace={viewingPalace} onClose={() => setViewingPalace(null)} />}
 
             <div className="mt-8 flex flex-wrap justify-center gap-4">
                 <Button onClick={onReset} variant="secondary">

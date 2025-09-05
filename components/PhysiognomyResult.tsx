@@ -18,7 +18,7 @@ const ICONS = {
 };
 
 const AnalysisSection: React.FC<{ title: string; content: string; icon: React.ReactNode }> = React.memo(({ title, content, icon }) => (
-    <div className="bg-gray-900/50 p-6 rounded-lg border border-gray-700/80">
+    <div className="bg-gradient-to-br from-gray-900/80 to-gray-900/50 p-6 rounded-lg border border-gray-700/80 shadow-inner shadow-black/20">
         <h3 className="text-xl font-bold text-yellow-400 font-serif mb-3 flex items-center gap-3">
             {icon}
             {title}
@@ -33,7 +33,7 @@ const PhysiognomyResult: React.FC<Props> = ({ analysisData, imageData, onReset, 
       <h2 className="text-4xl font-bold text-center mb-8 text-yellow-400 font-serif animate-fade-in-down">Kết Quả Luận Giải Nhân Tướng</h2>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-1 text-center p-6 bg-gray-900/30 rounded-lg border border-gray-700/50">
+        <div className="lg:col-span-1 text-center p-6 bg-gray-900/30 rounded-lg border border-gray-700/50 lg:sticky lg:top-28">
           <h3 className="text-2xl font-serif text-yellow-300 mb-4">Ảnh Chân Dung</h3>
           <img 
             src={imageData} 

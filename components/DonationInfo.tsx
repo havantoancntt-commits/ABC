@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { SUPPORT_INFO } from '../constants';
 
-const DonationInfo: React.FC = () => {
+interface Props {
+  variant?: 'form' | 'modal';
+}
+
+const DonationInfo: React.FC<Props> = ({ variant = 'form' }) => {
   const [copyStatus, setCopyStatus] = useState<Record<string, string>>({});
   const [transferContentWithId] = useState(`${SUPPORT_INFO.transferContent}${Math.floor(1000 + Math.random() * 9000)}`);
   const qrCodeUrl = `https://img.vietqr.io/image/${SUPPORT_INFO.bankBin}-${SUPPORT_INFO.accountNumber}-compact2.png?addInfo=${encodeURIComponent(transferContentWithId)}&accountName=${encodeURIComponent(SUPPORT_INFO.accountName)}`;
@@ -16,10 +20,13 @@ const DonationInfo: React.FC = () => {
     });
   };
 
+  const containerClass = variant === 'modal'
+    ? 'bg-transparent border-none shadow-none p-0'
+    : 'mt-6 p-6 rounded-lg bg-gray-900/50 border border-gray-700/50 shadow-lg';
+
   return (
-    <div className="mt-6 p-6 rounded-lg text-center bg-gradient-to-br from-[#8c5a2b] to-[#593a1a] border-2 border-[#f0c040] shadow-[0_10px_20px_rgba(0,0,0,0.5),_inset_0_0_15px_rgba(0,0,0,0.7)] relative overflow-hidden">
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-2.5 bg-gradient-to-b from-black to-[#333] rounded-sm border-2 border-[#b8860b]"></div>
-      <h3 className="text-xl font-semibold text-yellow-300 font-serif mt-6 mb-2">Tùy Hỷ Công Đức</h3>
+    <div className={`text-center ${containerClass}`}>
+      <h3 className="text-xl font-semibold text-yellow-300 font-serif mb-2">Tùy Hỷ Công Đức</h3>
       <p className="text-amber-100 mb-4 text-sm leading-relaxed max-w-lg mx-auto">
         Mỗi lá số là kết tinh của tâm huyết và tri thức. Sự ủng hộ của quý vị là động lực vô giá để chúng tôi duy trì và lan tỏa giá trị của Tử Vi Đẩu Số đến cộng đồng.
       </p>

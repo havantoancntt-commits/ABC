@@ -16,8 +16,12 @@ const SavedCharts: React.FC<Props> = ({ charts, onView, onDelete, onCreateNew })
       <h2 className="text-3xl font-bold text-center mb-8 text-yellow-400 font-serif">Các Lá Số Đã Lưu</h2>
       {charts.length > 0 ? (
         <div className="space-y-4 mb-8">
-          {charts.map((chart) => (
-            <div key={chart.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg border border-gray-700/50 transition-all hover:shadow-lg hover:border-yellow-500/50 hover:bg-gray-900">
+          {charts.map((chart, index) => (
+            <div 
+              key={chart.id} 
+              className="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg border border-gray-700/50 transition-all hover:shadow-lg hover:border-yellow-500/50 hover:bg-gray-900/80 hover:-translate-y-1 animate-fade-in"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
               <div>
                 <p className="font-bold text-white text-lg">{chart.birthInfo.name}</p>
                 <p className="text-sm text-gray-400 mt-1">{`Ngày sinh: ${chart.birthInfo.day}/${chart.birthInfo.month}/${chart.birthInfo.year}`}</p>

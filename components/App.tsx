@@ -185,7 +185,7 @@ const App: React.FC = () => {
   const MemoizedHeader = useMemo(() => <Header onHomeClick={handleResetToHome} />, [handleResetToHome]);
   const MemoizedZaloContact = useMemo(() => <ZaloContact />, []);
 
-  const renderContent = () => {
+  const content = useMemo(() => {
     switch (appState) {
       case AppState.HOME:
         return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} />;
@@ -199,7 +199,7 @@ const App: React.FC = () => {
       case AppState.ASTROLOGY_FORM:
         return <BirthInfoForm onSubmit={handleFormSubmit} />;
       case AppState.LOADING:
-        return <Spinner message="Hệ thống đang khởi tạo lá số tử vi cho bạn. Quá trình này có thể mất vài phút, xin vui lòng chờ..." />;
+        return <Spinner message="Hệ thống đang khởi tạo lá số tử vi cho bạn. Các vì sao đang dịch chuyển vào đúng vị trí... Quá trình này có thể mất vài phút, xin vui lòng chờ..." />;
       case AppState.RESULT:
         return chartData && <AstrologyChart data={chartData} birthInfo={birthInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.FACE_SCAN_CAPTURE:
@@ -211,13 +211,13 @@ const App: React.FC = () => {
             capturedImage={capturedImage}
         />;
       case AppState.FACE_SCAN_LOADING:
-        return <Spinner message="AI đang phân tích nhân tướng của bạn. Vui lòng giữ nguyên trang..." />;
+        return <Spinner message="AI đang phân tích các đường nét trên khuôn mặt bạn... Xin vui lòng giữ nguyên trang..." />;
       case AppState.FACE_SCAN_RESULT:
           return physiognomyData && capturedImage && <PhysiognomyResult analysisData={physiognomyData} imageData={capturedImage} onReset={handleResetFaceScan} onBackToHome={handleResetToHome} />;
       default:
         return null;
     }
-  };
+  }, [appState, handleStartAstrology, handleStartPhysiognomy, savedCharts, handleViewChart, handleDeleteChart, handleCreateNew, handleFormSubmit, chartData, birthInfo, handleResetToHome, handleAnalyzeFace, handleCaptureImage, handleRetakeCapture, capturedImage, physiognomyData, handleResetFaceScan]);
 
   return (
     <div className="min-h-screen text-gray-200">
@@ -231,7 +231,7 @@ const App: React.FC = () => {
             </div>
           )}
           <div className="animate-fade-in">
-            {renderContent()}
+            {content}
           </div>
         </main>
         <footer className="text-center py-8 text-gray-400 bg-black bg-opacity-50 mt-8 border-t border-gray-700/50">

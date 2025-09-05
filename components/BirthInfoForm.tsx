@@ -56,10 +56,10 @@ const BirthInfoForm: React.FC<Props> = ({ onSubmit }) => {
     <div className="max-w-3xl mx-auto">
         <div className="text-center my-10 max-w-4xl mx-auto">
             <h2 className="text-4xl font-bold text-gray-100 font-serif leading-tight">
-                Khoa Học Tử Vi Cổ Đại
+                Giải Mã Bản Đồ Vận Mệnh Của Bạn
             </h2>
             <p className="mt-4 text-lg text-gray-300 leading-relaxed">
-                Tử Vi Đẩu Số là một tấm bản đồ chi tiết về vận mệnh, tính cách và các giai đoạn thăng trầm trong cuộc đời. Bằng cách phân tích vị trí các vì sao tại thời điểm bạn chào đời, chúng tôi mang đến những luận giải sâu sắc, giúp bạn thấu hiểu bản thân, tận dụng cơ hội và hóa giải thách thức.
+                Tử Vi Đẩu Số là một hệ thống triết học phương Đông cổ đại, phân tích vị trí các vì sao tại thời điểm bạn chào đời để vẽ nên một tấm bản đồ chi tiết về vận mệnh. Hãy nhập thông tin của bạn để khám phá những luận giải sâu sắc, giúp thấu hiểu bản thân, tận dụng cơ hội và hóa giải thách thức.
             </p>
         </div>
       <Card>
