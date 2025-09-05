@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { AstrologyChartData, BirthInfo, Palace } from '../types';
 import Button from './Button';
 
@@ -31,7 +31,7 @@ const PalaceIcon: React.FC<{ palaceName: string }> = ({ palaceName }) => {
     return icons[palaceName] || null;
 };
 
-const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; }> = ({ palace, isMenh, isThan }) => {
+const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; }> = React.memo(({ palace, isMenh, isThan }) => {
     const borderClass = isMenh 
         ? 'border-yellow-400 border-2 shadow-[0_0_20px_rgba(250,204,21,0.5)]' 
         : isThan 
@@ -63,10 +63,23 @@ const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; }
             </details>
         </div>
     );
+});
+
+const palaceToGridArea: Record<string, string> = {
+    'Cung Quan Lộc': 'quan-loc', 'Cung Nô Bộc': 'no-boc', 'Cung Thiên Di': 'thien-di', 'Cung Tật Ách': 'tat-ach',
+    'Cung Điền Trạch': 'dien-trach', 'Cung Tài Bạch': 'tai-bach',
+    'Cung Phúc Đức': 'phuc-duc', 'Cung Tử Tức': 'tu-tuc',
+    'Cung Phụ Mẫu': 'phu-mau', 'Cung Mệnh': 'menh', 'Cung Phu Thê': 'phu-the', 'Cung Huynh Đệ': 'huynh-de'
 };
 
 const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonationModal }) => {
     const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+    const allPalaces = useMemo(() => [
+        data.cungMenh, data.cungPhuMau, data.cungPhucDuc, data.cungDienTrach,
+        data.cungQuanLoc, data.cungNoBoc, data.cungThienDi, data.cungTatAch,
+        data.cungTaiBach, data.cungTuTuc, data.cungPhuThe, data.cungHuynhDe
+    ], [data]);
 
     const loadScript = (src: string) => {
         return new Promise<void>((resolve, reject) => {
@@ -109,19 +122,6 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
         } finally {
             setIsDownloadingPdf(false);
         }
-    };
-
-    const allPalaces = [
-        data.cungMenh, data.cungPhuMau, data.cungPhucDuc, data.cungDienTrach,
-        data.cungQuanLoc, data.cungNoBoc, data.cungThienDi, data.cungTatAch,
-        data.cungTaiBach, data.cungTuTuc, data.cungPhuThe, data.cungHuynhDe
-    ];
-
-    const palaceToGridArea: Record<string, string> = {
-        'Cung Quan Lộc': 'quan-loc', 'Cung Nô Bộc': 'no-boc', 'Cung Thiên Di': 'thien-di', 'Cung Tật Ách': 'tat-ach',
-        'Cung Điền Trạch': 'dien-trach', 'Cung Tài Bạch': 'tai-bach',
-        'Cung Phúc Đức': 'phuc-duc', 'Cung Tử Tức': 'tu-tuc',
-        'Cung Phụ Mẫu': 'phu-mau', 'Cung Mệnh': 'menh', 'Cung Phu Thê': 'phu-the', 'Cung Huynh Đệ': 'huynh-de'
     };
 
     return (

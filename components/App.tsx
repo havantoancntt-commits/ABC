@@ -121,7 +121,7 @@ const App: React.FC = () => {
     setError(null);
   }, []);
   
-  const handleFormSubmit = (info: BirthInfo) => {
+  const handleFormSubmit = useCallback((info: BirthInfo) => {
     const chartId = createChartId(info);
     const existingChart = savedCharts.find(chart => chart.id === chartId);
 
@@ -132,9 +132,9 @@ const App: React.FC = () => {
     } else {
       handleGenerateChart(info);
     }
-  };
+  }, [savedCharts, handleGenerateChart]);
 
-  const handleResetToHome = () => {
+  const handleResetToHome = useCallback(() => {
     if (savedCharts.length > 0) {
         setAppState(AppState.SAVED_CHARTS);
     } else {
@@ -145,42 +145,42 @@ const App: React.FC = () => {
     setPhysiognomyData(null);
     setCapturedImage(null);
     setError(null);
-  };
+  }, [savedCharts]);
   
-  const handleStartAstrology = () => setAppState(AppState.ASTROLOGY_FORM);
-  const handleStartPhysiognomy = () => setAppState(AppState.FACE_SCAN_CAPTURE);
+  const handleStartAstrology = useCallback(() => setAppState(AppState.ASTROLOGY_FORM), []);
+  const handleStartPhysiognomy = useCallback(() => setAppState(AppState.FACE_SCAN_CAPTURE), []);
 
-  const handleViewChart = (chart: SavedChart) => {
+  const handleViewChart = useCallback((chart: SavedChart) => {
     setBirthInfo(chart.birthInfo);
     setChartData(chart.chartData);
     setAppState(AppState.RESULT);
-  };
+  }, []);
 
-  const handleDeleteChart = (chart: SavedChart) => {
+  const handleDeleteChart = useCallback((chart: SavedChart) => {
     setChartToDelete(chart);
-  };
+  }, []);
 
-  const confirmDeleteChart = () => {
+  const confirmDeleteChart = useCallback(() => {
     if (!chartToDelete) return;
     const updatedCharts = savedCharts.filter(chart => chart.id !== chartToDelete.id);
     setSavedCharts(updatedCharts);
     localStorage.setItem('astrologyCharts', JSON.stringify(updatedCharts));
     setChartToDelete(null);
-  };
+  }, [chartToDelete, savedCharts]);
   
-  const handleCreateNew = () => {
+  const handleCreateNew = useCallback(() => {
       setAppState(AppState.ASTROLOGY_FORM);
       setBirthInfo(null);
       setChartData(null);
       setError(null);
-  };
+  }, []);
 
-  const handleResetFaceScan = () => {
+  const handleResetFaceScan = useCallback(() => {
       setAppState(AppState.FACE_SCAN_CAPTURE);
       setPhysiognomyData(null);
       setCapturedImage(null);
       setError(null);
-  }
+  }, []);
 
   const MemoizedHeader = useMemo(() => <Header onHomeClick={handleResetToHome} />, [handleResetToHome]);
   const MemoizedZaloContact = useMemo(() => <ZaloContact />, []);

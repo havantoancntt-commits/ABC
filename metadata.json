@@ -1,7 +1,5 @@
 {
   "name": "Lá Số Tử Vi & Nhân Tướng Học",
   "description": "Một ứng dụng web chuyên nghiệp để lập lá số tử vi và luận giải nhân tướng học qua nhận diện khuôn mặt. Tích hợp hướng dẫn thanh toán để xem chi tiết.",
-  "requestFramePermissions": [
-    "camera"
-  ]
+  "requestFramePermissions": []
 }

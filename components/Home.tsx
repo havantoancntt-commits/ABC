@@ -51,7 +51,7 @@ const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy }) => {
                 />
                  <FeatureCard
                     title="Nhân Tướng Học"
-                    description="Phân tích các đặc điểm trên khuôn mặt bạn thông qua camera. Luận giải về tính cách, vận số qua Tam Đình, Ngũ Quan."
+                    description="Phân tích các đặc điểm trên khuôn mặt bạn thông qua ảnh chân dung. Luận giải về tính cách, vận số qua Tam Đình, Ngũ Quan."
                     buttonText="Xem Nhân Tướng"
                     onClick={onStartPhysiognomy}
                     buttonVariant="special"
