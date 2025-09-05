@@ -84,7 +84,7 @@ const App: React.FC = () => {
       setAppState(AppState.RESULT);
     } catch (err) {
       console.error(err);
-      setError('Không thể tạo lá số. Vui lòng kiểm tra lại thông tin hoặc thử lại sau.');
+      setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định. Vui lòng thử lại.');
       setAppState(AppState.ASTROLOGY_FORM);
     }
   }, [savedCharts]);
@@ -107,7 +107,7 @@ const App: React.FC = () => {
       setAppState(AppState.FACE_SCAN_RESULT);
     } catch (err) {
        console.error(err);
-       setError('Không thể phân tích nhân tướng. Vui lòng thử lại với ảnh rõ nét hơn.');
+       setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định. Vui lòng thử lại.');
        setAppState(AppState.FACE_SCAN_CAPTURE);
     }
   }, [capturedImage]);

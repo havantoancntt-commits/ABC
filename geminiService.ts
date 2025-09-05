@@ -5,7 +5,7 @@ import type { BirthInfo, AstrologyChartData, PhysiognomyData } from './types';
 const getAiClient = () => {
     if (!process.env.API_KEY) {
         // This error will be caught by the calling function's try/catch block
-        throw new Error("API_KEY is not configured.");
+        throw new Error("Lỗi cấu hình: Biến môi trường API_KEY chưa được thiết lập.");
     }
     return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
@@ -102,8 +102,11 @@ export const generateAstrologyChart = async (info: BirthInfo): Promise<Astrology
     const jsonText = response.text.trim();
     return JSON.parse(jsonText) as AstrologyChartData;
   } catch (error) {
-    console.error("Error generating astrology chart:", error);
-    throw new Error("Không thể kết nối đến chuyên gia tử vi. Vui lòng kiểm tra lại kết nối mạng và thử lại sau.");
+    console.error("Lỗi khi tạo lá số tử vi:", error);
+    if (error instanceof Error && error.message.includes("API_KEY")) {
+        throw new Error("Dịch vụ đang gặp lỗi cấu hình. Vui lòng quay lại sau.");
+    }
+    throw new Error("Không thể tạo lá số do lỗi kết nối. Vui lòng kiểm tra lại mạng và thử lại.");
   }
 };
 
@@ -154,7 +157,10 @@ export const analyzePhysiognomy = async (base64Image: string): Promise<Physiogno
         const jsonText = response.text.trim();
         return JSON.parse(jsonText) as PhysiognomyData;
     } catch (error) {
-        console.error("Error analyzing physiognomy:", error);
-        throw new Error("Không thể kết nối đến chuyên gia nhân tướng. Vui lòng kiểm tra lại kết nối mạng và thử lại sau.");
+        console.error("Lỗi khi phân tích nhân tướng:", error);
+        if (error instanceof Error && error.message.includes("API_KEY")) {
+            throw new Error("Dịch vụ đang gặp lỗi cấu hình. Vui lòng quay lại sau.");
+        }
+        throw new Error("Không thể phân tích nhân tướng do lỗi kết nối. Vui lòng kiểm tra lại mạng và thử lại.");
     }
 };
