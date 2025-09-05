@@ -78,6 +78,14 @@
       .animate-pulse-button {
         animation: pulse-glow 2.5s infinite cubic-bezier(0.66, 0, 0, 1);
       }
+      @keyframes shutter-flash {
+        0% { opacity: 0; }
+        50% { opacity: 0.8; }
+        100% { opacity: 0; }
+      }
+      .animate-shutter-flash {
+        animation: shutter-flash 0.4s ease-out forwards;
+      }
     </style>
   <script type="importmap">
 {
