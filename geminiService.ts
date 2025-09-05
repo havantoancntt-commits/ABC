@@ -3,11 +3,14 @@ import type { BirthInfo, AstrologyChartData, PhysiognomyData } from './types';
 
 // Helper function to lazily initialize the AI client and handle missing API key
 const getAiClient = () => {
-    if (!process.env.API_KEY) {
-        // This error will be caught by the calling function's try/catch block
-        throw new Error("Lỗi cấu hình: Biến môi trường API_KEY chưa được thiết lập.");
+    // Dựa theo ảnh chụp màn hình Vercel của người dùng, khóa API của họ được lưu trong biến môi trường TUVI_API.
+    const apiKey = process.env.TUVI_API;
+    
+    if (!apiKey) {
+        // Lỗi này sẽ được bắt bởi khối try/catch của hàm gọi
+        throw new Error("Lỗi cấu hình: Biến môi trường TUVI_API chưa được thiết lập.");
     }
-    return new GoogleGenAI({ apiKey: process.env.API_KEY });
+    return new GoogleGenAI({ apiKey: apiKey });
 };
 
 const palaceSchema = {
