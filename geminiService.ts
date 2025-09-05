@@ -10,7 +10,7 @@ async function callProxy(operation: string, payload: object): Promise<any> {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Đã xảy ra lỗi không xác định.' }));
         if (response.status === 500 && errorData.error?.includes('API key not configured')) {
-             throw new Error("Dịch vụ đang gặp lỗi cấu hình. Vui lòng quay lại sau.");
+             throw new Error("Lỗi cấu hình API Key trên Vercel: Vui lòng vào mục Settings > Environment Variables trong dự án Vercel của bạn, đảm bảo biến `API_KEY` đã được tạo. Quan trọng: Sau khi thêm biến, bạn cần phải triển khai lại (redeploy) dự án để thay đổi có hiệu lực.");
         }
         throw new Error(errorData.error || 'Không thể kết nối đến máy chủ. Vui lòng thử lại.');
     }
