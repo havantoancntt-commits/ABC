@@ -81,7 +81,8 @@ export default async function handler(req: Request) {
 
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'API key not configured on server' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    const errorMessage = 'Lỗi cấu hình API Key trên máy chủ. Vui lòng vào mục Settings > Environment Variables trong dự án Vercel của bạn, đảm bảo biến `API_KEY` đã được tạo. QUAN TRỌNG: Sau khi thêm biến, bạn cần phải triển khai lại (redeploy) dự án để thay đổi có hiệu lực.';
+    return new Response(JSON.stringify({ error: errorMessage }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 
   try {
@@ -128,7 +129,7 @@ export default async function handler(req: Request) {
         return new Response(JSON.stringify({ error: 'Invalid operation' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
     
-    if (!response || !response.candidates || response.candidates.length === 0) {
+    if (!response || !response.text) {
         const feedback = response?.promptFeedback;
         console.error('Gemini response was blocked or empty.', feedback);
         let userMessage = 'Không thể tạo nội dung. Phản hồi từ AI trống hoặc đã bị chặn bởi bộ lọc an toàn.';
@@ -174,7 +175,11 @@ export default async function handler(req: Request) {
         if (apiError.status === 'UNAVAILABLE' || apiError.code === 503) {
             userMessage = 'Hệ thống AI hiện đang quá tải. Xin vui lòng thử lại sau giây lát.';
             statusCode = 503;
-        } else {
+        } else if (apiError.code === 400 || apiError.message.toLowerCase().includes('api key not valid')) {
+            userMessage = 'Lỗi xác thực API Key. Vui lòng kiểm tra lại giá trị API Key trên máy chủ.';
+            statusCode = 401;
+        }
+        else {
             userMessage = `Lỗi từ hệ thống AI: ${apiError.message}`;
             statusCode = apiError.code || 500;
         }
