@@ -129,7 +129,22 @@ export default async function handler(req: Request) {
         return new Response(JSON.stringify({ error: 'Invalid operation' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
     
+    // Check for blocked or empty response to prevent serverless function from crashing
+    if (!response || !response.candidates || response.candidates.length === 0) {
+        const feedback = response?.promptFeedback;
+        console.error('Gemini response was blocked or empty.', feedback);
+        let userMessage = 'Không thể tạo nội dung. Phản hồi từ AI trống hoặc đã bị chặn bởi bộ lọc an toàn.';
+        if (feedback?.blockReason) {
+            userMessage = `Yêu cầu của bạn đã bị chặn vì lý do an toàn (${feedback.blockReason}). Vui lòng thử lại với thông tin khác.`;
+        }
+        return new Response(JSON.stringify({ error: userMessage }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+
     // The SDK's response.text is already a stringified JSON when a schema is used.
+    // Accessing .text might throw if the response was blocked, which we now handle above.
     return new Response(response.text, {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
