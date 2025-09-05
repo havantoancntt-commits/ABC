@@ -1,5 +1,5 @@
 // @ts-ignore
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import type { BirthInfo } from '../types';
 
 // This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
@@ -74,6 +74,7 @@ Yêu cầu:
 4. Đưa ra lời khuyên hữu ích, mang tính xây dựng và tích cực dựa trên phân tích.`;
 
 
+// --- Main Handler ---
 export default async function handler(req: Request) {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
@@ -81,7 +82,7 @@ export default async function handler(req: Request) {
 
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    const errorMessage = 'Lỗi cấu hình API Key trên máy chủ. Vui lòng vào mục Settings > Environment Variables trong dự án Vercel của bạn, đảm bảo biến `API_KEY` đã được tạo. QUAN TRỌNG: Sau khi thêm biến, bạn cần phải triển khai lại (redeploy) dự án để thay đổi có hiệu lực.';
+    const errorMessage = 'API Key chưa được cấu hình trên máy chủ. Vui lòng kiểm tra lại biến môi trường `API_KEY` trong cài đặt dự án và triển khai lại (redeploy).';
     return new Response(JSON.stringify({ error: errorMessage }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 
@@ -89,16 +90,12 @@ export default async function handler(req: Request) {
     const ai = new GoogleGenAI({ apiKey });
     const { operation, payload } = await req.json();
 
-    let response;
+    let response: GenerateContentResponse;
 
     if (operation === 'generateAstrologyChart') {
         const info: BirthInfo = payload.info;
         const hourString = info.hour === -1 ? 'Không rõ' : `${info.hour} giờ`;
-        const userPrompt = `Lập lá số tử vi chi tiết cho người có thông tin sau:
-- Tên: ${info.name}
-- Giới tính: ${info.gender}
-- Ngày sinh (Dương Lịch): ${info.day}/${info.month}/${info.year}
-- Giờ sinh: ${hourString}`;
+        const userPrompt = `Lập lá số tử vi chi tiết cho người có thông tin sau:\n- Tên: ${info.name}\n- Giới tính: ${info.gender}\n- Ngày sinh (Dương Lịch): ${info.day}/${info.month}/${info.year}\n- Giờ sinh: ${hourString}`;
         
         response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
@@ -147,44 +144,25 @@ export default async function handler(req: Request) {
       headers: { 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in Gemini proxy:', error);
 
-    let userMessage = 'Đã xảy ra lỗi không mong muốn khi xử lý yêu cầu của bạn. Vui lòng thử lại sau.';
+    let userMessage = 'Đã xảy ra lỗi không mong muốn khi xử lý yêu cầu của bạn.';
     let statusCode = 500;
     
-    // Helper to gracefully extract the innermost error details
-    const getInnermostError = (e: any): any => {
-        if (e instanceof Error && e.message.includes('{')) {
-            try {
-                // Handle cases where the error message is a JSON string
-                const jsonPart = e.message.substring(e.message.indexOf('{'));
-                const parsed = JSON.parse(jsonPart);
-                return parsed.error || parsed;
-            } catch {
-                return null; // Parsing failed
-            }
-        }
-        // Handle structured error objects from the SDK
-        return e?.error || e;
-    };
+    const errorDetails = (error as any)?.details || (error as any)?.message || '';
+    const errorString = (typeof errorDetails === 'string' ? errorDetails : JSON.stringify(errorDetails)).toLowerCase();
 
-    const apiError = getInnermostError(error);
-
-    if (apiError && apiError.message) {
-        if (apiError.status === 'UNAVAILABLE' || apiError.code === 503) {
-            userMessage = 'Hệ thống AI hiện đang quá tải. Xin vui lòng thử lại sau giây lát.';
-            statusCode = 503;
-        } else if (apiError.code === 400 || apiError.message.toLowerCase().includes('api key not valid')) {
-            userMessage = 'Lỗi xác thực API Key. Vui lòng kiểm tra lại giá trị API Key trên máy chủ.';
-            statusCode = 401;
-        }
-        else {
-            userMessage = `Lỗi từ hệ thống AI: ${apiError.message}`;
-            statusCode = apiError.code || 500;
-        }
+    if (errorString.includes('api key not valid')) {
+        userMessage = 'Lỗi xác thực API Key. Vui lòng kiểm tra lại giá trị API Key trên máy chủ.';
+        statusCode = 401;
+    } else if (errorString.includes('503') || errorString.includes('unavailable')) {
+        userMessage = 'Hệ thống AI hiện đang quá tải. Xin vui lòng thử lại sau giây lát.';
+        statusCode = 503;
     } else if (error instanceof Error) {
-        userMessage = error.message;
+        userMessage = `Lỗi từ hệ thống AI: ${error.message}`;
+    } else if (errorString) {
+        userMessage = `Lỗi từ hệ thống AI: ${errorString}`;
     }
     
     return new Response(JSON.stringify({ error: userMessage }), { 
