@@ -1,11 +1,14 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { BirthInfo, AstrologyChartData, PhysiognomyData } from './types';
 
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Helper function to lazily initialize the AI client and handle missing API key
+const getAiClient = () => {
+    if (!process.env.API_KEY) {
+        // This error will be caught by the calling function's try/catch block
+        throw new Error("API_KEY is not configured.");
+    }
+    return new GoogleGenAI({ apiKey: process.env.API_KEY });
+};
 
 const palaceSchema = {
   type: Type.OBJECT,
@@ -85,6 +88,7 @@ export const generateAstrologyChart = async (info: BirthInfo): Promise<Astrology
   `;
 
   try {
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
@@ -99,7 +103,7 @@ export const generateAstrologyChart = async (info: BirthInfo): Promise<Astrology
     return JSON.parse(jsonText) as AstrologyChartData;
   } catch (error) {
     console.error("Error generating astrology chart:", error);
-    throw new Error("Failed to communicate with the astrology expert.");
+    throw new Error("Không thể kết nối đến chuyên gia tử vi. Vui lòng kiểm tra lại kết nối mạng và thử lại sau.");
   }
 };
 
@@ -129,6 +133,7 @@ export const analyzePhysiognomy = async (base64Image: string): Promise<Physiogno
     `;
 
     try {
+        const ai = getAiClient();
         const imagePart = {
             inlineData: {
                 mimeType: 'image/jpeg',
@@ -150,6 +155,6 @@ export const analyzePhysiognomy = async (base64Image: string): Promise<Physiogno
         return JSON.parse(jsonText) as PhysiognomyData;
     } catch (error) {
         console.error("Error analyzing physiognomy:", error);
-        throw new Error("Failed to communicate with the physiognomy expert.");
+        throw new Error("Không thể kết nối đến chuyên gia nhân tướng. Vui lòng kiểm tra lại kết nối mạng và thử lại sau.");
     }
 };

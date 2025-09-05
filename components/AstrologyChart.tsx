@@ -46,19 +46,19 @@ const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; }
     };
 
     return (
-        <div className={`relative bg-gray-900/50 rounded-lg p-3 text-xs border ${borderClass} h-full flex flex-col transition-all duration-300`}>
-            {isMenh && <span className="absolute top-1 right-1 text-xs font-bold text-yellow-300 bg-black/50 px-1.5 py-0.5 rounded">MỆNH</span>}
-            {isThan && !isMenh && <span className="absolute top-1 right-1 text-xs font-bold text-fuchsia-300 bg-black/50 px-1.5 py-0.5 rounded">THÂN</span>}
+        <div className={`relative bg-gray-900/50 rounded-lg p-2 sm:p-3 text-[10px] sm:text-xs border ${borderClass} h-full flex flex-col transition-all duration-300`}>
+            {isMenh && <span className="absolute top-1 right-1 text-[10px] sm:text-xs font-bold text-yellow-300 bg-black/50 px-1.5 py-0.5 rounded">MỆNH</span>}
+            {isThan && !isMenh && <span className="absolute top-1 right-1 text-[10px] sm:text-xs font-bold text-fuchsia-300 bg-black/50 px-1.5 py-0.5 rounded">THÂN</span>}
             
             <span className="absolute bottom-1 left-2 text-sm font-serif text-gray-600">{branchMap[palace.name]}</span>
             
-            <h3 className={`font-bold text-center text-sm mb-2 flex items-center justify-center gap-2 ${textClass}`}>
+            <h3 className={`font-bold text-center text-xs sm:text-sm mb-1 sm:mb-2 flex items-center justify-center gap-2 ${textClass}`}>
                 <PalaceIcon palaceName={palace.name} />
                 {palace.name.replace('Cung ', '')}
             </h3>
-            <div className="text-center text-purple-300 font-semibold mb-2 flex-grow min-h-[3rem] flex items-center justify-center">{palace.stars.join(', ')}</div>
+            <div className="text-center text-purple-300 font-semibold mb-2 flex-grow min-h-[2.5rem] sm:min-h-[3rem] flex items-center justify-center">{palace.stars.join(', ')}</div>
             <details className="text-gray-400 cursor-pointer z-10">
-                <summary className="text-center text-xs text-yellow-500 hover:text-yellow-400 list-none">Luận giải</summary>
+                <summary className="text-center text-yellow-500 hover:text-yellow-400 list-none">Luận giải</summary>
                 <p className="mt-2 text-left leading-relaxed text-gray-300">{palace.interpretation}</p>
             </details>
         </div>
@@ -126,8 +126,8 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
 
     return (
         <div className="max-w-7xl mx-auto">
-            <div id="laso-print-area" className="p-4 bg-gray-900/30 rounded-lg">
-                <div className="grid grid-cols-4 grid-rows-4 gap-2" style={{aspectRatio: '1 / 1'}}>
+            <div id="laso-print-area" className="p-2 sm:p-4 bg-gray-900/30 rounded-lg">
+                <div className="grid grid-cols-4 grid-rows-4 gap-1 sm:gap-2" style={{aspectRatio: '1 / 1'}}>
                     {allPalaces.map(palace => (
                          <div key={palace.name} style={{ gridArea: palaceToGridArea[palace.name] }}>
                             <PalaceCard 
@@ -138,13 +138,13 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                         </div>
                     ))}
 
-                    <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/80 flex flex-col justify-center text-center" style={{gridArea: 'center'}}>
+                    <div className="p-2 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-700/80 flex flex-col justify-center text-center" style={{gridArea: 'center'}}>
                         <div className="flex-grow flex flex-col justify-center">
-                            <h2 className="text-2xl font-bold text-yellow-400 font-serif">{birthInfo.name}</h2>
-                            <p className="text-gray-300 text-sm">{birthInfo.gender} - {`Ngày ${birthInfo.day}/${birthInfo.month}/${birthInfo.year}`}</p>
-                            <p className="text-gray-400 text-xs">{birthInfo.hour === -1 ? 'Không rõ giờ' : `${birthInfo.hour} giờ`}</p>
+                            <h2 className="text-lg sm:text-2xl font-bold text-yellow-400 font-serif">{birthInfo.name}</h2>
+                            <p className="text-gray-300 text-xs sm:text-sm">{birthInfo.gender} - {`Ngày ${birthInfo.day}/${birthInfo.month}/${birthInfo.year}`}</p>
+                            <p className="text-gray-400 text-[10px] sm:text-xs">{birthInfo.hour === -1 ? 'Không rõ giờ' : `${birthInfo.hour} giờ`}</p>
                          </div>
-                         <div className="text-xs space-y-1 text-gray-300 my-2 py-2 border-y border-gray-700/50">
+                         <div className="text-[10px] sm:text-xs space-y-1 text-gray-300 my-2 py-2 border-y border-gray-700/50">
                            <p><strong className="text-gray-400">Mệnh:</strong> {data.tongQuan.menh}</p>
                            <p><strong className="text-gray-400">Thân:</strong> {data.tongQuan.than}</p>
                         </div>

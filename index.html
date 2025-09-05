@@ -24,6 +24,26 @@
       .font-serif {
         font-family: 'Playfair Display', serif;
       }
+      /* Pre-React Loading Spinner */
+      #root:empty {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      #root:empty::before {
+        content: '';
+        display: block;
+        width: 48px;
+        height: 48px;
+        border: 5px solid rgba(250, 204, 21, 0.2);
+        border-top-color: #facc15; /* Tailwind yellow-400 */
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
       /* Animations */
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
