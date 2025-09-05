@@ -9,7 +9,7 @@ export const config = {
   runtime: 'edge', // Use the Vercel Edge runtime for speed
 };
 
-// Schemas for Gemini API response validation (kept on the server)
+// --- Schemas for Gemini API response validation ---
 const palaceSchema = {
   type: Type.OBJECT,
   properties: {
@@ -49,38 +49,29 @@ const astrologySchema = {
 const physiognomySchema = {
     type: Type.OBJECT,
     properties: {
-        tongQuan: { type: Type.STRING, description: 'Luận giải tổng quan về thần thái.' },
-        tamDinh: { type: Type.STRING, description: 'Phân tích chi tiết về Tam Đình.' },
-        nguQuan: { type: Type.STRING, description: 'Phân tích chi tiết về Ngũ Quan.' },
-        loiKhuyen: { type: Type.STRING, description: 'Đưa ra lời khuyên hữu ích.' },
+        tongQuan: { type: Type.STRING, description: 'Luận giải tổng quan về thần thái, khí sắc.' },
+        tamDinh: { type: Type.STRING, description: 'Phân tích chi tiết về Tam Đình (Thượng, Trung, Hạ).' },
+        nguQuan: { type: Type.STRING, description: 'Phân tích chi tiết về Ngũ Quan (Mắt, Mũi, Miệng, Tai, Lông mày).' },
+        loiKhuyen: { type: Type.STRING, description: 'Đưa ra lời khuyên hữu ích, mang tính xây dựng.' },
     },
     required: ['tongQuan', 'tamDinh', 'nguQuan', 'loiKhuyen']
 };
 
+// --- System Instructions for the AI Model ---
+const ASTROLOGY_SYSTEM_INSTRUCTION = `Bạn là một chuyên gia Tử Vi Đẩu Số bậc thầy. Nhiệm vụ của bạn là lập một lá số tử vi chi tiết dựa trên thông tin được cung cấp và trả về kết quả dưới dạng JSON theo schema đã định sẵn. 
+Yêu cầu:
+1. Luận giải một cách sâu sắc, chính xác và dễ hiểu.
+2. An sao phải chính xác. Nếu không rõ giờ sinh, hãy an theo giờ Tý và ghi chú điều này trong phần luận giải nếu cần.
+3. Luận giải tổng quan Mệnh, Thân và xác định chính xác cung an Thân.
+4. Luận giải chi tiết tất cả 12 cung.
+5. Cung cấp một đoạn "Tổng kết" súc tích, tóm lược những điểm chính và đưa ra lời khuyên hữu ích, mang tính xây dựng.`;
 
-const getAstrologyPrompt = (info: BirthInfo) => {
-    const hourString = info.hour === -1 ? 'Không rõ' : `${info.hour} giờ`;
-    return `Bạn là một chuyên gia Tử Vi Đẩu Số bậc thầy. Lập lá số tử vi chi tiết cho:
-        - Tên: ${info.name}
-        - Giới tính: ${info.gender}
-        - Ngày sinh (Dương Lịch): ${info.day}/${info.month}/${info.year}
-        - Giờ sinh: ${hourString}
-    Yêu cầu:
-    1. Lập lá số đầy đủ, an sao chính xác. Nếu không rõ giờ sinh, an theo giờ Tý và ghi chú rõ ràng.
-    2. Luận giải tổng quan Mệnh, Thân và xác định cung an Thân.
-    3. Luận giải chi tiết 12 cung.
-    4. Viết một đoạn "Tổng kết" tóm lược và đưa ra lời khuyên.
-    5. Cung cấp kết quả dưới định dạng JSON theo schema.`;
-}
-
-const getPhysiognomyPrompt = () => `
-    Bạn là một bậc thầy về Nhân tướng học phương Đông. Phân tích hình ảnh khuôn mặt được cung cấp.
-    Yêu cầu:
-    1. Phân tích tổng quan thần thái, khí sắc.
-    2. Phân tích Tam Đình.
-    3. Phân tích Ngũ Quan.
-    4. Đưa ra lời khuyên hữu ích.
-    5. Cung cấp kết quả dưới định dạng JSON theo schema.`;
+const PHYSIOGNOMY_SYSTEM_INSTRUCTION = `Bạn là một bậc thầy về Nhân tướng học phương Đông. Nhiệm vụ của bạn là phân tích hình ảnh khuôn mặt được cung cấp và trả về kết quả dưới dạng JSON theo schema đã định sẵn.
+Yêu cầu:
+1. Phân tích tổng quan thần thái, khí sắc một cách sâu sắc.
+2. Phân tích chi tiết Tam Đình (Thượng đình, Trung đình, Hạ đình).
+3. Phân tích chi tiết Ngũ Quan (Mắt, Mũi, Miệng, Tai, Lông mày).
+4. Đưa ra lời khuyên hữu ích, mang tính xây dựng và tích cực dựa trên phân tích.`;
 
 
 export default async function handler(req: Request) {
@@ -100,12 +91,19 @@ export default async function handler(req: Request) {
     let response;
 
     if (operation === 'generateAstrologyChart') {
-        const { info } = payload;
-        const prompt = getAstrologyPrompt(info);
+        const info: BirthInfo = payload.info;
+        const hourString = info.hour === -1 ? 'Không rõ' : `${info.hour} giờ`;
+        const userPrompt = `Lập lá số tử vi chi tiết cho người có thông tin sau:
+- Tên: ${info.name}
+- Giới tính: ${info.gender}
+- Ngày sinh (Dương Lịch): ${info.day}/${info.month}/${info.year}
+- Giờ sinh: ${hourString}`;
+        
         response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: prompt,
+            contents: userPrompt,
             config: {
+                systemInstruction: ASTROLOGY_SYSTEM_INSTRUCTION,
                 responseMimeType: "application/json",
                 responseSchema: astrologySchema,
                 temperature: 0.7,
@@ -114,12 +112,13 @@ export default async function handler(req: Request) {
 
     } else if (operation === 'analyzePhysiognomy') {
         const { base64Image } = payload;
-        const prompt = getPhysiognomyPrompt();
+        const promptText = "Phân tích nhân tướng học cho khuôn mặt trong ảnh này.";
         const imagePart = { inlineData: { mimeType: 'image/jpeg', data: base64Image } };
         response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: { parts: [imagePart, { text: prompt }] },
+            contents: { parts: [imagePart, { text: promptText }] },
             config: {
+                systemInstruction: PHYSIOGNOMY_SYSTEM_INSTRUCTION,
                 responseMimeType: "application/json",
                 responseSchema: physiognomySchema,
                 temperature: 0.6,
@@ -129,7 +128,6 @@ export default async function handler(req: Request) {
         return new Response(JSON.stringify({ error: 'Invalid operation' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
     
-    // Check for blocked or empty response to prevent serverless function from crashing
     if (!response || !response.candidates || response.candidates.length === 0) {
         const feedback = response?.promptFeedback;
         console.error('Gemini response was blocked or empty.', feedback);
@@ -143,8 +141,6 @@ export default async function handler(req: Request) {
         });
     }
 
-    // The SDK's response.text is already a stringified JSON when a schema is used.
-    // Accessing .text might throw if the response was blocked, which we now handle above.
     return new Response(response.text, {
       status: 200,
       headers: { 'Content-Type': 'application/json' },

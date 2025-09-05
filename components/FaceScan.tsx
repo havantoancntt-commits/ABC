@@ -297,7 +297,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         {capturedImage && <img src={capturedImage} alt="Ảnh đã chụp" className="w-full h-full object-contain" />}
 
         {!capturedImage && (
-            <video ref={videoRef} autoPlay playsInline muted className={`w-full h-full object-cover transform -scale-x-100 ${isCameraOn ? 'opacity-100' : 'opacity-0'} transition-opacity`} />
+            <video ref={videoRef} autoPlay playsInline muted className={`w-full h-full object-cover transform -scale-x-100 ${isCameraOn ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`} />
         )}
         
         {isCameraOn && !capturedImage && (
