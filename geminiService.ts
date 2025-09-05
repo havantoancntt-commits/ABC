@@ -3,11 +3,11 @@ import type { BirthInfo, AstrologyChartData, PhysiognomyData } from './types';
 
 // Helper function to lazily initialize the AI client and handle missing API key
 const getAiClient = () => {
-    if (!process.env.TUVI_API) {
+    if (!process.env.API_KEY) {
         // This error will be caught by the calling function's try/catch block
-        throw new Error("TUVI_API is not configured.");
+        throw new Error("API_KEY is not configured.");
     }
-    return new GoogleGenAI({ apiKey: process.env.TUVI_API });
+    return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
 const palaceSchema = {
