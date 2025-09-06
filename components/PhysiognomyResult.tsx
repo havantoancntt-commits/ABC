@@ -36,7 +36,7 @@ const PhysiognomyResult: React.FC<Props> = ({ analysisData, imageData, onReset, 
       <h2 className="text-4xl font-bold text-center mb-8 text-yellow-400 font-serif animate-fade-in-down">{t('physiognomyResultTitle')}</h2>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-1 text-center p-6 bg-gray-900/50 rounded-lg border border-gray-700/50 lg:sticky lg:top-28">
+        <div className="lg:col-span-1 text-center p-6 bg-gray-900/50 rounded-lg border border-gray-800 lg:sticky lg:top-28">
           <h3 className="text-2xl font-serif text-yellow-300 mb-4">{t('physiognomyResultImageTitle')}</h3>
           <img 
             src={imageData} 
@@ -45,7 +45,7 @@ const PhysiognomyResult: React.FC<Props> = ({ analysisData, imageData, onReset, 
           />
         </div>
         
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
           <AnalysisSection title={t('physiognomyResultSection1')} content={analysisData.tongQuan} icon={ICONS.tongQuan} />
           <AnalysisSection title={t('physiognomyResultSection2')} content={analysisData.tamDinh} icon={ICONS.tamDinh} />
           <AnalysisSection title={t('physiognomyResultSection3')} content={analysisData.nguQuan} icon={ICONS.nguQuan} />

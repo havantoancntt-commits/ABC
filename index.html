@@ -22,7 +22,8 @@
         background-size: 100% 100%, 550px 550px, 350px 350px, 250px 250px, 150px 150px;
         background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
         color: #e5e7eb; /* default text-gray-200 */
-        animation: move-twinkles 300s linear infinite;
+        animation: move-twinkles 600s linear infinite;
+        background-blend-mode: screen;
       }
       .font-serif {
         font-family: 'Playfair Display', serif;
@@ -70,7 +71,7 @@
       /* Animations */
       @keyframes move-twinkles {
           from { background-position: 0 0, 40px 60px, 130px 270px, 70px 100px; }
-          to { background-position: -1000px 500px, -960px 540px, -870px 270px, -930px 600px; }
+          to { background-position: -10000px 5000px, -9960px 5040px, -9870px 2270px, -9930px 6000px; }
       }
       @keyframes fadeIn {
         from { opacity: 0; }

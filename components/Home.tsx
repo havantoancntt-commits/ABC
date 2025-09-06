@@ -23,7 +23,7 @@ const FeatureCard: React.FC<{
                 {icon}
             </div>
             <h3 className="text-2xl font-bold font-serif text-yellow-300 mb-3">{title}</h3>
-            <p className="text-gray-300 flex-grow mb-6">{description}</p>
+            <p className="text-gray-400 text-sm flex-grow mb-6">{description}</p>
             <Button onClick={onClick} variant={buttonVariant} className="w-full mt-auto">
                 {buttonText}
             </Button>

@@ -232,7 +232,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen text-gray-200">
-      <div className="min-h-screen bg-black bg-opacity-70 backdrop-blur-sm flex flex-col">
+      <div className="min-h-screen bg-black bg-opacity-70 backdrop-blur-md flex flex-col">
         {MemoizedHeader}
         <main className="container mx-auto px-4 py-8 flex-grow">
           {error && (

@@ -69,6 +69,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
     if (isCapturing || !videoRef.current || !canvasRef.current) return;
 
     setIsCapturing(true);
+    setOverlayStatus('capturing');
     stopDetectionLoop();
     cancelCountdown();
 
@@ -78,22 +79,20 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
     if (context) {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-
-        // Flip the image horizontally to match the user's mirrored view
+        
         context.translate(canvas.width, 0);
         context.scale(-1, 1);
         
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         onCapture(canvas.toDataURL('image/jpeg'));
         
-        // Reset transform for next use
         context.setTransform(1, 0, 0, 1, 0, 0);
     }
     
     setTimeout(() => {
       stopCamera();
       setIsCapturing(false);
-    }, 500); // Allow shutter animation to play
+    }, 500); 
   }, [onCapture, stopCamera, isCapturing, stopDetectionLoop, cancelCountdown]);
 
   const startCountdown = useCallback(() => {
@@ -120,7 +119,9 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
 
   const runFaceDetection = useCallback(async () => {
     const video = videoRef.current;
-    if (video && !video.paused && video.readyState >= 3 && detectorRef.current) {
+    const container = video?.parentElement;
+
+    if (video && container && !video.paused && video.readyState >= 3 && detectorRef.current) {
         try {
             const faces = await detectorRef.current.detect(video);
             let newFeedback = t('faceScanNotFound');
@@ -130,52 +131,59 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
                 const face = faces[0].boundingBox;
                 const videoWidth = video.videoWidth;
                 const videoHeight = video.videoHeight;
-                const container = video.parentElement;
+                const containerWidth = container.clientWidth;
+                const containerHeight = container.clientHeight;
+
+                // This logic correctly determines the visible area of the video with 'object-cover'
+                const videoRatio = videoWidth / videoHeight;
+                const containerRatio = containerWidth / containerHeight;
                 
-                if (container) {
-                    const containerWidth = container.clientWidth;
-                    const containerHeight = container.clientHeight;
-                    const videoRatio = videoWidth / videoHeight;
-                    const containerRatio = containerWidth / containerHeight;
+                let scale = 1;
+                let offsetX = 0;
+                let offsetY = 0;
 
-                    let visibleVideoWidth = videoWidth;
-                    
-                    if (videoRatio > containerRatio) {
-                        const scale = containerHeight / videoHeight;
-                        visibleVideoWidth = containerWidth / scale;
-                    } 
-                    
-                    const smallerDim = Math.min(visibleVideoWidth, videoHeight);
-                    const targetSize = smallerDim * 0.45;
-                    const tolerance = 0.25;
-
-                    const faceCenterX = face.x + face.width / 2;
-                    const faceCenterY = face.y + face.height / 2;
-                    
-                    const frameCenterX = videoWidth / 2;
-                    const frameCenterY = videoHeight / 2;
-                    
-                    const distance = Math.sqrt(Math.pow(faceCenterX - frameCenterX, 2) + Math.pow(faceCenterY - frameCenterY, 2));
-                    const positionOffset = distance / smallerDim;
-                    
-                    const faceSize = (face.width + face.height) / 2;
-                    
-                    if (faceSize < targetSize * (1 - tolerance)) {
-                        newFeedback = t('faceScanCloser');
-                    } else if (faceSize > targetSize * (1 + tolerance)) {
-                        newFeedback = t('faceScanFurther');
-                    } else if (positionOffset > 0.20) {
-                        newFeedback = t('faceScanCenter');
-                    } else {
-                        isPositionGood = true;
-                    }
+                if (videoRatio > containerRatio) { // Video is wider, clipped left/right
+                    scale = containerHeight / videoHeight;
+                    offsetX = (videoWidth * scale - containerWidth) / 2;
+                } else { // Video is taller, clipped top/bottom
+                    scale = containerWidth / videoWidth;
+                    offsetY = (videoHeight * scale - containerHeight) / 2;
                 }
+
+                // Transform face coordinates to match the container's coordinate system
+                const faceX = face.x * scale - offsetX;
+                const faceY = face.y * scale - offsetY;
+                const faceWidth = face.width * scale;
+                const faceHeight = face.height * scale;
+
+                // Define the target area (center of the screen)
+                const targetSize = Math.min(containerWidth, containerHeight) * 0.45;
+                const tolerance = 0.30;
+                const faceCenterX = faceX + faceWidth / 2;
+                const faceCenterY = faceY + faceHeight / 2;
+                const containerCenterX = containerWidth / 2;
+                const containerCenterY = containerHeight / 2;
+                
+                const distance = Math.sqrt(Math.pow(faceCenterX - containerCenterX, 2) + Math.pow(faceCenterY - containerCenterY, 2));
+                const positionOffset = distance / Math.min(containerWidth, containerHeight);
+
+                const avgFaceSize = (faceWidth + faceHeight) / 2;
+                
+                if (avgFaceSize < targetSize * (1 - tolerance)) {
+                    newFeedback = t('faceScanCloser');
+                } else if (avgFaceSize > targetSize * (1 + tolerance)) {
+                    newFeedback = t('faceScanFurther');
+                } else if (positionOffset > 0.15) {
+                    newFeedback = t('faceScanCenter');
+                } else {
+                    isPositionGood = true;
+                }
+
             } else if (faces.length > 1) {
                 newFeedback = t('faceScanOnePerson');
             }
 
             if (isPositionGood) {
-                setOverlayStatus('good_position');
                 if (!isCountingDownRef.current) {
                     startCountdown();
                 }
@@ -271,13 +279,13 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
   
   const overlayBorderColor = {
       idle: 'border-gray-500/80',
-      detecting: 'border-yellow-400/80 animate-pulse',
+      detecting: 'border-yellow-400/80',
       good_position: 'border-green-400/90 shadow-[0_0_20px_rgba(74,222,128,0.7)]',
       capturing: 'border-white',
   }[overlayStatus];
 
   return (
-    <Card className="max-w-3xl mx-auto flex flex-col items-center">
+    <Card className="max-w-xl mx-auto flex flex-col items-center">
       <h2 className="text-3xl font-bold text-center mb-4 text-yellow-400 font-serif">{t('faceScanTitle')}</h2>
       <p className="text-center text-gray-400 mb-6 max-w-lg">{t('faceScanSubtitle')}</p>
       
@@ -287,7 +295,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         </div>
       )}
       
-      <div className="relative w-full max-w-lg mx-auto aspect-square rounded-lg overflow-hidden bg-gray-900/50 border-2 border-dashed border-gray-600 flex items-center justify-center text-gray-400 group">
+      <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden bg-gray-900/50 border-2 border-dashed border-gray-600 flex items-center justify-center text-gray-400 group">
         <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
         <canvas ref={canvasRef} className="hidden" />
         
@@ -299,13 +307,13 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         
         {isCameraOn && !capturedImage && (
             <>
-                <div className="absolute inset-0 bg-black/20"></div>
-                <div className={`absolute inset-[10%] rounded-full border-4 ${overlayBorderColor} transition-all duration-300`}></div>
-                <div className="absolute bottom-4 left-4 right-4 p-3 bg-black/60 rounded-lg text-center text-white font-semibold text-sm">
-                    {countdown === null ? feedback : t('faceScanHold')}
+                <div className={`absolute inset-0 transition-all duration-500 ${overlayStatus === 'good_position' ? 'shadow-[0_0_100px_40px_rgba(74,222,128,0.2)_inset]' : 'shadow-[0_0_100px_40px_rgba(0,0,0,0.7)_inset]'}`} style={{ maskImage: 'radial-gradient(ellipse 50% 60% at center, transparent 0%, transparent 60%, black 100%)' }}></div>
+
+                <div className="absolute bottom-5 left-5 right-5 p-3 bg-black/60 rounded-lg text-center text-white font-semibold text-sm backdrop-blur-sm border border-white/10">
+                    {countdown === null ? feedback : `${t('faceScanHold')}...`}
                 </div>
                 {countdown !== null && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/10">
                         <span className="text-9xl font-bold text-white animate-ping-once" style={{ textShadow: '0 0 25px rgba(0,0,0,0.8)' }}>
                             {countdown}
                         </span>

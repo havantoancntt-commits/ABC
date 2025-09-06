@@ -38,7 +38,7 @@ const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; o
         ? 'border-yellow-400 border-2 shadow-[0_0_20px_rgba(250,204,21,0.5)]' 
         : isThan 
         ? 'border-fuchsia-400 border-2 shadow-[0_0_20px_rgba(232,121,249,0.5)]' 
-        : 'border-gray-700/80';
+        : 'border-gray-800';
     const textClass = isMenh ? 'text-yellow-300' : isThan ? 'text-fuchsia-300' : 'text-gray-300';
     
     const branchMap: Record<string, string> = {
@@ -50,7 +50,7 @@ const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; o
     const displayName = palace.name.replace('Cung ', '').replace('Palace of ', '');
 
     return (
-        <button onClick={onClick} className={`w-full h-full relative bg-gray-900/50 rounded-lg p-2 sm:p-3 text-[10px] sm:text-xs border ${borderClass} flex flex-col transition-all duration-300 hover:bg-gray-900 hover:shadow-lg hover:-translate-y-1`}>
+        <button onClick={onClick} className={`w-full h-full relative bg-gray-900/50 rounded-lg p-2 sm:p-3 text-[10px] sm:text-xs border ${borderClass} flex flex-col transition-all duration-300 hover:bg-gray-900 hover:shadow-lg hover:-translate-y-1 hover:shadow-yellow-500/20`}>
             {isMenh && <span className="absolute top-1 right-1 text-[10px] sm:text-xs font-bold text-yellow-300 bg-black/50 px-1.5 py-0.5 rounded">{t('menh')}</span>}
             {isThan && !isMenh && <span className="absolute top-1 right-1 text-[10px] sm:text-xs font-bold text-fuchsia-300 bg-black/50 px-1.5 py-0.5 rounded">{t('than')}</span>}
             
@@ -190,7 +190,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                         </div>
                     ))}
 
-                    <div className="p-2 sm:p-4 bg-gray-900/70 rounded-lg border border-yellow-500/30 flex flex-col justify-center text-center shadow-[0_0_20px_rgba(250,204,21,0.2)]" style={{gridArea: 'center'}}>
+                    <div className="p-2 sm:p-4 bg-gray-950/70 rounded-lg border border-yellow-500/30 flex flex-col justify-center text-center shadow-[0_0_20px_rgba(250,204,21,0.2)]" style={{gridArea: 'center'}}>
                         <div className="flex-grow flex flex-col justify-center">
                             <h2 className="text-lg sm:text-2xl font-bold text-yellow-400 font-serif">{birthInfo.name}</h2>
                             <p className="text-gray-300 text-xs sm:text-sm">{t(birthInfo.gender)} - {birthDate}</p>
@@ -221,7 +221,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                     }
                 `}</style>
 
-                <div className="mt-4 p-6 bg-gray-900/50 rounded-lg border border-gray-700/80">
+                <div className="mt-4 p-6 bg-gray-900/50 rounded-lg border border-gray-800">
                     <h3 className="text-xl font-bold text-yellow-400 font-serif mb-3">{t('summary')}</h3>
                     <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{data.tongKet}</p>
                 </div>
