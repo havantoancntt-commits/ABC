@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -75,5 +75,18 @@ export const generateNumerologyChart = async (info: NumerologyInfo, language: st
             throw error;
         }
         throw new Error("Could not generate numerology chart due to a connection error or server issue. Please try again.");
+    }
+};
+
+export const analyzePalm = async (base64Image: string, language: string): Promise<PalmReadingData> => {
+    try {
+        const data = await callProxy('analyzePalm', { base64Image, language });
+        return data as PalmReadingData;
+    } catch (error) {
+        console.error("Error analyzing palm:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Could not analyze palm due to a connection error or server issue. Please try again.");
     }
 };

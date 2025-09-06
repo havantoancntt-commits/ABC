@@ -48,6 +48,14 @@ export interface PhysiognomyData {
     loiKhuyen: string;
 }
 
+export interface PalmReadingData {
+    tongQuan: string;
+    duongTamDao: string;
+    duongTriDao: string;
+    duongSinhDao: string;
+    loiKhuyen: string;
+}
+
 export interface ZodiacHour {
     name: string;
     timeRange: string;
@@ -140,4 +148,7 @@ export enum AppState {
   NUMEROLOGY_FORM,
   NUMEROLOGY_LOADING,
   NUMEROLOGY_RESULT,
+  PALM_SCAN_CAPTURE,
+  PALM_SCAN_LOADING,
+  PALM_SCAN_RESULT,
 }

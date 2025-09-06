@@ -74,6 +74,23 @@ export const translations = {
     numerologyStrengthArrows: 'Mũi Tên Sức Mạnh',
     numerologyWeaknessArrows: 'Mũi Tên Trống (Cơ Hội)',
 
+    // Palm Reading
+    palmReadingTitle: 'Xem Chỉ Tay',
+    palmReadingDesc: 'Chụp hoặc tải lên ảnh bàn tay của bạn để AI phân tích các đường chỉ tay chính: Tâm Đạo, Trí Đạo, và Sinh Đạo.',
+    palmReadingButton: 'Xem Chỉ Tay',
+    spinnerPalmReading: 'AI đang phân tích các đường chỉ tay của bạn... Năng lượng từ lòng bàn tay đang được giải mã. Vui lòng chờ...',
+    palmScanTitle: 'Phân Tích Chỉ Tay Qua Ảnh',
+    palmScanSubtitle: 'Để có kết quả chính xác, hãy sử dụng ảnh chụp rõ nét lòng bàn tay phải của bạn, trong điều kiện đủ sáng.',
+    palmScanAnalyze: 'Luận Giải Chỉ Tay',
+    palmReadingResultTitle: 'Kết Quả Luận Giải Chỉ Tay',
+    palmReadingResultImageTitle: 'Ảnh Bàn Tay',
+    palmReadingResultImageAlt: 'Ảnh bàn tay để phân tích',
+    palmReadingSection1: 'Tổng Quan',
+    palmReadingSection2: 'Đường Tâm Đạo',
+    palmReadingSection3: 'Đường Trí Đạo',
+    palmReadingSection4: 'Đường Sinh Đạo',
+    palmReadingSection5: 'Lời Khuyên',
+
     // Birth Info Form
     formTitle: 'Kiến Tạo Bản Đồ Vận Mệnh',
     formSubtitle: 'Tử Vi Đẩu Số là một môn nghệ thuật cổ xưa, giải mã vị trí các vì sao tại thời khắc bạn chào đời để vẽ nên một tấm bản đồ chi tiết về vận mệnh. Hãy nhập thông tin của bạn để khám phá những luận giải sâu sắc, thấu hiểu bản thân và nắm bắt tương lai.',
@@ -295,6 +312,23 @@ export const translations = {
     numerologyBirthdayChartTitle: 'Birthday Chart',
     numerologyStrengthArrows: 'Arrows of Strength',
     numerologyWeaknessArrows: 'Empty Arrows (Opportunities)',
+
+    // Palm Reading
+    palmReadingTitle: 'Palm Reading',
+    palmReadingDesc: 'Capture or upload a photo of your palm for AI to analyze the main lines: Heart, Head, and Life lines.',
+    palmReadingButton: 'Read My Palm',
+    spinnerPalmReading: 'The AI is analyzing your palm lines... The energy from your palm is being decoded. Please wait...',
+    palmScanTitle: 'Palm Reading Analysis',
+    palmScanSubtitle: 'For accurate results, please use a clear, well-lit photo of your right palm.',
+    palmScanAnalyze: 'Analyze Palm',
+    palmReadingResultTitle: 'Palm Reading Analysis Results',
+    palmReadingResultImageTitle: 'Palm Photo',
+    palmReadingResultImageAlt: 'Palm photo for analysis',
+    palmReadingSection1: 'Overall Analysis',
+    palmReadingSection2: 'Heart Line',
+    palmReadingSection3: 'Head Line',
+    palmReadingSection4: 'Life Line',
+    palmReadingSection5: 'Advice',
 
     // Birth Info Form
     formTitle: 'Create Your Destiny Map',

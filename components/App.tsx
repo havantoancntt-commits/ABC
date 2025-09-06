@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData } from '../lib/types';
+import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData } from '../lib/types';
 import { AppState } from '../lib/types';
-import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart } from '../lib/gemini';
+import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm } from '../lib/gemini';
 import Header from './Header';
 import BirthInfoForm from './BirthInfoForm';
 import DonationModal from './PaymentModal';
@@ -18,6 +18,8 @@ import IChingDivination from './IChingDivination';
 import Shop from './Hero'; // Re-using Hero.tsx for the Shop component
 import NumerologyForm from './NumerologyForm';
 import NumerologyChart from './NumerologyChart';
+import PalmScan from './PalmScan';
+import PalmReadingResult from './PalmReadingResult';
 import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
 import Card from './Card';
@@ -152,7 +154,9 @@ const App: React.FC = () => {
   const [physiognomyData, setPhysiognomyData] = useState<PhysiognomyData | null>(null);
   const [numerologyInfo, setNumerologyInfo] = useState<NumerologyInfo | null>(null);
   const [numerologyData, setNumerologyData] = useState<NumerologyData | null>(null);
+  const [palmReadingData, setPalmReadingData] = useState<PalmReadingData | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [capturedPalmImage, setCapturedPalmImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedCharts, setSavedCharts] = useState<SavedChart[]>([]);
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
@@ -209,6 +213,8 @@ const App: React.FC = () => {
     setCapturedImage(null);
     setNumerologyInfo(null);
     setNumerologyData(null);
+    setPalmReadingData(null);
+    setCapturedPalmImage(null);
     setError(null);
   }, []);
 
@@ -260,6 +266,29 @@ const App: React.FC = () => {
     }
   }, [capturedImage, language, t]);
 
+  const handleAnalyzePalm = useCallback(async () => {
+    if (!capturedPalmImage) return;
+    
+    setAppState(AppState.PALM_SCAN_LOADING);
+    setError(null);
+    const base64Data = capturedPalmImage.split(',')[1];
+    if(!base64Data) {
+        setError(t('errorInvalidImageData'));
+        setAppState(AppState.PALM_SCAN_CAPTURE);
+        return;
+    }
+
+    try {
+      const data = await analyzePalm(base64Data, language);
+      setPalmReadingData(data);
+      setAppState(AppState.PALM_SCAN_RESULT);
+    } catch (err) {
+       console.error(err);
+       setError(err instanceof Error ? err.message : t('errorUnknown'));
+       setAppState(AppState.PALM_SCAN_CAPTURE);
+    }
+  }, [capturedPalmImage, language, t]);
+
   const handleGenerateNumerology = useCallback(async (info: NumerologyInfo) => {
     setNumerologyInfo(info);
     setAppState(AppState.NUMEROLOGY_LOADING);
@@ -281,6 +310,15 @@ const App: React.FC = () => {
 
   const handleRetakeCapture = useCallback(() => {
     setCapturedImage(null);
+    setError(null);
+  }, []);
+
+  const handleCapturePalmImage = useCallback((imageDataUrl: string) => {
+    setCapturedPalmImage(imageDataUrl);
+  }, []);
+
+  const handleRetakePalmCapture = useCallback(() => {
+    setCapturedPalmImage(null);
     setError(null);
   }, []);
   
@@ -319,6 +357,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleStartPhysiognomy = useCallback(() => setAppState(AppState.FACE_SCAN_CAPTURE), []);
+  const handleStartPalmReading = useCallback(() => setAppState(AppState.PALM_SCAN_CAPTURE), []);
   const handleStartNumerology = useCallback(() => {
       setError(null);
       setAppState(AppState.NUMEROLOGY_FORM);
@@ -376,6 +415,13 @@ const App: React.FC = () => {
       setError(null);
   }, []);
 
+  const handleResetPalmScan = useCallback(() => {
+      setAppState(AppState.PALM_SCAN_CAPTURE);
+      setPalmReadingData(null);
+      setCapturedPalmImage(null);
+      setError(null);
+  }, []);
+
   const handlePasswordSuccess = useCallback(() => {
     sessionStorage.setItem('astrology_unlocked', 'true');
     if (postLoginAction) {
@@ -392,7 +438,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} />;
       case AppState.SAVED_CHARTS:
         return <SavedCharts 
           charts={savedCharts}
@@ -423,6 +469,24 @@ const App: React.FC = () => {
               analysisData={physiognomyData} 
               imageData={capturedImage} 
               onReset={handleResetFaceScan} 
+              onBackToHome={handleResetToHome} 
+              onOpenDonationModal={() => setIsDonationModalOpen(true)} 
+          />;
+      case AppState.PALM_SCAN_CAPTURE:
+        return <PalmScan 
+            onAnalyze={handleAnalyzePalm} 
+            onBack={handleResetToHome}
+            onCapture={handleCapturePalmImage}
+            onRetake={handleRetakePalmCapture}
+            capturedImage={capturedPalmImage}
+        />;
+      case AppState.PALM_SCAN_LOADING:
+        return <Spinner message={t('spinnerPalmReading')} />;
+      case AppState.PALM_SCAN_RESULT:
+          return palmReadingData && capturedPalmImage && <PalmReadingResult 
+              analysisData={palmReadingData} 
+              imageData={capturedPalmImage} 
+              onReset={handleResetPalmScan} 
               onBackToHome={handleResetToHome} 
               onOpenDonationModal={() => setIsDonationModalOpen(true)} 
           />;

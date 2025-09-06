@@ -57,6 +57,18 @@ const physiognomySchema = {
     required: ['tongQuan', 'tamDinh', 'nguQuan', 'loiKhuyen']
 };
 
+const palmReadingSchema = {
+    type: Type.OBJECT,
+    properties: {
+        tongQuan: { type: Type.STRING, description: 'Luận giải tổng quan về hình dáng bàn tay, gò, và các dấu hiệu đặc biệt.' },
+        duongTamDao: { type: Type.STRING, description: 'Phân tích chi tiết về đường Tâm Đạo (tình duyên, cảm xúc).' },
+        duongTriDao: { type: Type.STRING, description: 'Phân tích chi tiết về đường Trí Đạo (trí tuệ, tư duy, sự nghiệp).' },
+        duongSinhDao: { type: Type.STRING, description: 'Phân tích chi tiết về đường Sinh Đạo (sức khỏe, năng lượng sống).' },
+        loiKhuyen: { type: Type.STRING, description: 'Đưa ra lời khuyên hữu ích dựa trên toàn bộ phân tích.' },
+    },
+    required: ['tongQuan', 'duongTamDao', 'duongTriDao', 'duongSinhDao', 'loiKhuyen']
+};
+
 const iChingSchema = {
     type: Type.OBJECT,
     properties: {
@@ -171,6 +183,24 @@ Requirements:
 4. Provide a detailed analysis of the Three Sections (Tam Đình: Upper, Middle, Lower).
 5. Provide a detailed analysis of the Five Organs (Ngũ Quan: Eyes, Nose, Mouth, Ears, Eyebrows).
 6. Provide useful, concise, constructive, and positive advice.`;
+
+const VI_PALM_READING_SYSTEM_INSTRUCTION = `Bạn là một chuyên gia xem chỉ tay (thuật xem tướng tay) bậc thầy. Nhiệm vụ của bạn là phân tích hình ảnh lòng bàn tay được cung cấp và trả về kết quả dưới dạng JSON theo schema đã định sẵn.
+Yêu cầu:
+1. Luận giải phải súc tích, sâu sắc và mang tính xây dựng. Giới hạn mỗi phần khoảng 100-150 từ.
+2. 'tongQuan': Phân tích tổng quan về hình dáng bàn tay (vuông, dài, nhọn...) và các gò chính.
+3. 'duongTamDao': Phân tích đường Tâm Đạo (heart line) để nói về tình cảm, cảm xúc.
+4. 'duongTriDao': Phân tích đường Trí Đạo (head line) để nói về tư duy, học vấn, sự nghiệp.
+5. 'duongSinhDao': Phân tích đường Sinh Đạo (life line) để nói về sức khỏe, sinh lực.
+6. 'loiKhuyen': Đưa ra lời khuyên tích cực, giúp người xem cải thiện vận mệnh.`;
+
+const EN_PALM_READING_SYSTEM_INSTRUCTION = `You are a master palm reader (chiromancy expert). Your task is to analyze the provided image of a palm and return the result as a JSON object following the predefined schema.
+Requirements:
+1. The analysis must be concise, insightful, and constructive. Limit each section to about 100-150 words.
+2. 'tongQuan' (Overall): Analyze the overall hand shape (square, long, pointed...) and the main mounts.
+3. 'duongTamDao' (Heart Line): Analyze the Heart Line to interpret emotions and relationships.
+4. 'duongTriDao' (Head Line): Analyze the Head Line to interpret intellect, mindset, and career.
+5. 'duongSinhDao' (Life Line): Analyze the Life Line to interpret health and vitality.
+6. 'loiKhuyen' (Advice): Provide positive advice to help the person improve their destiny.`;
 
 const VI_ICHING_SYSTEM_INSTRUCTION = `Bạn là một bậc thầy uyên thâm về Kinh Dịch. Nhiệm vụ của bạn là luận giải một quẻ Dịch và trả về kết quả dưới dạng JSON theo schema đã định sẵn.
 Yêu cầu:
@@ -303,6 +333,21 @@ export default async function handler(req: any, res: any) {
           temperature: 0.6,
         },
       });
+    } else if (operation === 'analyzePalm') {
+        const { base64Image, language } = payload;
+        const systemInstruction = language === 'en' ? EN_PALM_READING_SYSTEM_INSTRUCTION : VI_PALM_READING_SYSTEM_INSTRUCTION;
+        const promptText = language === 'en' ? "Analyze the palm in this image." : "Phân tích chỉ tay trong ảnh này.";
+        const imagePart = { inlineData: { mimeType: 'image/jpeg', data: base64Image } };
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: { parts: [imagePart, { text: promptText }] },
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: palmReadingSchema,
+                temperature: 0.6,
+            },
+        });
     } else if (operation === 'getIChingInterpretation') {
         const { castResult, question, language }: { castResult: CastResult, question: string, language: 'vi' | 'en' } = payload;
         const systemInstruction = language === 'en' ? EN_ICHING_SYSTEM_INSTRUCTION : VI_ICHING_SYSTEM_INSTRUCTION;
