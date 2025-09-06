@@ -112,7 +112,6 @@ export interface NumerologyData {
   summary: string;
 }
 
-
 export enum AppState {
   HOME,
   SAVED_CHARTS,

@@ -158,8 +158,7 @@ const App: React.FC = () => {
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
   const [chartToDelete, setChartToDelete] = useState<SavedChart | null>(null);
   const [visitCount, setVisitCount] = useState<number>(0);
-  const [nextStateAfterLogin, setNextStateAfterLogin] = useState<AppState | null>(null);
-  const [chartToViewAfterLogin, setChartToViewAfterLogin] = useState<SavedChart | null>(null);
+  const [postLoginAction, setPostLoginAction] = useState<(() => void) | null>(null);
   const { language, t } = useLocalization();
 
   useEffect(() => {
@@ -308,14 +307,17 @@ const App: React.FC = () => {
   }, [savedCharts, resetAllDynamicData]);
   
   const handleStartAstrology = useCallback(() => {
-    if (sessionStorage.getItem('astrology_unlocked') === 'true') {
+    const action = () => {
         setAppState(AppState.ASTROLOGY_FORM);
+    };
+    if (sessionStorage.getItem('astrology_unlocked') === 'true') {
+        action();
     } else {
-        setNextStateAfterLogin(AppState.ASTROLOGY_FORM);
-        setChartToViewAfterLogin(null);
+        setPostLoginAction(() => action);
         setAppState(AppState.ASTROLOGY_PASSWORD);
     }
   }, []);
+
   const handleStartPhysiognomy = useCallback(() => setAppState(AppState.FACE_SCAN_CAPTURE), []);
   const handleStartNumerology = useCallback(() => {
       setError(null);
@@ -335,14 +337,16 @@ const App: React.FC = () => {
   }, []);
 
   const handleViewChart = useCallback((chart: SavedChart) => {
-    if (sessionStorage.getItem('astrology_unlocked') === 'true') {
+    const action = () => {
       setBirthInfo(chart.birthInfo);
       setChartData(chart.chartData);
       setAppState(AppState.RESULT);
+    };
+    if (sessionStorage.getItem('astrology_unlocked') === 'true') {
+        action();
     } else {
-      setChartToViewAfterLogin(chart);
-      setNextStateAfterLogin(AppState.RESULT);
-      setAppState(AppState.ASTROLOGY_PASSWORD);
+        setPostLoginAction(() => action);
+        setAppState(AppState.ASTROLOGY_PASSWORD);
     }
   }, []);
 
@@ -374,18 +378,13 @@ const App: React.FC = () => {
 
   const handlePasswordSuccess = useCallback(() => {
     sessionStorage.setItem('astrology_unlocked', 'true');
-    if (nextStateAfterLogin) {
-        if (nextStateAfterLogin === AppState.RESULT && chartToViewAfterLogin) {
-            setBirthInfo(chartToViewAfterLogin.birthInfo);
-            setChartData(chartToViewAfterLogin.chartData);
-        }
-        setAppState(nextStateAfterLogin);
+    if (postLoginAction) {
+      postLoginAction();
     } else {
-        setAppState(AppState.ASTROLOGY_FORM);
+      setAppState(AppState.ASTROLOGY_FORM);
     }
-    setNextStateAfterLogin(null);
-    setChartToViewAfterLogin(null);
-  }, [nextStateAfterLogin, chartToViewAfterLogin]);
+    setPostLoginAction(null);
+  }, [postLoginAction]);
 
   const MemoizedHeader = useMemo(() => <Header onHomeClick={handleResetToHome} />, [handleResetToHome]);
   const MemoizedZaloContact = useMemo(() => <ZaloContact />, []);

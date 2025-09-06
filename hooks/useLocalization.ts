@@ -57,7 +57,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const value = { language, setLanguage, t };
 
-  // FIX: Replaced JSX with React.createElement to be compatible with a .ts file extension.
+  // FIX: Replaced JSX with React.createElement to fix compilation errors in a .ts file.
   return React.createElement(LanguageContext.Provider, { value }, children);
 };
 
