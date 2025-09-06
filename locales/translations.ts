@@ -182,6 +182,17 @@ export const translations = {
     shopFeature2: 'Chế Tác Thủ Công',
     shopFeature3: 'Năng Lượng Bình An',
     shopCTA: 'Mua Ngay trên TikTok Shop',
+    
+    // Password Prompt
+    passwordPromptTitle: 'Yêu Cầu Đăng Nhập',
+    passwordPromptSubtitle: 'Chức năng này yêu cầu mật khẩu để truy cập.',
+    passwordLabel: 'Mật khẩu',
+    passwordPlaceholder: 'Nhập mật khẩu...',
+    passwordSubmit: 'Đăng Nhập',
+    passwordIncorrect: 'Mật khẩu không chính xác. Vui lòng thử lại.',
+    passwordPaymentTitle: 'Cách Nhận Mật Khẩu',
+    passwordPaymentStep1: '1. Thanh toán tuỳ tâm qua ZaloPay đến SĐT:',
+    passwordPaymentStep2: '2. Gửi ảnh chụp giao dịch qua Zalo để nhận mật khẩu ngay lập tức.',
 
   },
   en: {
@@ -368,6 +379,17 @@ export const translations = {
     shopFeature2: 'Handcrafted',
     shopFeature3: 'Peaceful Energy',
     shopCTA: 'Buy Now on TikTok Shop',
+
+    // Password Prompt
+    passwordPromptTitle: 'Login Required',
+    passwordPromptSubtitle: 'This feature requires a password to access.',
+    passwordLabel: 'Password',
+    passwordPlaceholder: 'Enter password...',
+    passwordSubmit: 'Login',
+    passwordIncorrect: 'Incorrect password. Please try again.',
+    passwordPaymentTitle: 'How to Get the Password',
+    passwordPaymentStep1: '1. Make a discretionary payment via ZaloPay to the phone number:',
+    passwordPaymentStep2: '2. Send a transaction screenshot via Zalo to receive the password immediately.',
   }
 };
 

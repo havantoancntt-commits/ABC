@@ -18,11 +18,119 @@ import IChingDivination from './IChingDivination';
 import Shop from './Hero'; // Re-using Hero.tsx for the Shop component
 import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
+import Card from './Card';
+import Button from './Button';
 
 const createChartId = (info: BirthInfo): string => {
   const hourPart = info.hour === -1 ? 'unknown' : info.hour;
   return `${info.name}-${info.gender}-${info.year}-${info.month}-${info.day}-${hourPart}`.trim().replace(/\s+/g, '_');
 };
+
+// --- Password Prompt Component ---
+interface PasswordPromptProps {
+  onSuccess: () => void;
+  onBack: () => void;
+}
+
+const PasswordPrompt: React.FC<PasswordPromptProps> = ({ onSuccess, onBack }) => {
+  const { t } = useLocalization();
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [copyStatus, setCopyStatus] = useState<Record<string, string>>({});
+
+  const copyToClipboard = (text: string, field: string) => {
+    if (copyStatus[field]) return; // Prevent re-copying while message is shown
+    navigator.clipboard.writeText(text).then(() => {
+      setCopyStatus({ [field]: t('copied') });
+      setTimeout(() => {
+        setCopyStatus(prev => {
+            const newStatus = {...prev};
+            delete newStatus[field];
+            return newStatus;
+        });
+      }, 2000);
+    }).catch(err => {
+      console.error('Could not copy text: ', err);
+      setCopyStatus({ [field]: t('copyError') });
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === 'tuvi2025') {
+      setError(null);
+      onSuccess();
+    } else {
+      setError(t('passwordIncorrect'));
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto animate-slide-in-up">
+      <Card>
+        <h2 className="text-3xl font-bold text-center mb-4 text-yellow-400 font-serif">
+          {t('passwordPromptTitle')}
+        </h2>
+        <p className="text-center text-gray-400 mb-6">
+          {t('passwordPromptSubtitle')}
+        </p>
+
+        {/* Payment Instructions */}
+        <div className="mb-8 p-4 bg-gray-950/60 rounded-lg border border-yellow-500/30 text-center">
+            <h3 className="font-semibold text-lg text-yellow-300 font-serif mb-3">
+                {t('passwordPaymentTitle')}
+            </h3>
+            <div className="space-y-3 text-sm text-gray-300">
+                <p className="text-left px-2">
+                    {t('passwordPaymentStep1')}
+                </p>
+                <div className="flex items-center justify-between p-3 bg-black/30 rounded-md">
+                    <span className="font-mono text-white text-lg tracking-wider">
+                        {SUPPORT_INFO.zaloPhone}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => copyToClipboard(SUPPORT_INFO.zaloPhone, 'zaloPhone')}
+                        className="text-yellow-400 hover:text-yellow-300 text-xs font-bold uppercase disabled:text-gray-500 transition-colors w-20 text-right"
+                        disabled={!!copyStatus['zaloPhone']}
+                    >
+                        {copyStatus['zaloPhone'] || t('copy')}
+                    </button>
+                </div>
+                <p className="text-left px-2">{t('passwordPaymentStep2')}</p>
+            </div>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="password-input" className="block text-sm font-medium text-gray-300 mb-2">
+            {t('passwordLabel')}
+          </label>
+          <input
+            type="password"
+            id="password-input"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (error) setError(null);
+            }}
+            className={`w-full bg-gray-900/50 border rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all ${error ? 'border-red-500' : 'border-gray-600'}`}
+            placeholder={t('passwordPlaceholder')}
+            required
+            aria-required="true"
+            aria-invalid={!!error}
+            aria-describedby={error ? "password-error" : undefined}
+          />
+          {error && <p id="password-error" className="text-red-500 text-xs mt-2 text-center">{error}</p>}
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Button onClick={onBack} variant="secondary" type="button">{t('back')}</Button>
+            <Button type="submit" variant="primary">{t('passwordSubmit')}</Button>
+          </div>
+        </form>
+      </Card>
+    </div>
+  );
+};
+
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.HOME);
@@ -35,6 +143,8 @@ const App: React.FC = () => {
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
   const [chartToDelete, setChartToDelete] = useState<SavedChart | null>(null);
   const [visitCount, setVisitCount] = useState<number>(0);
+  const [nextStateAfterLogin, setNextStateAfterLogin] = useState<AppState | null>(null);
+  const [chartToViewAfterLogin, setChartToViewAfterLogin] = useState<SavedChart | null>(null);
   const { language, t } = useLocalization();
 
   useEffect(() => {
@@ -165,7 +275,15 @@ const App: React.FC = () => {
     resetAllDynamicData();
   }, [savedCharts, resetAllDynamicData]);
   
-  const handleStartAstrology = useCallback(() => setAppState(AppState.ASTROLOGY_FORM), []);
+  const handleStartAstrology = useCallback(() => {
+    if (sessionStorage.getItem('astrology_unlocked') === 'true') {
+        setAppState(AppState.ASTROLOGY_FORM);
+    } else {
+        setNextStateAfterLogin(AppState.ASTROLOGY_FORM);
+        setChartToViewAfterLogin(null);
+        setAppState(AppState.ASTROLOGY_PASSWORD);
+    }
+  }, []);
   const handleStartPhysiognomy = useCallback(() => setAppState(AppState.FACE_SCAN_CAPTURE), []);
   const handleStartZodiacFinder = useCallback(() => {
       setError(null);
@@ -181,9 +299,15 @@ const App: React.FC = () => {
   }, []);
 
   const handleViewChart = useCallback((chart: SavedChart) => {
-    setBirthInfo(chart.birthInfo);
-    setChartData(chart.chartData);
-    setAppState(AppState.RESULT);
+    if (sessionStorage.getItem('astrology_unlocked') === 'true') {
+      setBirthInfo(chart.birthInfo);
+      setChartData(chart.chartData);
+      setAppState(AppState.RESULT);
+    } else {
+      setChartToViewAfterLogin(chart);
+      setNextStateAfterLogin(AppState.RESULT);
+      setAppState(AppState.ASTROLOGY_PASSWORD);
+    }
   }, []);
 
   const handleDeleteChart = useCallback((chart: SavedChart) => {
@@ -212,6 +336,21 @@ const App: React.FC = () => {
       setError(null);
   }, []);
 
+  const handlePasswordSuccess = useCallback(() => {
+    sessionStorage.setItem('astrology_unlocked', 'true');
+    if (nextStateAfterLogin) {
+        if (nextStateAfterLogin === AppState.RESULT && chartToViewAfterLogin) {
+            setBirthInfo(chartToViewAfterLogin.birthInfo);
+            setChartData(chartToViewAfterLogin.chartData);
+        }
+        setAppState(nextStateAfterLogin);
+    } else {
+        setAppState(AppState.ASTROLOGY_FORM);
+    }
+    setNextStateAfterLogin(null);
+    setChartToViewAfterLogin(null);
+  }, [nextStateAfterLogin, chartToViewAfterLogin]);
+
   const MemoizedHeader = useMemo(() => <Header onHomeClick={handleResetToHome} />, [handleResetToHome]);
   const MemoizedZaloContact = useMemo(() => <ZaloContact />, []);
 
@@ -224,8 +363,10 @@ const App: React.FC = () => {
           charts={savedCharts}
           onView={handleViewChart}
           onDelete={handleDeleteChart}
-          onCreateNew={handleCreateNew}
+          onCreateNew={handleStartAstrology}
         />;
+      case AppState.ASTROLOGY_PASSWORD:
+        return <PasswordPrompt onSuccess={handlePasswordSuccess} onBack={handleResetToHome} />;
       case AppState.ASTROLOGY_FORM:
         return <BirthInfoForm onSubmit={handleFormSubmit} />;
       case AppState.LOADING:

@@ -95,6 +95,7 @@ export interface IChingInterpretation {
 export enum AppState {
   HOME,
   SAVED_CHARTS,
+  ASTROLOGY_PASSWORD,
   ASTROLOGY_FORM,
   LOADING,
   RESULT,
