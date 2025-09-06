@@ -1,30 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { ZodiacHourData } from '../lib/types';
 import Button from './Button';
 import Card from './Card';
 import { useLocalization } from '../hooks/useLocalization';
+import { calculateZodiacData } from '../lib/zodiac';
 
-interface Props {
-  onFind: (date: { day: number, month: number, year: number }) => void;
-  data: ZodiacHourData | null;
-}
-
-const ZodiacHourFinder: React.FC<Props> = ({ onFind, data }) => {
-  const { t } = useLocalization();
+const ZodiacHourFinder: React.FC = () => {
+  const { t, language } = useLocalization();
   const [currentDate] = useState(new Date());
   const [day, setDay] = useState(currentDate.getDate());
   const [month, setMonth] = useState(currentDate.getMonth() + 1);
   const [year, setYear] = useState(currentDate.getFullYear());
+  const [data, setData] = useState<ZodiacHourData | null>(null);
+
+  const findHours = useCallback(() => {
+    const result = calculateZodiacData({ day, month, year }, language);
+    setData(result);
+  }, [day, month, year, language]);
 
   useEffect(() => {
-    // Automatically find hours for the current date on initial load
-    onFind({ day, month, year });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on mount
+    findHours();
+  }, [findHours]);
 
   const handleFind = (e: React.FormEvent) => {
     e.preventDefault();
-    onFind({ day, month, year });
+    findHours();
   };
 
   const renderOptions = (start: number, end: number) => {

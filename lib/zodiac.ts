@@ -19,8 +19,8 @@ const INAUSPICIOUS_STARS_VI = ['Thiên Hình', 'Chu Tước', 'Bạch Hổ', 'Th
 const AUSPICIOUS_STARS_EN = ['Azure Dragon', 'Bright Hall', 'Golden Chest', 'Celestial Virtue', 'Jade Hall', 'Commanding Destiny'];
 const INAUSPICIOUS_STARS_EN = ['Celestial Punishment', 'Vermilion Bird', 'White Tiger', 'Celestial Prison', 'Mysterious Warrior', 'Hook Array'];
 
-// Maps day branch index to the starting hour index for the auspicious sequence
-const ARIES_START_HOUR_MAP: { [key: number]: number } = {
+// Maps day branch index to the starting auspicious hour index (0=Tý, 1=Sửu...)
+const AUSPICIOUS_START_HOUR_MAP: { [key: number]: number } = {
     0: 8,  // Tý, Ngọ -> Thân
     1: 10, // Sửu, Mùi -> Tuất
     2: 0,  // Dần, Thân -> Tý
@@ -35,8 +35,7 @@ const ARIES_START_HOUR_MAP: { [key: number]: number } = {
     11: 6,
 };
 
-// Using UTC to avoid timezone issues.
-// Epoch: Feb 4, 1984 (UTC) was a Giáp Tý day (Stem 0, Branch 0)
+// Epoch: Feb 4, 1984 (UTC) was a Giáp Tý day (Can 0, Chi 0)
 const EPOCH_DATE_UTC = Date.UTC(1984, 1, 4); // Month is 0-indexed
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -46,7 +45,6 @@ export function calculateZodiacData(
 ): ZodiacHourData {
     const { day, month, year } = date;
     const targetDateUTC = Date.UTC(year, month - 1, day);
-
     const dayDiff = Math.floor((targetDateUTC - EPOCH_DATE_UTC) / ONE_DAY_MS);
 
     const canIndex = (dayDiff % 10 + 10) % 10;
@@ -56,18 +54,20 @@ export function calculateZodiacData(
     const CHI = language === 'vi' ? CHI_VI : CHI_EN;
     const dayCanChi = `${CAN[canIndex]} ${CHI[chiIndex]}`;
 
-    const startHourIndex = ARIES_START_HOUR_MAP[chiIndex];
+    const startHourIndex = AUSPICIOUS_START_HOUR_MAP[chiIndex];
     
     const AUSPICIOUS_STARS = language === 'vi' ? AUSPICIOUS_STARS_VI : AUSPICIOUS_STARS_EN;
     const INAUSPICIOUS_STARS = language === 'vi' ? INAUSPICIOUS_STARS_VI : INAUSPICIOUS_STARS_EN;
 
-    const auspiciousSequence = Array.from({ length: 6 }, (_, i) => (startHourIndex + i * 2) % 12);
+    const auspiciousHoursIndices = new Set(
+        Array.from({ length: 6 }, (_, i) => (startHourIndex + i * 2) % 12)
+    );
 
     let auspiciousStarCounter = 0;
     let inauspiciousStarCounter = 0;
 
     const hours: ZodiacHour[] = HOURS_DATA.map((hourData, i) => {
-        const isAuspicious = auspiciousSequence.includes(i);
+        const isAuspicious = auspiciousHoursIndices.has(i);
         let governingStar: string;
         
         if (isAuspicious) {

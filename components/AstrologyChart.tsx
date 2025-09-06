@@ -178,7 +178,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
     return (
         <div className="max-w-7xl mx-auto">
             <div id="laso-print-area" className="p-2 sm:p-4 bg-gray-900/30 rounded-lg">
-                <div className="grid grid-cols-4 grid-rows-4 gap-1 sm:gap-2" style={{aspectRatio: '1 / 1'}}>
+                <div className="astrology-grid grid grid-cols-4 grid-rows-4 gap-1 sm:gap-2" style={{aspectRatio: '1 / 1'}}>
                     {allPalaces.map(palace => (
                          <div key={palace.name} style={{ gridArea: palaceToGridArea[palace.name] }}>
                             <PalaceCard 
@@ -190,7 +190,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                         </div>
                     ))}
 
-                    <div className="p-2 sm:p-4 bg-gray-950/70 rounded-lg border border-yellow-500/30 flex flex-col justify-center text-center shadow-[0_0_20px_rgba(250,204,21,0.2)]" style={{gridArea: 'center'}}>
+                    <div className="grid-center-cell p-2 sm:p-4 bg-gray-950/70 rounded-lg border border-yellow-500/30 flex flex-col justify-center text-center shadow-[0_0_20px_rgba(250,204,21,0.2)]">
                         <div className="flex-grow flex flex-col justify-center">
                             <h2 className="text-lg sm:text-2xl font-bold text-yellow-400 font-serif">{birthInfo.name}</h2>
                             <p className="text-gray-300 text-xs sm:text-sm">{t(birthInfo.gender)} - {birthDate}</p>
@@ -206,20 +206,6 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                         </details>
                     </div>
                 </div>
-
-                <style>{`
-                    #laso-print-area .grid {
-                        grid-template-areas: 
-                            "quan-loc   no-boc   thien-di  tat-ach"
-                            "dien-trach  center   center    tai-bach"
-                            "phuc-duc   center   center    tu-tuc"
-                            "phu-mau    menh     phu-the   huynh-de";
-                    }
-                    #laso-print-area [style*="grid-area: center"] {
-                        grid-column: span 2;
-                        grid-row: span 2;
-                    }
-                `}</style>
 
                 <div className="mt-4 p-6 bg-gray-900/50 rounded-lg border border-gray-800">
                     <h3 className="text-xl font-bold text-yellow-400 font-serif mb-3">{t('summary')}</h3>

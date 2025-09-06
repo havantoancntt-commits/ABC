@@ -57,28 +57,6 @@ const physiognomySchema = {
     required: ['tongQuan', 'tamDinh', 'nguQuan', 'loiKhuyen']
 };
 
-const zodiacHourSchema = {
-  type: Type.OBJECT,
-  properties: {
-    dayCanChi: { type: Type.STRING, description: "Can Chi (Thiên Can, Địa Chi) của ngày được chọn." },
-    hours: {
-      type: Type.ARRAY,
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          name: { type: Type.STRING, description: "Tên giờ theo Địa Chi (ví dụ: Tý, Sửu)." },
-          timeRange: { type: Type.STRING, description: "Khoảng thời gian của giờ (ví dụ: 23:00-01:00)." },
-          isAuspicious: { type: Type.BOOLEAN, description: "True nếu là giờ Hoàng Đạo (tốt), false nếu là giờ Hắc Đạo (xấu)." },
-          governingStar: { type: Type.STRING, description: "Tên sao chủ quản giờ đó (ví dụ: Thanh Long, Bạch Hổ)." },
-        },
-        required: ['name', 'timeRange', 'isAuspicious', 'governingStar']
-      }
-    }
-  },
-  required: ['dayCanChi', 'hours']
-};
-
-
 // --- System Instructions for the AI Model ---
 const VI_ASTROLOGY_SYSTEM_INSTRUCTION = `Bạn là một chuyên gia Tử Vi Đẩu Số bậc thầy. Nhiệm vụ của bạn là lập một lá số tử vi chi tiết và trả về kết quả dưới dạng JSON theo schema đã định sẵn.
 Yêu cầu:
@@ -111,22 +89,6 @@ Requirements:
 3. Provide a detailed analysis of the Three Sections (Tam Đình: Upper, Middle, Lower).
 4. Provide a detailed analysis of the Five Organs (Ngũ Quan: Eyes, Nose, Mouth, Ears, Eyebrows).
 5. Provide useful, concise, constructive, and positive advice.`;
-
-const VI_ZODIAC_HOUR_SYSTEM_INSTRUCTION = `Bạn là một chuyên gia về lịch pháp Âm lịch và Can Chi. Nhiệm vụ của bạn là tính toán và trả về các giờ Hoàng Đạo và Hắc Đạo cho một ngày cụ thể.
-Yêu cầu:
-1. Tính chính xác Can Chi cho ngày được cung cấp.
-2. Liệt kê tất cả 12 giờ trong ngày theo Địa Chi (Tý đến Hợi).
-3. Xác định mỗi giờ là Hoàng Đạo (tốt) hay Hắc Đạo (xấu).
-4. Gán đúng sao chủ quản cho từng giờ (ví dụ: Thanh Long, Minh Đường cho giờ tốt; Thiên Hình, Chu Tước cho giờ xấu).
-5. Trả về kết quả dưới dạng JSON theo schema đã định sẵn.`;
-
-const EN_ZODIAC_HOUR_SYSTEM_INSTRUCTION = `You are an expert in the Lunar calendar and the Heavenly Stems & Earthly Branches system. Your task is to calculate and return the auspicious (Hoàng Đạo) and inauspicious (Hắc Đạo) hours for a specific day.
-Requirements:
-1. Accurately calculate the Stem-Branch (Can Chi) for the given day.
-2. List all 12 two-hour periods of the day according to the Earthly Branches (from Tý/Zi to Hợi/Hai).
-3. Determine whether each hour is auspicious (good) or inauspicious (bad).
-4. Assign the correct governing star to each hour (e.g., Azure Dragon, Bright Hall for good hours; Celestial Punishment, Vermilion Bird for bad hours).
-5. Return the result as a JSON object following the predefined schema.`;
 
 // --- Main Handler ---
 // Corrected signature for Vercel's Node.js runtime
@@ -200,24 +162,6 @@ export default async function handler(req: any, res: any) {
           temperature: 0.6,
         },
       });
-    } else if (operation === 'findZodiacHours') {
-        const { date, language } = payload;
-        const systemInstruction = language === 'en' ? EN_ZODIAC_HOUR_SYSTEM_INSTRUCTION : VI_ZODIAC_HOUR_SYSTEM_INSTRUCTION;
-        
-        const userPrompt = language === 'en'
-            ? `Find the auspicious and inauspicious hours for the date: ${date.day}/${date.month}/${date.year}`
-            : `Tìm giờ Hoàng Đạo và Hắc Đạo cho ngày: ${date.day}/${date.month}/${date.year}`;
-        
-        response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: userPrompt,
-            config: {
-                systemInstruction: systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: zodiacHourSchema,
-                temperature: 0.2,
-            },
-        });
     } else {
       return res.status(400).json({ error: 'Invalid operation specified' });
     }

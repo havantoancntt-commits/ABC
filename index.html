@@ -127,6 +127,20 @@
       .animate-shutter-flash {
         animation: shutter-flash 0.4s ease-out forwards;
       }
+
+      /* Astrology Chart Grid Layout */
+      #laso-print-area .astrology-grid {
+        grid-template-areas: 
+            "quan-loc   no-boc   thien-di  tat-ach"
+            "dien-trach  center   center    tai-bach"
+            "phuc-duc   center   center    tu-tuc"
+            "phu-mau    menh     phu-the   huynh-de";
+      }
+      #laso-print-area .grid-center-cell {
+        grid-area: center;
+        grid-column: span 2;
+        grid-row: span 2;
+      }
     </style>
   <script type="importmap">
 {
