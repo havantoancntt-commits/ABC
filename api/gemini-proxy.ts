@@ -7,6 +7,7 @@ import type { BirthInfo } from '../types';
 // will default to the standard Node.js serverless runtime, which has a longer
 // timeout. This is necessary because Gemini API calls for complex tasks can
 // exceed the short timeout of the Edge runtime, causing a 504 error.
+// The handler signature has been updated to match the Node.js runtime.
 
 // --- Schemas for Gemini API response validation ---
 const palaceSchema = {
@@ -74,14 +75,13 @@ Yêu cầu:
 5. Đưa ra lời khuyên hữu ích, ngắn gọn, mang tính xây dựng và tích cực.`;
 
 // --- Main Handler ---
-export default async function handler(req: Request) {
-  const headers = {
-    'Content-Type': 'application/json',
-    'X-Proxy-Version': '1.2-nodejs',
-  };
+// Corrected signature for Vercel's Node.js runtime
+export default async function handler(req: any, res: any) {
+  res.setHeader('Content-Type', 'application/json');
 
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers });
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
@@ -89,10 +89,19 @@ export default async function handler(req: Request) {
     if (!apiKey) {
       console.error("API_KEY environment variable not set on Vercel.");
       const errorMessage = 'API Key chưa được cấu hình trên máy chủ. Quản trị viên cần kiểm tra lại biến môi trường `API_KEY` trong cài đặt dự án và triển khai lại (redeploy).';
-      return new Response(JSON.stringify({ error: errorMessage }), { status: 500, headers });
+      return res.status(500).json({ error: errorMessage });
     }
 
-    const { operation, payload } = await req.json();
+    if (!req.body) {
+      return res.status(400).json({ error: 'Yêu cầu không có nội dung.' });
+    }
+
+    const { operation, payload } = req.body;
+    
+    if(!operation || !payload) {
+      return res.status(400).json({ error: 'Yêu cầu thiếu "operation" hoặc "payload".' });
+    }
+
     const ai = new GoogleGenAI({ apiKey });
     let response: GenerateContentResponse;
 
@@ -127,7 +136,7 @@ export default async function handler(req: Request) {
         },
       });
     } else {
-      return new Response(JSON.stringify({ error: 'Invalid operation specified' }), { status: 400, headers });
+      return res.status(400).json({ error: 'Invalid operation specified' });
     }
 
     const responseText = response.text;
@@ -140,28 +149,26 @@ export default async function handler(req: Request) {
         const reason = feedback.blockReason === BlockedReason.SAFETY ? 'an toàn' : `khác (${feedback.blockReason})`;
         userMessage = `Yêu cầu của bạn đã bị chặn vì lý do ${reason}. Vui lòng thử lại với thông tin khác.`;
       }
-      return new Response(JSON.stringify({ error: userMessage }), { status: 400, headers });
+      return res.status(400).json({ error: userMessage });
     }
 
+    let parsedJson;
     try {
-      JSON.parse(responseText);
+      parsedJson = JSON.parse(responseText);
     } catch (e) {
       console.error('Gemini response is not valid JSON:', responseText);
       const userMessage = 'Hệ thống AI đã trả về một định dạng dữ liệu không hợp lệ. Đây có thể là sự cố tạm thời, vui lòng thử lại.';
-      return new Response(JSON.stringify({ error: userMessage }), { status: 500, headers });
+      return res.status(500).json({ error: userMessage });
     }
 
-    return new Response(responseText, { status: 200, headers });
+    return res.status(200).json(parsedJson);
 
   } catch (error: unknown) {
     console.error('Critical error in Gemini proxy function:', error);
     let userMessage = 'Đã xảy ra lỗi không mong muốn khi xử lý yêu cầu của bạn.';
     let statusCode = 500;
 
-    if (error instanceof SyntaxError && error.message.includes('JSON')) {
-      userMessage = 'Yêu cầu gửi lên máy chủ có định dạng không hợp lệ.';
-      statusCode = 400;
-    } else if (error instanceof Error) {
+    if (error instanceof Error) {
       const errorString = error.toString().toLowerCase();
       if (errorString.includes('api key not valid')) {
         userMessage = 'Lỗi xác thực API Key. Vui lòng kiểm tra lại giá trị API Key trên máy chủ.';
@@ -170,10 +177,12 @@ export default async function handler(req: Request) {
         userMessage = 'Hệ thống AI hiện đang quá tải hoặc đã hết tài nguyên. Xin vui lòng thử lại sau giây lát.';
         statusCode = 503;
       } else {
-        userMessage = `Đã xảy ra lỗi phía máy chủ. Vui lòng thử lại sau. (Chi tiết: ${error.message})`;
+        userMessage = `Đã xảy ra lỗi phía máy chủ. Vui lòng thử lại sau.`;
       }
     }
-
-    return new Response(JSON.stringify({ error: userMessage }), { status: statusCode, headers });
+    
+    if (!res.headersSent) {
+      return res.status(statusCode).json({ error: userMessage });
+    }
   }
 }
