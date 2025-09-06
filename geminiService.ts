@@ -8,6 +8,9 @@ async function callProxy(operation: string, payload: object): Promise<any> {
     });
 
     if (!response.ok) {
+        if (response.status === 504) {
+            throw new Error('Máy chủ mất quá nhiều thời gian để phản hồi (Gateway Timeout). Điều này có thể do yêu cầu phức tạp hoặc hệ thống đang quá tải. Vui lòng thử lại sau giây lát.');
+        }
         let errorMsg = 'Đã xảy ra lỗi không xác định khi đọc phản hồi từ máy chủ.';
         try {
             const errorData = await response.json();
