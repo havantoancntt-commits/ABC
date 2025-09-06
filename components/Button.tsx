@@ -1,6 +1,6 @@
 import React from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'special';
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'special' | 'iching';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -24,6 +24,7 @@ const Button: React.FC<Props> = ({
     secondary: 'bg-gray-700/80 text-white hover:bg-gray-700 focus-visible:ring-gray-400',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-400',
     special: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 focus-visible:ring-purple-400',
+    iching: 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-500 focus-visible:ring-emerald-400',
   };
 
   const sizeClasses: Record<ButtonSize, string> = {

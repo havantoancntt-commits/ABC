@@ -60,6 +60,37 @@ export interface ZodiacHourData {
     hours: ZodiacHour[];
 }
 
+export interface IChingLine {
+    value: 6 | 7 | 8 | 9;
+    isChanging: boolean;
+    isYang: boolean;
+}
+
+export interface IChingHexagram {
+    number: number;
+    name: { vi: string, en: string, pinyin: string };
+    judgment: { vi: string, en: string };
+    image: { vi: string, en: string };
+}
+
+export interface CastResult {
+    lines: IChingLine[];
+    primaryHexagram: IChingHexagram;
+    secondaryHexagram: IChingHexagram | null;
+    changingLinesIndices: number[]; // 0-5 for lines 1-6
+}
+
+export interface IChingInterpretation {
+    tongQuan: string;
+    thoanTu: string;
+    hinhTuong: string;
+    haoDong: {
+        line: number; // 1-6
+        interpretation: string;
+    }[];
+    queBienDoi: string | null;
+}
+
 
 export enum AppState {
   HOME,
@@ -71,4 +102,5 @@ export enum AppState {
   FACE_SCAN_LOADING,
   FACE_SCAN_RESULT,
   ZODIAC_HOUR_FINDER,
+  ICHING_DIVINATION,
 }

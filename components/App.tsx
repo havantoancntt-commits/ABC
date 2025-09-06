@@ -14,6 +14,7 @@ import FaceScan from './FaceScan';
 import PhysiognomyResult from './PhysiognomyResult';
 import Home from './Home';
 import ZodiacHourFinder from './ZodiacHourFinder';
+import IChingDivination from './IChingDivination';
 import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
 
@@ -169,6 +170,10 @@ const App: React.FC = () => {
       setError(null);
       setAppState(AppState.ZODIAC_HOUR_FINDER);
   }, []);
+  const handleStartIChing = useCallback(() => {
+      setError(null);
+      setAppState(AppState.ICHING_DIVINATION);
+  }, []);
 
   const handleViewChart = useCallback((chart: SavedChart) => {
     setBirthInfo(chart.birthInfo);
@@ -208,7 +213,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} />;
       case AppState.SAVED_CHARTS:
         return <SavedCharts 
           charts={savedCharts}
@@ -242,6 +247,8 @@ const App: React.FC = () => {
           />;
       case AppState.ZODIAC_HOUR_FINDER:
           return <ZodiacHourFinder />;
+      case AppState.ICHING_DIVINATION:
+          return <IChingDivination onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       default:
         return null;
     }

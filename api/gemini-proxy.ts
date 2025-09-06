@@ -1,7 +1,8 @@
 // This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
 import { GoogleGenAI, Type, BlockedReason } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
-import type { BirthInfo } from '../types';
+// FIX: Corrected the import path to resolve to the correct types file which exports CastResult.
+import type { BirthInfo, CastResult } from '../lib/types';
 
 // By removing the `export const config = { runtime: 'edge' };`, this function
 // will default to the standard Node.js serverless runtime, which has a longer
@@ -57,6 +58,29 @@ const physiognomySchema = {
     required: ['tongQuan', 'tamDinh', 'nguQuan', 'loiKhuyen']
 };
 
+const iChingSchema = {
+    type: Type.OBJECT,
+    properties: {
+        tongQuan: { type: Type.STRING, description: 'Luận giải tổng quan, sâu sắc về quẻ trong bối cảnh câu hỏi của người dùng. Diễn giải hiện đại, dễ hiểu.' },
+        thoanTu: { type: Type.STRING, description: 'Diễn giải Thoán từ (lời quẻ) của quẻ chính.' },
+        hinhTuong: { type: Type.STRING, description: 'Diễn giải Hình tượng (lời tượng) của quẻ chính.' },
+        haoDong: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    line: { type: Type.INTEGER, description: 'Thứ tự của hào động (1-6).' },
+                    interpretation: { type: Type.STRING, description: 'Luận giải chi tiết ý nghĩa của hào động này.' }
+                },
+                required: ['line', 'interpretation']
+            }
+        },
+        queBienDoi: { type: Type.STRING, description: 'Luận giải về quẻ biến đổi, mô tả xu hướng và kết quả tương lai. Nếu không có hào động thì trả về null.' }
+    },
+    required: ['tongQuan', 'thoanTu', 'hinhTuong', 'haoDong', 'queBienDoi']
+};
+
+
 // --- System Instructions for the AI Model ---
 const VI_ASTROLOGY_SYSTEM_INSTRUCTION = `Bạn là một chuyên gia Tử Vi Đẩu Số bậc thầy. Nhiệm vụ của bạn là lập một lá số tử vi chi tiết và trả về kết quả dưới dạng JSON theo schema đã định sẵn.
 Yêu cầu:
@@ -89,6 +113,27 @@ Requirements:
 3. Provide a detailed analysis of the Three Sections (Tam Đình: Upper, Middle, Lower).
 4. Provide a detailed analysis of the Five Organs (Ngũ Quan: Eyes, Nose, Mouth, Ears, Eyebrows).
 5. Provide useful, concise, constructive, and positive advice.`;
+
+const VI_ICHING_SYSTEM_INSTRUCTION = `Bạn là một bậc thầy uyên thâm về Kinh Dịch. Nhiệm vụ của bạn là luận giải một quẻ Dịch và trả về kết quả dưới dạng JSON theo schema đã định sẵn.
+Yêu cầu:
+1. Luận giải phải sâu sắc, kết hợp triết lý cổ xưa với góc nhìn hiện đại, phù hợp với câu hỏi của người dùng.
+2. 'tongQuan': Luận giải tổng quát ý nghĩa của quẻ chính trong bối cảnh câu hỏi. Đây là phần quan trọng nhất, cần phải rõ ràng, mang tính định hướng.
+3. 'thoanTu': Diễn giải ngắn gọn ý nghĩa của Thoán từ (lời quẻ).
+4. 'hinhTuong': Diễn giải ngắn gọn ý nghĩa của Hình tượng (lời tượng).
+5. 'haoDong': Luận giải từng hào động. Đây là chìa khóa của quẻ, cần phân tích kỹ lưỡng nhất. Giải thích tại sao hào đó động và nó báo hiệu điều gì.
+6. 'queBienDoi': Luận giải ý nghĩa của quẻ biến, cho thấy xu hướng và kết quả cuối cùng của sự việc. Nếu không có hào động, trả về null cho trường này.
+7. Giữ giọng văn trang trọng, uyên bác nhưng dễ hiểu.`;
+
+const EN_ICHING_SYSTEM_INSTRUCTION = `You are a profound master of the I Ching. Your task is to interpret a hexagram and return the result as a JSON object following the predefined schema.
+Requirements:
+1. The interpretation must be insightful, combining ancient philosophy with a modern perspective relevant to the user's question.
+2. 'tongQuan' (Overall Interpretation): Provide a general interpretation of the primary hexagram in the context of the question. This is the most crucial part and should be clear and guiding.
+3. 'thoanTu' (The Judgment): Briefly explain the meaning of the Judgment text.
+4. 'hinhTuong' (The Image): Briefly explain the meaning of the Image text.
+5. 'haoDong' (Changing Lines): Interpret each changing line. This is the key to the reading and requires the most thorough analysis. Explain why the line is changing and what it signifies.
+6. 'queBienDoi' (Transformed Hexagram): Interpret the meaning of the transformed hexagram, indicating the trend and final outcome. If there are no changing lines, return null for this field.
+7. Maintain a formal, wise, yet understandable tone.`;
+
 
 // --- Main Handler ---
 // Corrected signature for Vercel's Node.js runtime
@@ -162,6 +207,28 @@ export default async function handler(req: any, res: any) {
           temperature: 0.6,
         },
       });
+    } else if (operation === 'getIChingInterpretation') {
+        const { castResult, question, language }: { castResult: CastResult, question: string, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_ICHING_SYSTEM_INSTRUCTION : VI_ICHING_SYSTEM_INSTRUCTION;
+        
+        const primaryName = castResult.primaryHexagram.name[language];
+        const secondaryName = castResult.secondaryHexagram?.name[language] || (language === 'en' ? 'None' : 'Không có');
+        const changingLines = castResult.changingLinesIndices.map(i => i + 1).join(', ') || (language === 'en' ? 'None' : 'Không có');
+        
+        const userPrompt = language === 'en'
+        ? `Interpret the following I Ching reading:\n- User's Question: "${question || 'A general question about my current situation.'}"\n- Primary Hexagram: ${castResult.primaryHexagram.number}. ${primaryName}\n- Changing Lines: ${changingLines}\n- Secondary Hexagram: ${secondaryName}`
+        : `Luận giải quẻ Kinh Dịch sau:\n- Câu hỏi: "${question || 'Một câu hỏi chung về tình hình hiện tại.'}"\n- Quẻ Chính: ${castResult.primaryHexagram.number}. ${primaryName}\n- Hào Động: ${changingLines}\n- Quẻ Biến: ${secondaryName}`;
+
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: iChingSchema,
+                temperature: 0.8,
+            },
+        });
     } else {
       return res.status(400).json({ error: 'Invalid operation specified' });
     }

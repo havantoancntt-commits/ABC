@@ -41,6 +41,9 @@ export const translations = {
     zodiacHourTitle: 'Xem Giờ Hoàng Đạo',
     zodiacHourDesc: 'Tìm kiếm các khung giờ tốt (Hoàng Đạo) và xấu (Hắc Đạo) trong ngày để lên kế hoạch cho các công việc quan trọng một cách hiệu quả.',
     zodiacHourButton: 'Xem Giờ Tốt',
+    iChingTitle: 'Kinh Dịch Luận Quẻ',
+    iChingDesc: 'Gieo quẻ Kinh Dịch để nhận được sự chỉ dẫn cho các tình huống trong cuộc sống. Đặt câu hỏi và nhận luận giải sâu sắc từ 64 quẻ dịch.',
+    iChingButton: 'Gieo Quẻ Dịch',
 
     // Birth Info Form
     formTitle: 'Kiến Tạo Bản Đồ Vận Mệnh',
@@ -61,6 +64,7 @@ export const translations = {
     spinnerAstrology: 'Hệ thống đang khởi tạo lá số tử vi cho bạn. Các vì sao đang dịch chuyển vào đúng vị trí... Quá trình này có thể mất vài phút, xin vui lòng chờ...',
     spinnerPhysiognomy: 'AI đang phân tích các đường nét trên khuôn mặt bạn... Xin vui lòng giữ nguyên trang...',
     spinnerCamera: 'Đang khởi động camera...',
+    spinnerIChing: 'Đang luận giải quẻ Dịch... Vũ trụ đang gửi thông điệp đến bạn, xin vui lòng chờ trong giây lát.',
 
     // Face Scan
     faceScanTitle: 'Xem Nhân Tướng Qua Ảnh',
@@ -147,6 +151,24 @@ export const translations = {
     zodiacFinderAuspicious: 'Hoàng Đạo (Tốt)',
     zodiacFinderInauspicious: 'Hắc Đạo (Xấu)',
 
+    // I Ching Divination
+    iChingDivinationTitle: 'Kinh Dịch Luận Quẻ',
+    iChingDivinationSubtitle: 'Tập trung tâm trí vào câu hỏi bạn đang tìm kiếm câu trả lời. Sự thành tâm sẽ giúp kết nối với vũ trụ và nhận được chỉ dẫn rõ ràng nhất.',
+    iChingQuestionPlaceholder: 'Nhập câu hỏi của bạn ở đây (không bắt buộc)...',
+    iChingCastButton: 'Thành Tâm Gieo Quẻ',
+    iChingCastingMessage: 'Đang gieo hào thứ {{count}}...',
+    iChingResultTitle: 'Luận Giải Quẻ Dịch',
+    iChingYourQuestion: 'Câu Hỏi Của Bạn',
+    iChingPrimaryHexagram: 'Quẻ Chính',
+    iChingSecondaryHexagram: 'Quẻ Biến',
+    iChingSectionOverall: 'Tổng Quan Luận Giải',
+    iChingSectionJudgment: 'Thoán Từ (Lời Quẻ)',
+    iChingSectionImage: 'Hình Tượng (Lời Tượng)',
+    iChingSectionChangingLines: 'Luận Giải Hào Động',
+    iChingSectionTransformed: 'Ý Nghĩa Quẻ Biến',
+    iChingLine: 'Hào {{line}}',
+    iChingCastAgain: 'Gieo Quẻ Khác',
+
   },
   en: {
     // Common
@@ -190,6 +212,9 @@ export const translations = {
     zodiacHourTitle: 'Auspicious Hour Finder',
     zodiacHourDesc: 'Find the good (Auspicious) and bad (Inauspicious) hours of any day to effectively plan your important events and activities.',
     zodiacHourButton: 'Find Auspicious Hours',
+    iChingTitle: 'I Ching Divination',
+    iChingDesc: 'Cast an I Ching hexagram to receive guidance for life\'s situations. Ask a question and receive profound interpretations from the 64 hexagrams.',
+    iChingButton: 'Cast Hexagram',
 
     // Birth Info Form
     formTitle: 'Create Your Destiny Map',
@@ -210,6 +235,7 @@ export const translations = {
     spinnerAstrology: 'The system is generating your horoscope. The stars are aligning... This process may take a few moments, please wait.',
     spinnerPhysiognomy: 'The AI is analyzing your facial features... Please stay on this page.',
     spinnerCamera: 'Starting camera...',
+    spinnerIChing: 'Interpreting the hexagram... The universe is sending its message to you, please wait a moment.',
 
     // Face Scan
     faceScanTitle: 'Facial Physiognomy Analysis',
@@ -296,6 +322,24 @@ export const translations = {
     zodiacFinderDayInfo: 'Day: {{dayCanChi}}',
     zodiacFinderAuspicious: 'Auspicious (Good)',
     zodiacFinderInauspicious: 'Inauspicious (Bad)',
+
+    // I Ching Divination
+    iChingDivinationTitle: 'I Ching Divination',
+    iChingDivinationSubtitle: 'Focus your mind on the question for which you seek an answer. Sincerity will help connect you to the universe and receive the clearest guidance.',
+    iChingQuestionPlaceholder: 'Enter your question here (optional)...',
+    iChingCastButton: 'Sincerely Cast Hexagram',
+    iChingCastingMessage: 'Casting line {{count}}...',
+    iChingResultTitle: 'I Ching Reading',
+    iChingYourQuestion: 'Your Question',
+    iChingPrimaryHexagram: 'Primary Hexagram',
+    iChingSecondaryHexagram: 'Transformed Hexagram',
+    iChingSectionOverall: 'Overall Interpretation',
+    iChingSectionJudgment: 'The Judgment',
+    iChingSectionImage: 'The Image',
+    iChingSectionChangingLines: 'Changing Lines Analysis',
+    iChingSectionTransformed: 'Meaning of Transformed Hexagram',
+    iChingLine: 'Line {{line}}',
+    iChingCastAgain: 'Cast Another Hexagram',
   }
 };
 

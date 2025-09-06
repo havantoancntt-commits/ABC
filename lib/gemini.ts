@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -42,11 +42,25 @@ export const analyzePhysiognomy = async (base64Image: string, language: string):
   try {
     const data = await callProxy('analyzePhysiognomy', { base64Image, language });
     return data as PhysiognomyData;
-  } catch (error) {
+  } catch (error)
+ {
     console.error("Error analyzing physiognomy:", error);
     if (error instanceof Error) {
         throw error;
     }
     throw new Error("Could not analyze face due to a connection error or server issue. Please try again.");
   }
+};
+
+export const getIChingInterpretation = async (castResult: CastResult, question: string, language: string): Promise<IChingInterpretation> => {
+    try {
+        const data = await callProxy('getIChingInterpretation', { castResult, question, language });
+        return data as IChingInterpretation;
+    } catch (error) {
+        console.error("Error getting I Ching interpretation:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Could not get interpretation due to a connection error or server issue. Please try again.");
+    }
 };
