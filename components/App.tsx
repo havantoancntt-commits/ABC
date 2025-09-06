@@ -224,7 +224,13 @@ const App: React.FC = () => {
       case AppState.FACE_SCAN_LOADING:
         return <Spinner message={t('spinnerPhysiognomy')} />;
       case AppState.FACE_SCAN_RESULT:
-          return physiognomyData && capturedImage && <PhysiognomyResult analysisData={physiognomyData} imageData={capturedImage} onReset={handleResetFaceScan} onBackToHome={handleResetToHome} />;
+          return physiognomyData && capturedImage && <PhysiognomyResult 
+              analysisData={physiognomyData} 
+              imageData={capturedImage} 
+              onReset={handleResetFaceScan} 
+              onBackToHome={handleResetToHome} 
+              onOpenDonationModal={() => setIsDonationModalOpen(true)} 
+          />;
       default:
         return null;
     }
