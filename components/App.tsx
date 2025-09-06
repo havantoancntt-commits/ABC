@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, ZodiacHourData } from '../lib/types';
 import { AppState } from '../lib/types';
-import { generateAstrologyChart, analyzePhysiognomy, findZodiacHours } from '../lib/gemini';
+import { generateAstrologyChart, analyzePhysiognomy } from '../lib/gemini';
+import { calculateZodiacData } from '../lib/zodiac';
 import Header from './Header';
 import BirthInfoForm from './BirthInfoForm';
 import DonationModal from './PaymentModal';
@@ -134,11 +135,10 @@ const App: React.FC = () => {
     }
   }, [capturedImage, language, t]);
 
-  const handleFindZodiacHours = useCallback(async (date: { day: number, month: number, year: number }) => {
-    setAppState(AppState.ZODIAC_HOUR_LOADING);
+  const handleFindZodiacHours = useCallback((date: { day: number, month: number, year: number }) => {
     setError(null);
     try {
-        const data = await findZodiacHours(date, language);
+        const data = calculateZodiacData(date, language);
         setZodiacHourData(data);
         setAppState(AppState.ZODIAC_HOUR_FINDER);
     } catch (err) {
@@ -259,8 +259,6 @@ const App: React.FC = () => {
           />;
       case AppState.ZODIAC_HOUR_FINDER:
           return <ZodiacHourFinder onFind={handleFindZodiacHours} data={zodiacHourData} />;
-      case AppState.ZODIAC_HOUR_LOADING:
-          return <Spinner message={t('spinnerZodiac')} />;
       default:
         return null;
     }

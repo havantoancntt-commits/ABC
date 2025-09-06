@@ -57,27 +57,6 @@ const physiognomySchema = {
     required: ['tongQuan', 'tamDinh', 'nguQuan', 'loiKhuyen']
 };
 
-const zodiacHourSchema = {
-    type: Type.OBJECT,
-    properties: {
-        dayCanChi: { type: Type.STRING, description: 'Can Chi của ngày được chọn, ví dụ: "Ngày Canh Thân".' },
-        hours: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    name: { type: Type.STRING, description: 'Tên giờ, ví dụ: "Tý", "Sửu".' },
-                    timeRange: { type: Type.STRING, description: 'Khoảng thời gian, ví dụ: "23:00-01:00".' },
-                    isAuspicious: { type: Type.BOOLEAN, description: 'True nếu là giờ Hoàng Đạo, false nếu là giờ Hắc Đạo.' },
-                    governingStar: { type: Type.STRING, description: 'Tên sao cai quản giờ đó, ví dụ: "Thanh Long" hoặc "Thiên Hình".' },
-                },
-                required: ['name', 'timeRange', 'isAuspicious', 'governingStar'],
-            },
-        },
-    },
-    required: ['dayCanChi', 'hours'],
-};
-
 // --- System Instructions for the AI Model ---
 const VI_ASTROLOGY_SYSTEM_INSTRUCTION = `Bạn là một chuyên gia Tử Vi Đẩu Số bậc thầy. Nhiệm vụ của bạn là lập một lá số tử vi chi tiết và trả về kết quả dưới dạng JSON theo schema đã định sẵn.
 Yêu cầu:
@@ -110,39 +89,6 @@ Requirements:
 3. Provide a detailed analysis of the Three Sections (Tam Đình: Upper, Middle, Lower).
 4. Provide a detailed analysis of the Five Organs (Ngũ Quan: Eyes, Nose, Mouth, Ears, Eyebrows).
 5. Provide useful, concise, constructive, and positive advice.`;
-
-const VI_ZODIAC_HOUR_SYSTEM_INSTRUCTION = `Bạn là chuyên gia về lịch Can Chi và thuật chọn ngày giờ. Nhiệm vụ của bạn là xác định chính xác ngày Can Chi và các giờ Hoàng Đạo, Hắc Đạo cho một ngày dương lịch cụ thể, sau đó trả về kết quả dưới dạng JSON theo schema.
-Quy tắc xác định giờ Hoàng Đạo:
-- Dần, Thân khởi Tý.
-- Mão, Dậu khởi Dần.
-- Thìn, Tuất khởi Thìn.
-- Tỵ, Hợi khởi Ngọ.
-- Tý, Ngọ khởi Thân.
-- Sửu, Mùi khởi Tuất.
-Các sao Hoàng Đạo: Thanh Long, Minh Đường, Kim Quỹ, Thiên Đức, Ngọc Đường, Tư Mệnh.
-Các sao Hắc Đạo: Thiên Hình, Chu Tước, Bạch Hổ, Thiên Lao, Nguyên Vũ, Câu Trận.
-Yêu cầu:
-1. Tính chính xác Can Chi cho ngày được cung cấp.
-2. Liệt kê TẤT CẢ 12 giờ (từ Tý đến Hợi), mỗi giờ kèm theo khoảng thời gian 24h tương ứng.
-3. Đánh dấu đúng 6 giờ Hoàng Đạo và 6 giờ Hắc Đạo.
-4. Gán đúng tên sao cai quản cho từng giờ.`;
-
-const EN_ZODIAC_HOUR_SYSTEM_INSTRUCTION = `You are an expert in the Can Chi (Stem-Branch) calendar and the art of date selection. Your task is to accurately determine the Can Chi day and the Auspicious (Hoàng Đạo) and Inauspicious (Hắc Đạo) hours for a specific Gregorian date, then return the result as a JSON object following the schema.
-Rule for determining Auspicious Hours:
-- Dần, Thân days start with Tý.
-- Mão, Dậu days start with Dần.
-- Thìn, Tuất days start with Thìn.
-- Tỵ, Hợi days start with Ngọ.
-- Tý, Ngọ days start with Thân.
-- Sửu, Mùi days start with Tuất.
-Auspicious Stars: Thanh Long, Minh Đường, Kim Quỹ, Thiên Đức, Ngọc Đường, Tư Mệnh.
-Inauspicious Stars: Thiên Hình, Chu Tước, Bạch Hổ, Thiên Lao, Nguyên Vũ, Câu Trận.
-Requirements:
-1. Accurately calculate the Can Chi for the provided date.
-2. List ALL 12 hours (from Tý to Hợi), each with its corresponding 24h time range.
-3. Correctly identify the 6 Auspicious hours and 6 Inauspicious hours.
-4. Assign the correct governing star name to each hour.`;
-
 
 // --- Main Handler ---
 // Corrected signature for Vercel's Node.js runtime
@@ -216,23 +162,6 @@ export default async function handler(req: any, res: any) {
           temperature: 0.6,
         },
       });
-    } else if (operation === 'findZodiacHours') {
-        const { date, language } = payload;
-        const systemInstruction = language === 'en' ? EN_ZODIAC_HOUR_SYSTEM_INSTRUCTION : VI_ZODIAC_HOUR_SYSTEM_INSTRUCTION;
-        const promptText = language === 'en'
-            ? `Find the auspicious hours for the date: ${date.day}/${date.month}/${date.year}.`
-            : `Tìm giờ hoàng đạo cho ngày: ${date.day}/${date.month}/${date.year}.`;
-        
-        response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: promptText,
-            config: {
-                systemInstruction: systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: zodiacHourSchema,
-                temperature: 0.2,
-            },
-        });
     } else {
       return res.status(400).json({ error: 'Invalid operation specified' });
     }
