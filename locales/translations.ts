@@ -2,7 +2,7 @@ export const translations = {
   vi: {
     // Common
     appName: 'Lá Số Tử Vi & Nhân Tướng Học',
-    processing: 'Đang xử lý...',
+    processing: 'Đang luận giải...',
     errorTitle: 'Đã xảy ra lỗi!',
     errorUnknown: 'Đã xảy ra lỗi không xác định. Vui lòng thử lại.',
     errorInvalidImageData: 'Dữ liệu ảnh không hợp lệ.',
@@ -18,7 +18,7 @@ export const translations = {
     details: 'Chi tiết',
     creating: 'Đang tạo...',
     downloadPdf: 'Tải PDF',
-    donate: 'Ủng hộ tác giả',
+    donate: 'Ủng hộ Tác giả',
     day: 'Ngày',
     month: 'Tháng',
     year: 'Năm',
@@ -31,7 +31,7 @@ export const translations = {
 
     // Home
     homeTitle: 'Khám Phá Huyền Học Cổ Đại',
-    homeSubtitle: 'Sử dụng trí tuệ nhân tạo để luận giải các bộ môn kinh điển của văn hóa phương Đông. Bắt đầu hành trình thấu hiểu bản thân và định hướng tương lai của bạn ngay hôm nay.',
+    homeSubtitle: 'Ứng dụng Trí Tuệ Nhân Tạo để luận giải các bộ môn kinh điển của văn hóa phương Đông, mang đến một góc nhìn sâu sắc để thấu hiểu bản thân và định hướng tương lai.',
     astrologyTitle: 'Tử Vi Đẩu Số',
     astrologyDesc: 'Lập và luận giải lá số tử vi chi tiết dựa trên ngày giờ sinh. Khám phá bản đồ vận mệnh, các cung số và nhận định hướng cho tương lai.',
     astrologyButton: 'Lập Lá Số Ngay',
@@ -60,7 +60,7 @@ export const translations = {
     numerologyDobLabel: 'Ngày tháng năm sinh',
     numerologySubmitButton: 'Luận Giải Thần Số Học',
     errorFormFullName: 'Vui lòng nhập họ và tên đầy đủ.',
-    spinnerNumerology: 'Các con số đang được phân tích... Năng lượng vũ trụ đang hội tụ để tiết lộ những bí ẩn về bạn. Vui lòng chờ trong giây lát.',
+    spinnerNumerology: 'Các con số đang được phân tích... Năng lượng vũ trụ đang hội tụ để tiết lộ những bí ẩn về bạn. Xin vui lòng chờ trong giây lát.',
     numerologyResultTitle: 'Bản Đồ Thần Số Học Của Bạn',
     numerologyLifePath: 'Số Đường Đời',
     numerologyDestiny: 'Số Sứ Mệnh',
@@ -78,7 +78,7 @@ export const translations = {
     palmReadingTitle: 'Xem Chỉ Tay',
     palmReadingDesc: 'Chụp hoặc tải lên ảnh bàn tay của bạn để AI phân tích các đường chỉ tay chính: Tâm Đạo, Trí Đạo, và Sinh Đạo.',
     palmReadingButton: 'Xem Chỉ Tay',
-    spinnerPalmReading: 'AI đang phân tích các đường chỉ tay của bạn... Năng lượng từ lòng bàn tay đang được giải mã. Vui lòng chờ...',
+    spinnerPalmReading: 'AI đang phân tích các đường chỉ tay... Năng lượng từ lòng bàn tay đang được giải mã. Vui lòng chờ trong giây lát.',
     palmScanTitle: 'Phân Tích Chỉ Tay Qua Ảnh',
     palmScanSubtitle: 'Để có kết quả chính xác, hãy sử dụng ảnh chụp rõ nét lòng bàn tay phải của bạn, trong điều kiện đủ sáng.',
     palmScanAnalyze: 'Luận Giải Chỉ Tay',
@@ -86,10 +86,10 @@ export const translations = {
     palmReadingResultImageTitle: 'Ảnh Bàn Tay',
     palmReadingResultImageAlt: 'Ảnh bàn tay để phân tích',
     palmReadingSection1: 'Tổng Quan',
-    palmReadingSection2: 'Đường Tâm Đạo',
-    palmReadingSection3: 'Đường Trí Đạo',
-    palmReadingSection4: 'Đường Sinh Đạo',
-    palmReadingSection5: 'Lời Khuyên',
+    palmReadingSection2: 'Đường Tâm Đạo (Tình Cảm)',
+    palmReadingSection3: 'Đường Trí Đạo (Tư Duy)',
+    palmReadingSection4: 'Đường Sinh Đạo (Năng Lượng)',
+    palmReadingSection5: 'Lời Khuyên & Định Hướng',
 
     // Birth Info Form
     formTitle: 'Kiến Tạo Bản Đồ Vận Mệnh',
@@ -107,8 +107,8 @@ export const translations = {
     errorFormYear: 'Năm sinh không thể ở tương lai.',
 
     // Spinners
-    spinnerAstrology: 'Hệ thống đang khởi tạo lá số tử vi cho bạn. Các vì sao đang dịch chuyển vào đúng vị trí... Quá trình này có thể mất vài phút, xin vui lòng chờ...',
-    spinnerPhysiognomy: 'AI đang phân tích các đường nét trên khuôn mặt bạn... Xin vui lòng giữ nguyên trang...',
+    spinnerAstrology: 'Đang khởi tạo lá số... Các tinh tú đang hội tụ. Quá trình này có thể cần một chút thời gian, xin vui lòng chờ.',
+    spinnerPhysiognomy: 'Đang phân tích thần thái và khí sắc... AI đang đọc những câu chuyện được viết trên khuôn mặt bạn.',
     spinnerCamera: 'Đang khởi động camera...',
     spinnerIChing: 'Đang luận giải quẻ Dịch... Vũ trụ đang gửi thông điệp đến bạn, xin vui lòng chờ trong giây lát.',
 
@@ -121,9 +121,9 @@ export const translations = {
     faceScanUpload: 'Tải Ảnh',
     faceScanRetake: 'Chụp/Chọn Lại',
     faceScanAnalyze: 'Luận Giải',
-    faceScanManualCapture: 'Chụp Ảnh Thủ Công',
+    faceScanManualCapture: 'Chụp Ảnh',
     faceScanStopCamera: 'Tắt Camera',
-    faceScanInitial: 'Căn chỉnh khuôn mặt vào trong vòng tròn.',
+    faceScanInitial: 'Căn chỉnh khuôn mặt của bạn vào trong khung hình.',
     faceScanHold: 'Tuyệt vời! Giữ yên...',
     faceScanNotFound: 'Không tìm thấy khuôn mặt. Vui lòng căn chỉnh lại.',
     faceScanCloser: 'Vui lòng tiến lại gần hơn một chút.',
@@ -146,7 +146,7 @@ export const translations = {
     physiognomyResultSection1: 'Tổng Quan Thần Sắc',
     physiognomyResultSection2: 'Phân Tích Tam Đình',
     physiognomyResultSection3: 'Phân Tích Ngũ Quan',
-    physiognomyResultSection4: 'Lời Khuyên',
+    physiognomyResultSection4: 'Lời Khuyên & Định Hướng',
     physiognomyResultTryAgain: 'Thử Lại Với Ảnh Khác',
     
     // Saved Charts
@@ -163,7 +163,7 @@ export const translations = {
     
     // Donation
     donationTitle: 'Tùy Hỷ Công Đức',
-    donationSubtitle: 'Sự ủng hộ của bạn, dù lớn hay nhỏ, đều là nguồn động viên quý báu để Huyền Phong Phật Đạo tiếp tục gieo duyên lành tri thức đến cộng đồng trong và ngoài nước.',
+    donationSubtitle: 'Sự ủng hộ của bạn, dù lớn hay nhỏ, đều là nguồn động viên quý báu để chúng tôi tiếp tục duy trì và phát triển ứng dụng.',
     donationMessage: 'Mỗi lá số là kết tinh của tâm huyết và tri thức. Sự ủng hộ của quý vị qua chuyển khoản ngân hàng hoặc PayPal là động lực vô giá để chúng tôi duy trì và lan tỏa giá trị của Tử Vi Đẩu Số đến cộng đồng.',
     donationBank: 'Ngân hàng',
     donationAccountNo: 'Số TK',
@@ -178,6 +178,7 @@ export const translations = {
     // Footer
     footerVisits: 'Lượt truy cập',
     footerDisclaimer: 'Mọi thông tin trong ứng dụng chỉ mang tính chất tham khảo, chiêm nghiệm và định hướng. Vận mệnh nằm trong tay bạn.',
+    footerAIDisclaimer: 'Nội dung được tạo bởi Trí Tuệ Nhân Tạo và có thể chứa thông tin không chính xác.',
     footerSupportTitle: 'Hỗ Trợ & Tư Vấn Chuyên Sâu',
     footerSupportDesc: 'Để được luận giải chi tiết hơn hoặc theo dõi các kênh của chúng tôi:',
     followTikTok: 'Theo dõi trên TikTok',
@@ -241,8 +242,8 @@ export const translations = {
   en: {
     // Common
     appName: 'Horoscope & Physiognomy',
-    processing: 'Processing...',
-    errorTitle: 'An error occurred!',
+    processing: 'Analyzing...',
+    errorTitle: 'An Error Occurred!',
     errorUnknown: 'An unknown error occurred. Please try again.',
     errorInvalidImageData: 'Invalid image data.',
     errorCloseAriaLabel: 'Close error notification',
@@ -270,7 +271,7 @@ export const translations = {
 
     // Home
     homeTitle: 'Explore Ancient Mysticism',
-    homeSubtitle: 'Use artificial intelligence to interpret classic disciplines of Eastern culture. Start your journey to understand yourself and shape your future today.',
+    homeSubtitle: 'Leveraging Artificial Intelligence to interpret the classic disciplines of Eastern culture, offering profound insights for self-understanding and future guidance.',
     astrologyTitle: 'Astrology (Tử Vi)',
     astrologyDesc: 'Generate and interpret detailed horoscopes based on your birth date and time. Discover your destiny map, palaces, and get guidance for the future.',
     astrologyButton: 'Generate Horoscope',
@@ -317,7 +318,7 @@ export const translations = {
     palmReadingTitle: 'Palm Reading',
     palmReadingDesc: 'Capture or upload a photo of your palm for AI to analyze the main lines: Heart, Head, and Life lines.',
     palmReadingButton: 'Read My Palm',
-    spinnerPalmReading: 'The AI is analyzing your palm lines... The energy from your palm is being decoded. Please wait...',
+    spinnerPalmReading: 'The AI is analyzing your palm lines... The energy from your palm is being decoded. Please wait a moment.',
     palmScanTitle: 'Palm Reading Analysis',
     palmScanSubtitle: 'For accurate results, please use a clear, well-lit photo of your right palm.',
     palmScanAnalyze: 'Analyze Palm',
@@ -325,10 +326,10 @@ export const translations = {
     palmReadingResultImageTitle: 'Palm Photo',
     palmReadingResultImageAlt: 'Palm photo for analysis',
     palmReadingSection1: 'Overall Analysis',
-    palmReadingSection2: 'Heart Line',
-    palmReadingSection3: 'Head Line',
-    palmReadingSection4: 'Life Line',
-    palmReadingSection5: 'Advice',
+    palmReadingSection2: 'Heart Line (Emotions)',
+    palmReadingSection3: 'Head Line (Intellect)',
+    palmReadingSection4: 'Life Line (Vitality)',
+    palmReadingSection5: 'Advice & Guidance',
 
     // Birth Info Form
     formTitle: 'Create Your Destiny Map',
@@ -346,8 +347,8 @@ export const translations = {
     errorFormYear: 'Birth year cannot be in the future.',
     
     // Spinners
-    spinnerAstrology: 'The system is generating your horoscope. The stars are aligning... This process may take a few moments, please wait.',
-    spinnerPhysiognomy: 'The AI is analyzing your facial features... Please stay on this page.',
+    spinnerAstrology: 'Generating your horoscope... The stars are aligning. This may take a moment, please wait.',
+    spinnerPhysiognomy: 'Analyzing spirit and complexion... The AI is reading the stories written on your face.',
     spinnerCamera: 'Starting camera...',
     spinnerIChing: 'Interpreting the hexagram... The universe is sending its message to you, please wait a moment.',
 
@@ -360,9 +361,9 @@ export const translations = {
     faceScanUpload: 'Upload Photo',
     faceScanRetake: 'Retake/Re-select',
     faceScanAnalyze: 'Analyze',
-    faceScanManualCapture: 'Manual Capture',
+    faceScanManualCapture: 'Capture Photo',
     faceScanStopCamera: 'Stop Camera',
-    faceScanInitial: 'Align your face within the circle.',
+    faceScanInitial: 'Please position your face within the frame.',
     faceScanHold: 'Great! Hold still...',
     faceScanNotFound: 'Face not found. Please adjust your position.',
     faceScanCloser: 'Please move a little closer.',
@@ -385,7 +386,7 @@ export const translations = {
     physiognomyResultSection1: 'Overall Spirit & Complexion',
     physiognomyResultSection2: 'Analysis of Three Sections',
     physiognomyResultSection3: 'Analysis of Five Organs',
-    physiognomyResultSection4: 'Advice',
+    physiognomyResultSection4: 'Advice & Guidance',
     physiognomyResultTryAgain: 'Try With Another Photo',
 
     // Saved Charts
@@ -403,7 +404,7 @@ export const translations = {
     
     // Donation
     donationTitle: 'Support the Project',
-    donationSubtitle: 'Your support, big or small, is a valuable source of motivation for us to continue sharing knowledge with our local and international community.',
+    donationSubtitle: 'Your support, big or small, is a valuable source of motivation for us to continue maintaining and developing this application.',
     donationMessage: 'Each analysis is a product of dedication and knowledge. Your support, via bank transfer or PayPal, is invaluable in helping us maintain and spread the value of these ancient arts to the global community.',
     donationBank: 'Bank',
     donationAccountNo: 'Account No.',
@@ -418,6 +419,7 @@ export const translations = {
     // Footer
     footerVisits: 'Visits',
     footerDisclaimer: 'All information in this application is for reference, contemplation, and guidance purposes only. Your destiny is in your hands.',
+    footerAIDisclaimer: 'Content is generated by AI and may contain inaccuracies.',
     footerSupportTitle: 'Support & In-depth Consultation',
     footerSupportDesc: 'For more detailed analysis or to follow our channels, please use the links below:',
     followTikTok: 'Follow on TikTok',

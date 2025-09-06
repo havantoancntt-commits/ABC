@@ -536,6 +536,7 @@ const App: React.FC = () => {
               <h4 className="font-bold text-lg text-yellow-400 font-serif mb-2">{t('appName')}</h4>
               <p className="text-sm text-gray-500">&copy; {new Date().getFullYear()} - {SUPPORT_INFO.channelName}. | {t('footerVisits')}: {visitCount > 0 ? visitCount.toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US') : '...'}</p>
               <p className="text-xs text-gray-600 mt-2">{t('footerDisclaimer')}</p>
+              <p className="text-xs text-gray-600 mt-1">{t('footerAIDisclaimer')}</p>
             </div>
             <div className="bg-gray-900/40 p-4 rounded-lg border border-gray-700/50 text-left md:text-right">
               <h4 className="font-bold text-lg text-yellow-400 font-serif mb-2">{t('footerSupportTitle')}</h4>

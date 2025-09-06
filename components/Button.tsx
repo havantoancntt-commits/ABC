@@ -17,17 +17,17 @@ const Button: React.FC<Props> = ({
   className = '',
   ...props
 }) => {
-  const baseClasses = 'flex items-center justify-center gap-2 font-bold rounded-lg transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900/50';
+  const baseClasses = 'flex items-center justify-center gap-2 font-bold rounded-lg transition-all duration-300 shadow-lg transform hover:-translate-y-px hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900/50';
 
   const variantClasses: Record<ButtonVariant, string> = {
-    primary: 'bg-gradient-to-r from-yellow-500 to-amber-600 text-gray-900 hover:from-yellow-500 hover:to-amber-500 focus-visible:ring-yellow-400',
-    secondary: 'bg-gray-700/80 text-white hover:bg-gray-700 focus-visible:ring-gray-400',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-400',
-    special: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 focus-visible:ring-purple-400',
-    iching: 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-500 focus-visible:ring-emerald-400',
-    shop: 'bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 hover:from-amber-500 hover:to-yellow-600 focus-visible:ring-yellow-400',
-    numerology: 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-500 focus-visible:ring-cyan-400',
-    palm: 'bg-gradient-to-r from-rose-500 to-pink-600 text-white hover:from-rose-600 hover:to-pink-500 focus-visible:ring-rose-400',
+    primary: 'bg-gradient-to-r from-yellow-500 to-amber-600 text-gray-900 hover:brightness-110 focus-visible:ring-yellow-400',
+    secondary: 'bg-gray-700/80 text-white hover:bg-gray-700 hover:brightness-110 focus-visible:ring-gray-400',
+    danger: 'bg-red-600 text-white hover:bg-red-700 hover:brightness-110 focus-visible:ring-red-400',
+    special: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:brightness-110 focus-visible:ring-purple-400',
+    iching: 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:brightness-110 focus-visible:ring-emerald-400',
+    shop: 'bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 hover:brightness-110 focus-visible:ring-yellow-400',
+    numerology: 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:brightness-110 focus-visible:ring-cyan-400',
+    palm: 'bg-gradient-to-r from-rose-500 to-pink-600 text-white hover:brightness-110 focus-visible:ring-rose-400',
   };
 
   const sizeClasses: Record<ButtonSize, string> = {

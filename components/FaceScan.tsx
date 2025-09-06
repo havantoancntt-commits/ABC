@@ -4,9 +4,6 @@ import Button from './Button';
 import Spinner from './Spinner';
 import { useLocalization } from '../hooks/useLocalization';
 
-// Note: The FaceDetector API is experimental. We handle its absence gracefully.
-declare var FaceDetector: any;
-
 interface Props {
   onAnalyze: () => void;
   onBack: () => void;
@@ -15,197 +12,29 @@ interface Props {
   capturedImage: string | null;
 }
 
-type OverlayStatus = 'idle' | 'detecting' | 'good_position' | 'capturing';
-
 const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, capturedImage }) => {
   const { t } = useLocalization();
   const [error, setError] = useState<string | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isStartingCamera, setIsStartingCamera] = useState(false);
-  const [feedback, setFeedback] = useState(t('faceScanInitial'));
-  const [overlayStatus, setOverlayStatus] = useState<OverlayStatus>('idle');
   const [isCapturing, setIsCapturing] = useState(false);
-  const [countdown, setCountdown] = useState<number | null>(null);
-  const isAutoDetectSupported = typeof FaceDetector !== 'undefined';
-
+  
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const detectorRef = useRef<any | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const isCountingDownRef = useRef(false); // Ref to track countdown state in animation loop
-
-  const stopDetectionLoop = useCallback(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-  }, []);
-
-  const cancelCountdown = useCallback(() => {
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-      countdownIntervalRef.current = null;
-    }
-    setCountdown(null);
-    isCountingDownRef.current = false;
-  }, []);
 
   const stopCamera = useCallback(() => {
-    stopDetectionLoop();
-    cancelCountdown();
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
     setIsCameraOn(false);
-    setOverlayStatus('idle');
-    setFeedback(t('faceScanInitial'));
-  }, [stopDetectionLoop, cancelCountdown, t]);
+  }, []);
 
-  const handleManualCapture = useCallback(() => {
-    if (isCapturing || !videoRef.current || !canvasRef.current) return;
-
-    setIsCapturing(true);
-    setOverlayStatus('capturing');
-    stopDetectionLoop();
-    cancelCountdown();
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    if (context) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        context.translate(canvas.width, 0);
-        context.scale(-1, 1);
-        
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        onCapture(canvas.toDataURL('image/jpeg'));
-        
-        context.setTransform(1, 0, 0, 1, 0, 0);
-    }
-    
-    setTimeout(() => {
-      stopCamera();
-      setIsCapturing(false);
-    }, 500); 
-  }, [onCapture, stopCamera, isCapturing, stopDetectionLoop, cancelCountdown]);
-
-  const startCountdown = useCallback(() => {
-    if (isCountingDownRef.current) return;
-
-    isCountingDownRef.current = true;
-    setFeedback(t('faceScanHold'));
-    setOverlayStatus('good_position');
-    setCountdown(3);
-
-    countdownIntervalRef.current = setInterval(() => {
-      setCountdown(prev => {
-        if (prev === null || prev <= 1) {
-          clearInterval(countdownIntervalRef.current!);
-          countdownIntervalRef.current = null;
-          isCountingDownRef.current = false;
-          handleManualCapture();
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, [handleManualCapture, t]);
-
-  const runFaceDetection = useCallback(async () => {
-    const video = videoRef.current;
-    const container = video?.parentElement;
-
-    if (video && container && !video.paused && video.readyState >= 3 && detectorRef.current) {
-        try {
-            const faces = await detectorRef.current.detect(video);
-            let newFeedback = t('faceScanNotFound');
-            let isPositionGood = false;
-
-            if (faces.length === 1) {
-                const face = faces[0].boundingBox;
-                const videoWidth = video.videoWidth;
-                const videoHeight = video.videoHeight;
-                const containerWidth = container.clientWidth;
-                const containerHeight = container.clientHeight;
-
-                // This logic correctly determines the visible area of the video with 'object-cover'
-                const videoRatio = videoWidth / videoHeight;
-                const containerRatio = containerWidth / containerHeight;
-                
-                let scale = 1;
-                let offsetX = 0;
-                let offsetY = 0;
-
-                if (videoRatio > containerRatio) { // Video is wider, clipped left/right
-                    scale = containerHeight / videoHeight;
-                    offsetX = (videoWidth * scale - containerWidth) / 2;
-                } else { // Video is taller, clipped top/bottom
-                    scale = containerWidth / videoWidth;
-                    offsetY = (videoHeight * scale - containerHeight) / 2;
-                }
-
-                // Transform face coordinates to match the container's coordinate system
-                const faceX = face.x * scale - offsetX;
-                const faceY = face.y * scale - offsetY;
-                const faceWidth = face.width * scale;
-                const faceHeight = face.height * scale;
-
-                // Define the target area (center of the screen)
-                const targetSize = Math.min(containerWidth, containerHeight) * 0.45;
-                const tolerance = 0.30;
-                const faceCenterX = faceX + faceWidth / 2;
-                const faceCenterY = faceY + faceHeight / 2;
-                const containerCenterX = containerWidth / 2;
-                const containerCenterY = containerHeight / 2;
-                
-                const distance = Math.sqrt(Math.pow(faceCenterX - containerCenterX, 2) + Math.pow(faceCenterY - containerCenterY, 2));
-                const positionOffset = distance / Math.min(containerWidth, containerHeight);
-
-                const avgFaceSize = (faceWidth + faceHeight) / 2;
-                
-                if (avgFaceSize < targetSize * (1 - tolerance)) {
-                    newFeedback = t('faceScanCloser');
-                } else if (avgFaceSize > targetSize * (1 + tolerance)) {
-                    newFeedback = t('faceScanFurther');
-                } else if (positionOffset > 0.15) {
-                    newFeedback = t('faceScanCenter');
-                } else {
-                    isPositionGood = true;
-                }
-
-            } else if (faces.length > 1) {
-                newFeedback = t('faceScanOnePerson');
-            }
-
-            if (isPositionGood) {
-                if (!isCountingDownRef.current) {
-                    startCountdown();
-                }
-            } else {
-                if (isCountingDownRef.current) {
-                    cancelCountdown();
-                    setFeedback(t('faceScanCancelled', { newFeedback }));
-                } else {
-                   setFeedback(newFeedback);
-                }
-                setOverlayStatus('detecting');
-            }
-        } catch (e) {
-            console.error("Face detection failed:", e);
-            stopDetectionLoop();
-        }
-    }
-
-    if (streamRef.current) {
-        animationFrameRef.current = requestAnimationFrame(runFaceDetection);
-    }
-  }, [startCountdown, cancelCountdown, stopDetectionLoop, t]);
+  useEffect(() => {
+    return () => stopCamera();
+  }, [stopCamera]);
   
   const startCamera = useCallback(async () => {
     if(isCameraOn || isStartingCamera) return;
@@ -220,21 +49,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-             videoRef.current?.play();
-             if (isAutoDetectSupported) {
-                try {
-                    detectorRef.current = new FaceDetector({ fastMode: true });
-                    stopDetectionLoop();
-                    animationFrameRef.current = requestAnimationFrame(runFaceDetection);
-                } catch (e) {
-                     console.error("FaceDetector init failed:", e);
-                     setFeedback(t('faceScanNotSupported'));
-                }
-             } else {
-                setFeedback(t('faceScanNotSupported'));
-             }
-        };
+        videoRef.current.play().catch(err => console.error("Video play failed:", err));
       }
       setIsCameraOn(true);
     } catch (err) {
@@ -249,13 +64,34 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
     } finally {
       setIsStartingCamera(false);
     }
-  }, [stopCamera, isAutoDetectSupported, runFaceDetection, isCameraOn, isStartingCamera, stopDetectionLoop, t]);
+  }, [isCameraOn, isStartingCamera, stopCamera, t]);
+  
+  const handleManualCapture = useCallback(() => {
+    if (isCapturing || !videoRef.current || !canvasRef.current) return;
 
-  useEffect(() => {
-    return () => {
+    setIsCapturing(true);
+    
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    if (context) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        context.translate(canvas.width, 0);
+        context.scale(-1, 1); // Flip horizontally
+        
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        onCapture(canvas.toDataURL('image/jpeg'));
+        
+        context.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+    }
+    
+    setTimeout(() => {
       stopCamera();
-    };
-  }, [stopCamera]);
+      setIsCapturing(false);
+    }, 500); 
+  }, [onCapture, stopCamera, isCapturing]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -276,13 +112,6 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
   }, [onRetake]);
   
   const triggerFileSelect = () => fileInputRef.current?.click();
-  
-  const overlayBorderColor = {
-      idle: 'border-gray-500/80',
-      detecting: 'border-yellow-400/80',
-      good_position: 'border-green-400/90 shadow-[0_0_20px_rgba(74,222,128,0.7)]',
-      capturing: 'border-white',
-  }[overlayStatus];
 
   return (
     <Card className="max-w-xl mx-auto flex flex-col items-center">
@@ -307,18 +136,10 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         
         {isCameraOn && !capturedImage && (
             <>
-                <div className={`absolute inset-0 transition-all duration-500 ${overlayStatus === 'good_position' ? 'shadow-[0_0_100px_40px_rgba(74,222,128,0.2)_inset]' : 'shadow-[0_0_100px_40px_rgba(0,0,0,0.7)_inset]'}`} style={{ maskImage: 'radial-gradient(ellipse 50% 60% at center, transparent 0%, transparent 60%, black 100%)' }}></div>
-
+                <div className="absolute inset-0 shadow-[0_0_100px_40px_rgba(0,0,0,0.7)_inset]" style={{ maskImage: 'radial-gradient(ellipse 50% 60% at center, transparent 0%, transparent 60%, black 100%)' }}></div>
                 <div className="absolute bottom-5 left-5 right-5 p-3 bg-black/60 rounded-lg text-center text-white font-semibold text-sm backdrop-blur-sm border border-white/10">
-                    {countdown === null ? feedback : `${t('faceScanHold')}...`}
+                    {t('faceScanInitial')}
                 </div>
-                {countdown !== null && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                        <span className="text-9xl font-bold text-white animate-ping-once" style={{ textShadow: '0 0 25px rgba(0,0,0,0.8)' }}>
-                            {countdown}
-                        </span>
-                    </div>
-                )}
             </>
         )}
         
@@ -358,7 +179,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
             </div>
         ) : isCameraOn ? (
             <div className="flex flex-col items-center gap-4">
-               <Button onClick={handleManualCapture} variant="special" className="w-full text-lg animate-pulse-button" disabled={isCapturing || (isAutoDetectSupported && countdown !== null)}>
+               <Button onClick={handleManualCapture} variant="special" className="w-full text-lg animate-pulse-button" disabled={isCapturing}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     {t('faceScanManualCapture')}
                 </Button>
@@ -371,16 +192,6 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
             <Button onClick={onBack} variant="secondary" className="w-full">{t('back')}</Button>
         )}
       </div>
-
-       <style>{`
-        @keyframes ping-once-key {
-            0% { transform: scale(1.5); opacity: 0.5; }
-            75%, 100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-ping-once {
-            animation: ping-once-key 1s cubic-bezier(0, 0, 0.2, 1);
-        }
-      `}</style>
     </Card>
   );
 };
