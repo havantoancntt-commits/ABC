@@ -133,7 +133,8 @@ export const translations = {
     footerVisits: 'Lượt truy cập',
     footerDisclaimer: 'Mọi thông tin trong ứng dụng chỉ mang tính chất tham khảo, chiêm nghiệm và định hướng. Vận mệnh nằm trong tay bạn.',
     footerSupportTitle: 'Hỗ Trợ & Tư Vấn Chuyên Sâu',
-    footerSupportDesc: 'Liên hệ qua Zalo để được luận giải chi tiết hơn:',
+    footerSupportDesc: 'Để được luận giải chi tiết hơn hoặc theo dõi các kênh của chúng tôi:',
+    followTikTok: 'Theo dõi trên TikTok',
     zaloTooltip: 'Chat qua Zalo',
 
     // Error Boundary
@@ -305,7 +306,8 @@ export const translations = {
     footerVisits: 'Visits',
     footerDisclaimer: 'All information in this application is for reference, contemplation, and guidance purposes only. Your destiny is in your hands.',
     footerSupportTitle: 'Support & In-depth Consultation',
-    footerSupportDesc: 'Contact us via Zalo for more detailed analysis:',
+    footerSupportDesc: 'For more detailed analysis or to follow our channels, please use the links below:',
+    followTikTok: 'Follow on TikTok',
     zaloTooltip: 'Chat on Zalo',
     
     // Error Boundary
