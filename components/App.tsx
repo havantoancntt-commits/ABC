@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, ZodiacHourData } from '../types';
-import { AppState } from '../types';
-import { generateAstrologyChart, analyzePhysiognomy, findZodiacHours } from '../geminiService';
+import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, ZodiacHourData } from '../lib/types';
+import { AppState } from '../lib/types';
+import { generateAstrologyChart, analyzePhysiognomy, findZodiacHours } from '../lib/gemini';
 import Header from './Header';
 import BirthInfoForm from './BirthInfoForm';
 import DonationModal from './PaymentModal';
@@ -14,7 +14,7 @@ import FaceScan from './FaceScan';
 import PhysiognomyResult from './PhysiognomyResult';
 import Home from './Home';
 import ZodiacHourFinder from './ZodiacHourFinder';
-import { SUPPORT_INFO } from '../constants';
+import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
 
 const createChartId = (info: BirthInfo): string => {
@@ -222,7 +222,7 @@ const App: React.FC = () => {
   const MemoizedHeader = useMemo(() => <Header onHomeClick={handleResetToHome} />, [handleResetToHome]);
   const MemoizedZaloContact = useMemo(() => <ZaloContact />, []);
 
-  const content = useMemo(() => {
+  const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
         return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} />;
@@ -264,7 +264,7 @@ const App: React.FC = () => {
       default:
         return null;
     }
-  }, [appState, handleStartAstrology, handleStartPhysiognomy, handleStartZodiacFinder, savedCharts, handleViewChart, handleDeleteChart, handleCreateNew, handleFormSubmit, chartData, birthInfo, handleResetToHome, handleAnalyzeFace, handleCaptureImage, handleRetakeCapture, capturedImage, physiognomyData, handleResetFaceScan, t, handleFindZodiacHours, zodiacHourData]);
+  };
 
   return (
     <div className="min-h-screen text-gray-200">
@@ -286,7 +286,7 @@ const App: React.FC = () => {
             </div>
           )}
           <div key={appState} className="animate-slide-in-up">
-            {content}
+            {renderContent()}
           </div>
         </main>
         <footer className="text-center py-8 text-gray-400 bg-black bg-opacity-50 mt-8 border-t border-gray-700/50">

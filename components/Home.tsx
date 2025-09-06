@@ -22,7 +22,7 @@ const FeatureCard: React.FC<{
             buttonVariant === 'primary' ? 'from-yellow-600 to-purple-600' : 
             buttonVariant === 'special' ? 'from-purple-600 to-indigo-600' :
             'from-cyan-600 to-blue-600'
-        } rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200`}></div>
+        } rounded-2xl blur opacity-25 group-hover:opacity-100 group-hover:blur-md transition duration-500`}></div>
         <Card className="relative flex flex-col text-center items-center h-full">
             <div className="p-4 bg-gray-900/50 rounded-full mb-4 border border-gray-700">
                 {icon}

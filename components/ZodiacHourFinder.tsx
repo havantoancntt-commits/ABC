@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { ZodiacHourData } from '../types';
+import type { ZodiacHourData } from '../lib/types';
 import Button from './Button';
 import Card from './Card';
 import { useLocalization } from '../hooks/useLocalization';
@@ -19,6 +19,7 @@ const ZodiacHourFinder: React.FC<Props> = ({ onFind, data }) => {
   useEffect(() => {
     // Automatically find hours for the current date on initial load
     onFind({ day, month, year });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only once on mount
 
   const handleFind = (e: React.FormEvent) => {

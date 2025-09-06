@@ -1,5 +1,5 @@
 import React from 'react';
-import { SUPPORT_INFO } from '../constants';
+import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
 
 const ZaloContact: React.FC = () => {

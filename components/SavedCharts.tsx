@@ -1,5 +1,5 @@
 import React from 'react';
-import type { SavedChart } from '../types';
+import type { SavedChart } from '../lib/types';
 import Button from './Button';
 import Card from './Card';
 import { useLocalization } from '../hooks/useLocalization';

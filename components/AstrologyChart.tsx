@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import type { AstrologyChartData, BirthInfo, Palace } from '../types';
+import type { AstrologyChartData, BirthInfo, Palace } from '../lib/types';
 import Button from './Button';
 import { useLocalization } from '../hooks/useLocalization';
 

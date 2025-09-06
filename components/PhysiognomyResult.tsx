@@ -1,5 +1,5 @@
 import React from 'react';
-import type { PhysiognomyData } from '../types';
+import type { PhysiognomyData } from '../lib/types';
 import Button from './Button';
 import Card from './Card';
 import { useLocalization } from '../hooks/useLocalization';
@@ -32,6 +32,13 @@ const AnalysisSection: React.FC<{ title: string; content: string; icon: React.Re
 
 const PhysiognomyResult: React.FC<Props> = ({ analysisData, imageData, onReset, onBackToHome, onOpenDonationModal }) => {
   const { t } = useLocalization();
+  const analysisSections = [
+      { title: t('physiognomyResultSection1'), content: analysisData.tongQuan, icon: ICONS.tongQuan },
+      { title: t('physiognomyResultSection2'), content: analysisData.tamDinh, icon: ICONS.tamDinh },
+      { title: t('physiognomyResultSection3'), content: analysisData.nguQuan, icon: ICONS.nguQuan },
+      { title: t('physiognomyResultSection4'), content: analysisData.loiKhuyen, icon: ICONS.loiKhuyen }
+  ];
+
   return (
     <div className="max-w-6xl mx-auto">
       <h2 className="text-4xl font-bold text-center mb-8 text-yellow-400 font-serif animate-fade-in-down">{t('physiognomyResultTitle')}</h2>
@@ -47,10 +54,11 @@ const PhysiognomyResult: React.FC<Props> = ({ analysisData, imageData, onReset, 
         </div>
         
         <div className="lg:col-span-2 space-y-8">
-          <AnalysisSection title={t('physiognomyResultSection1')} content={analysisData.tongQuan} icon={ICONS.tongQuan} />
-          <AnalysisSection title={t('physiognomyResultSection2')} content={analysisData.tamDinh} icon={ICONS.tamDinh} />
-          <AnalysisSection title={t('physiognomyResultSection3')} content={analysisData.nguQuan} icon={ICONS.nguQuan} />
-          <AnalysisSection title={t('physiognomyResultSection4')} content={analysisData.loiKhuyen} icon={ICONS.loiKhuyen} />
+            {analysisSections.map((section, index) => (
+                <div key={index} className="animate-slide-in-up" style={{ animationDelay: `${index * 150}ms`, opacity: 0 }}>
+                    <AnalysisSection title={section.title} content={section.content} icon={section.icon} />
+                </div>
+            ))}
         </div>
       </div>
 
