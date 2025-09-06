@@ -1,4 +1,5 @@
 
+
 export const SUPPORT_INFO = {
   channelName: 'Huyền Phong Phật Đạo',
   bank: 'Vietcombank (VCB)',
@@ -7,4 +8,5 @@ export const SUPPORT_INFO = {
   accountName: 'HA VAN TOAN',
   transferContent: 'UNGHO_HPPD',
   zaloPhone: '0974313633',
+  paypalUrl: 'https://www.paypal.me/TOANVAIO',
 };

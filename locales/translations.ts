@@ -110,12 +110,14 @@ export const translations = {
     
     // Donation
     donationTitle: 'Tùy Hỷ Công Đức',
-    donationSubtitle: 'Sự ủng hộ của bạn, dù lớn hay nhỏ, đều là nguồn động viên quý báu để Huyền Phong Phật Đạo tiếp tục gieo duyên lành tri thức.',
-    donationMessage: 'Mỗi lá số là kết tinh của tâm huyết và tri thức. Sự ủng hộ của quý vị là động lực vô giá để chúng tôi duy trì và lan tỏa giá trị của Tử Vi Đẩu Số đến cộng đồng.',
+    donationSubtitle: 'Sự ủng hộ của bạn, dù lớn hay nhỏ, đều là nguồn động viên quý báu để Huyền Phong Phật Đạo tiếp tục gieo duyên lành tri thức đến cộng đồng trong và ngoài nước.',
+    donationMessage: 'Mỗi lá số là kết tinh của tâm huyết và tri thức. Sự ủng hộ của quý vị qua chuyển khoản ngân hàng hoặc PayPal là động lực vô giá để chúng tôi duy trì và lan tỏa giá trị của Tử Vi Đẩu Số đến cộng đồng.',
     donationBank: 'Ngân hàng',
     donationAccountNo: 'Số TK',
     donationAccountName: 'Chủ TK',
     donationContent: 'Nội dung',
+    donationOr: 'Hoặc',
+    donationPayPal: 'Ủng hộ qua PayPal',
     copy: 'CHÉP',
     copied: 'Đã chép!',
     copyError: 'Lỗi!',
@@ -245,12 +247,14 @@ export const translations = {
     
     // Donation
     donationTitle: 'Support the Project',
-    donationSubtitle: 'Your support, big or small, is a valuable source of motivation for us to continue sharing knowledge.',
-    donationMessage: 'Each analysis is a product of dedication and knowledge. Your support is invaluable in helping us maintain and spread the value of these ancient arts to the community.',
+    donationSubtitle: 'Your support, big or small, is a valuable source of motivation for us to continue sharing knowledge with our local and international community.',
+    donationMessage: 'Each analysis is a product of dedication and knowledge. Your support, via bank transfer or PayPal, is invaluable in helping us maintain and spread the value of these ancient arts to the global community.',
     donationBank: 'Bank',
     donationAccountNo: 'Account No.',
     donationAccountName: 'Account Name',
     donationContent: 'Content',
+    donationOr: 'Or',
+    donationPayPal: 'Donate with PayPal',
     copy: 'COPY',
     copied: 'Copied!',
     copyError: 'Error!',
