@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { NumerologyData, NumerologyInfo, NumerologyNumber } from '../lib/types';
+import type { NumerologyData, NumerologyInfo, NumerologyNumber, BirthdayChartData } from '../lib/types';
 import Button from './Button';
 import Card from './Card';
 import { useLocalization } from '../hooks/useLocalization';
@@ -20,6 +20,106 @@ const NumberCard: React.FC<{ title: string; numberInfo: NumerologyNumber, color:
         <h3 className={`text-xl font-semibold ${color.replace('border-', 'text-')}`}>{title}</h3>
     </div>
 );
+
+
+const BirthdayChart: React.FC<{ chartData: BirthdayChartData }> = ({ chartData }) => {
+    const { t } = useLocalization();
+    const gridNumbers = [3, 6, 9, 2, 5, 8, 1, 4, 7];
+
+    const arrowPaths: Record<string, string> = {
+        '1-4-7': 'M 50 260 L 270 260',
+        '2-5-8': 'M 50 160 L 270 160',
+        '3-6-9': 'M 50 60 L 270 60',
+        '3-2-1': 'M 50 60 L 50 260',
+        '6-5-4': 'M 160 60 L 160 260',
+        '9-8-7': 'M 270 60 L 270 260',
+        '1-5-9': 'M 50 260 L 270 60',
+        '3-5-7': 'M 50 60 L 270 260',
+    };
+
+    const arrowNameKeywords: Record<string, string[]> = {
+        '1-4-7': ['thực tế', 'practicality', 'thể chất', 'physicality', 'hỗn loạn', 'disorder'],
+        '2-5-8': ['cảm xúc', 'feeling', 'tinh thần', 'spirituality', 'nhạy cảm', 'sensitivity'],
+        '3-6-9': ['trí não', 'intellect', 'trí tuệ', 'mind', 'trí nhớ', 'memory'],
+        '3-2-1': ['kế hoạch', 'planning', 'thụ động', 'lack'],
+        '6-5-4': ['ý chí', 'willpower', 'uất giận', 'frustration'],
+        '9-8-7': ['hoạt động', 'action', 'activity', 'trì hoãn', 'passivity'],
+        '1-5-9': ['quyết tâm', 'determination', 'chần chừ', 'procrastination'],
+        '3-5-7': ['nhạy bén', 'sensitivity', 'tâm linh', 'hoài nghi', 'skepticism'],
+    };
+
+    const findArrowPath = (arrowName: string) => {
+        const lowerCaseName = arrowName.toLowerCase();
+        for (const pathKey in arrowNameKeywords) {
+            if (arrowNameKeywords[pathKey].some(keyword => lowerCaseName.includes(keyword))) {
+                return arrowPaths[pathKey];
+            }
+        }
+        return null;
+    };
+
+    return (
+        <Card className="mt-8">
+            <h3 className="text-3xl font-bold text-cyan-300 font-serif mb-8 text-center">{t('numerologyBirthdayChartTitle')}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div className="relative aspect-square max-w-sm mx-auto w-full">
+                    <div className="grid grid-cols-3 grid-rows-3 w-full h-full gap-2">
+                        {gridNumbers.map(num => {
+                            const count = chartData.numberCounts[num - 1] || 0;
+                            return (
+                                <div key={num} className={`aspect-square flex items-center justify-center rounded-lg border-2 ${count > 0 ? 'border-cyan-500 bg-cyan-500/10' : 'border-gray-700/50'}`}>
+                                    <span className={`font-bold text-4xl font-serif text-center break-all ${count > 0 ? 'text-white' : 'text-gray-600'}`}>
+                                        {count > 0 ? `${num}`.repeat(count) : num}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 320 320" preserveAspectRatio="none">
+                        {chartData.strengthArrows.map(arrow => {
+                            const path = findArrowPath(arrow.name);
+                            if (!path) return null;
+                            return <path key={`strength-${arrow.name}`} d={path} stroke="#22d3ee" strokeWidth="5" strokeLinecap="round" fill="none" className="opacity-80 drop-shadow-[0_0_5px_#22d3ee]" />;
+                        })}
+                        {chartData.weaknessArrows.map(arrow => {
+                            const path = findArrowPath(arrow.name);
+                            if (!path) return null;
+                            return <path key={`weakness-${arrow.name}`} d={path} stroke="#a855f7" strokeWidth="5" strokeLinecap="round" strokeDasharray="10 5" fill="none" className="opacity-70" />;
+                        })}
+                    </svg>
+                </div>
+                <div className="space-y-6">
+                    {chartData.strengthArrows.length > 0 && (
+                        <div>
+                            <h4 className="text-xl font-semibold text-cyan-300 font-serif mb-3">{t('numerologyStrengthArrows')}</h4>
+                            <div className="space-y-4">
+                                {chartData.strengthArrows.map(arrow => (
+                                    <div key={arrow.name} className="p-4 bg-gray-900/50 rounded-lg border-l-4 border-cyan-400">
+                                        <p className="font-bold text-white">{arrow.name}</p>
+                                        <p className="text-gray-400 text-sm mt-1">{arrow.interpretation}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                     {chartData.weaknessArrows.length > 0 && (
+                        <div>
+                            <h4 className="text-xl font-semibold text-purple-400 font-serif mb-3">{t('numerologyWeaknessArrows')}</h4>
+                            <div className="space-y-4">
+                                {chartData.weaknessArrows.map(arrow => (
+                                    <div key={arrow.name} className="p-4 bg-gray-900/50 rounded-lg border-l-4 border-purple-400">
+                                        <p className="font-bold text-white">{arrow.name}</p>
+                                        <p className="text-gray-400 text-sm mt-1">{arrow.interpretation}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </Card>
+    );
+};
 
 
 const NumerologyChart: React.FC<Props> = ({ data, info, onReset, onOpenDonationModal }) => {
@@ -104,6 +204,9 @@ const NumerologyChart: React.FC<Props> = ({ data, info, onReset, onOpenDonationM
                         ))}
                     </div>
                 </Card>
+                
+                {data.birthdayChart && <BirthdayChart chartData={data.birthdayChart} />}
+
                 <div className="mt-8 space-y-8">
                     {coreNumbers.map((item, index) => (
                         <div key={index} className="animate-slide-in-up" style={{ animationDelay: `${(index + 5) * 100}ms` }}>

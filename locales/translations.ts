@@ -70,6 +70,9 @@ export const translations = {
     numerologySummary: 'Tổng Kết & Lời Khuyên',
     numerologyDownloadPdf: 'Tải Sơ Đồ PDF',
     numerologyCoreNumber: '{{title}} - Số {{number}}',
+    numerologyBirthdayChartTitle: 'Biểu Đồ Ngày Sinh',
+    numerologyStrengthArrows: 'Mũi Tên Sức Mạnh',
+    numerologyWeaknessArrows: 'Mũi Tên Trống (Cơ Hội)',
 
     // Birth Info Form
     formTitle: 'Kiến Tạo Bản Đồ Vận Mệnh',
@@ -289,6 +292,9 @@ export const translations = {
     numerologySummary: 'Summary & Advice',
     numerologyDownloadPdf: 'Download PDF Chart',
     numerologyCoreNumber: '{{title}} - Number {{number}}',
+    numerologyBirthdayChartTitle: 'Birthday Chart',
+    numerologyStrengthArrows: 'Arrows of Strength',
+    numerologyWeaknessArrows: 'Empty Arrows (Opportunities)',
 
     // Birth Info Form
     formTitle: 'Create Your Destiny Map',

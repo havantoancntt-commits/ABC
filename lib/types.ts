@@ -103,12 +103,24 @@ export interface NumerologyInfo {
   day: number;
 }
 
+export interface NumerologyArrow {
+  name: string;
+  interpretation: string;
+}
+
+export interface BirthdayChartData {
+  numberCounts: number[]; // Array of 9 numbers, index 0 is count for 1, index 8 is count for 9
+  strengthArrows: NumerologyArrow[];
+  weaknessArrows: NumerologyArrow[];
+}
+
 export interface NumerologyData {
   lifePathNumber: NumerologyNumber;
   destinyNumber: NumerologyNumber;
   soulUrgeNumber: NumerologyNumber;
   personalityNumber: NumerologyNumber;
   birthdayNumber: NumerologyNumber;
+  birthdayChart: BirthdayChartData;
   summary: string;
 }
 

@@ -88,6 +88,38 @@ const numerologyNumberSchema = {
     required: ['number', 'interpretation']
 };
 
+const numerologyArrowSchema = {
+    type: Type.OBJECT,
+    properties: {
+        name: { type: Type.STRING, description: "Tên của mũi tên (ví dụ: Mũi tên Quyết tâm)." },
+        interpretation: { type: Type.STRING, description: "Luận giải ngắn gọn về ý nghĩa và ảnh hưởng của mũi tên này." }
+    },
+    required: ['name', 'interpretation']
+};
+
+const birthdayChartSchema = {
+    type: Type.OBJECT,
+    properties: {
+        numberCounts: {
+            type: Type.ARRAY,
+            items: { type: Type.INTEGER },
+            description: "Một mảng 9 phần tử (index 0-8 tương ứng với số 1-9) chứa số lần xuất hiện của mỗi chữ số trong ngày sinh."
+        },
+        strengthArrows: {
+            type: Type.ARRAY,
+            items: numerologyArrowSchema,
+            description: "Danh sách các mũi tên sức mạnh được hình thành trong biểu đồ."
+        },
+        weaknessArrows: {
+            type: Type.ARRAY,
+            items: numerologyArrowSchema,
+            description: "Danh sách các mũi tên trống (điểm yếu cần cải thiện)."
+        }
+    },
+    required: ['numberCounts', 'strengthArrows', 'weaknessArrows']
+};
+
+
 const numerologySchema = {
     type: Type.OBJECT,
     properties: {
@@ -96,9 +128,10 @@ const numerologySchema = {
         soulUrgeNumber: numerologyNumberSchema,
         personalityNumber: numerologyNumberSchema,
         birthdayNumber: numerologyNumberSchema,
+        birthdayChart: birthdayChartSchema,
         summary: { type: Type.STRING, description: "Tổng kết toàn bộ các chỉ số, mối liên kết giữa chúng và đưa ra lời khuyên tổng thể." }
     },
-    required: ['lifePathNumber', 'destinyNumber', 'soulUrgeNumber', 'personalityNumber', 'birthdayNumber', 'summary']
+    required: ['lifePathNumber', 'destinyNumber', 'soulUrgeNumber', 'personalityNumber', 'birthdayNumber', 'birthdayChart', 'summary']
 };
 
 
@@ -161,22 +194,38 @@ Requirements:
 
 const VI_NUMEROLOGY_SYSTEM_INSTRUCTION = `Bạn là một chuyên gia Thần Số Học theo trường phái Pythagoras. Nhiệm vụ của bạn là phân tích họ tên và ngày sinh được cung cấp, sau đó trả về kết quả dưới dạng JSON theo schema đã định sẵn.
 Quy tắc tính toán:
-1.  **Số Đường Đời (Life Path Number):** Cộng và rút gọn tất cả các chữ số trong ngày, tháng, năm sinh. Ví dụ: 12/03/1990 -> 1+2+3+1+9+9+0 = 25 -> 2+5 = 7. Luôn rút gọn về một chữ số, trừ khi kết quả cuối cùng là 11, 22, 33 (Master Numbers).
-2.  **Số Sứ Mệnh (Destiny Number):** Cộng và rút gọn giá trị số của tất cả các chữ cái trong họ tên đầy đủ (nguyên âm + phụ âm). Sử dụng bảng chữ cái Pythagoras: 1-AJS, 2-BKT, 3-CLU, 4-DMV, 5-ENW, 6-FOX, 7-GPY, 8-HQZ, 9-IR. Rút gọn về một chữ số (trừ 11, 22, 33).
-3.  **Số Linh Hồn (Soul Urge Number):** Chỉ cộng và rút gọn giá trị số của các NGUYÊN ÂM (A, E, I, O, U) trong họ tên. Y được coi là nguyên âm khi nó là âm thanh nguyên âm duy nhất trong một âm tiết. Rút gọn về một chữ số (trừ 11, 22, 33).
-4.  **Số Nhân Cách (Personality Number):** Chỉ cộng và rút gọn giá trị số của các PHỤ ÂM trong họ tên. Y được coi là phụ âm khi nó đứng cạnh một nguyên âm khác. Rút gọn về một chữ số (trừ 11, 22, 33).
-5.  **Số Ngày Sinh (Birthday Number):** Rút gọn ngày sinh. Ví dụ: ngày 25 -> 2+5 = 7; ngày 19 -> 1+9=10 -> 1.
+1.  **5 Chỉ Số Cốt Lõi:** Tính toán chính xác theo quy tắc Pythagoras.
+    -   Số Đường Đời (Life Path): Cộng và rút gọn ngày sinh.
+    -   Số Sứ Mệnh (Destiny): Cộng và rút gọn tất cả chữ cái trong họ tên.
+    -   Số Linh Hồn (Soul Urge): Cộng và rút gọn các NGUYÊN ÂM.
+    -   Số Nhân Cách (Personality): Cộng và rút gọn các PHỤ ÂM.
+    -   Số Ngày Sinh (Birthday): Rút gọn ngày sinh.
+    -   LUÔN rút gọn về một chữ số, trừ các Số Vua 11, 22, 33.
+2.  **Biểu Đồ Ngày Sinh (Birthday Chart):**
+    -   Lập biểu đồ 3x3 (369, 258, 147).
+    -   Đếm số lần xuất hiện của mỗi chữ số (1-9) trong ngày sinh đầy đủ (ddmmyyyy). Trả kết quả vào mảng 'numberCounts' gồm 9 phần tử, index 0 cho số 1, index 8 cho số 9. Bỏ qua số 0.
+    -   Xác định tất cả **Mũi Tên Sức Mạnh** (các hàng, cột, đường chéo có đủ 3 số).
+    -   Xác định tất cả **Mũi Tên Trống** (các hàng, cột, đường chéo không có số nào).
+    -   Cung cấp luận giải ngắn gọn, súc tích cho MỖI mũi tên tìm thấy.
 Yêu cầu luận giải:
 -   Mỗi luận giải phải súc tích (khoảng 100-150 từ), sâu sắc, và mang tính xây dựng.
 -   Giọng văn chuyên nghiệp, tích cực và định hướng.`;
 
 const EN_NUMEROLOGY_SYSTEM_INSTRUCTION = `You are an expert in Pythagorean Numerology. Your task is to analyze the provided full name and date of birth, then return the result as a JSON object according to the predefined schema.
 Calculation Rules:
-1.  **Life Path Number:** Sum and reduce all digits of the birth date (day, month, year). E.g., 03/12/1990 -> 1+2+3+1+9+9+0 = 25 -> 2+5 = 7. Always reduce to a single digit, unless the final result is 11, 22, or 33 (Master Numbers).
-2.  **Destiny Number:** Sum and reduce the numerical value of all letters in the full name (vowels + consonants). Use the Pythagorean alphabet chart: 1-AJS, 2-BKT, 3-CLU, 4-DMV, 5-ENW, 6-FOX, 7-GPY, 8-HQZ, 9-IR. Reduce to a single digit (except for 11, 22, 33).
-3.  **Soul Urge Number:** Sum and reduce the numerical value of only the VOWELS (A, E, I, O, U) in the name. Y is considered a vowel when it's the only vowel sound in a syllable. Reduce to a single digit (except for 11, 22, 33).
-4.  **Personality Number:** Sum and reduce the numerical value of only the CONSONANTS in the name. Y is considered a consonant when it's next to another vowel. Reduce to a single digit (except for 11, 22, 33).
-5.  **Birthday Number:** Reduce the day of birth. E.g., 25th -> 2+5 = 7; 19th -> 1+9=10 -> 1.
+1.  **5 Core Numbers:** Calculate accurately according to Pythagorean rules.
+    -   Life Path Number: Sum and reduce the birth date.
+    -   Destiny Number: Sum and reduce all letters in the full name.
+    -   Soul Urge Number: Sum and reduce only the VOWELS.
+    -   Personality Number: Sum and reduce only the CONSONANTS.
+    -   Birthday Number: Reduce the day of birth.
+    -   ALWAYS reduce to a single digit, except for Master Numbers 11, 22, 33.
+2.  **Birthday Chart:**
+    -   Create the 3x3 grid (369, 258, 147).
+    -   Count the occurrences of each digit (1-9) from the full birth date (ddmmyyyy). Return the result in the 'numberCounts' array of 9 elements, index 0 for number 1, index 8 for number 9. Ignore the number 0.
+    -   Identify all **Arrows of Strength** (rows, columns, diagonals with all 3 numbers present).
+    -   Identify all **Empty Arrows** (rows, columns, diagonals with no numbers present).
+    -   Provide a concise interpretation for EACH arrow found.
 Interpretation Requirements:
 -   Each interpretation must be concise (around 100-150 words), insightful, and constructive.
 -   Maintain a professional, positive, and guiding tone.`;
