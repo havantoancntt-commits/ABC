@@ -31,13 +31,16 @@ export const translations = {
 
     // Home
     homeTitle: 'Khám Phá Huyền Học Cổ Đại',
-    homeSubtitle: 'Sử dụng trí tuệ nhân tạo để luận giải hai bộ môn kinh điển của văn hóa phương Đông. Bắt đầu hành trình thấu hiểu bản thân và định hướng tương lai của bạn ngay hôm nay.',
+    homeSubtitle: 'Sử dụng trí tuệ nhân tạo để luận giải các bộ môn kinh điển của văn hóa phương Đông. Bắt đầu hành trình thấu hiểu bản thân và định hướng tương lai của bạn ngay hôm nay.',
     astrologyTitle: 'Tử Vi Đẩu Số',
     astrologyDesc: 'Lập và luận giải lá số tử vi chi tiết dựa trên ngày giờ sinh. Khám phá bản đồ vận mệnh, các cung số và nhận định hướng cho tương lai.',
     astrologyButton: 'Lập Lá Số Ngay',
     physiognomyTitle: 'Nhân Tướng Học',
     physiognomyDesc: 'Phân tích các đặc điểm trên khuôn mặt bạn thông qua ảnh chân dung. Luận giải về tính cách, vận số qua Tam Đình, Ngũ Quan.',
     physiognomyButton: 'Xem Nhân Tướng',
+    zodiacHourTitle: 'Xem Giờ Hoàng Đạo',
+    zodiacHourDesc: 'Tìm kiếm các khung giờ tốt (Hoàng Đạo) và xấu (Hắc Đạo) trong ngày để lên kế hoạch cho các công việc quan trọng một cách hiệu quả.',
+    zodiacHourButton: 'Xem Giờ Tốt',
 
     // Birth Info Form
     formTitle: 'Kiến Tạo Bản Đồ Vận Mệnh',
@@ -58,6 +61,7 @@ export const translations = {
     spinnerAstrology: 'Hệ thống đang khởi tạo lá số tử vi cho bạn. Các vì sao đang dịch chuyển vào đúng vị trí... Quá trình này có thể mất vài phút, xin vui lòng chờ...',
     spinnerPhysiognomy: 'AI đang phân tích các đường nét trên khuôn mặt bạn... Xin vui lòng giữ nguyên trang...',
     spinnerCamera: 'Đang khởi động camera...',
+    spinnerZodiac: 'Đang tính toán Can Chi và tìm giờ Hoàng Đạo cho ngày bạn chọn...',
 
     // Face Scan
     faceScanTitle: 'Xem Nhân Tướng Qua Ảnh',
@@ -134,6 +138,16 @@ export const translations = {
     errorBoundaryMessage: 'Rất tiếc, ứng dụng đã gặp sự cố không mong muốn. Vui lòng thử tải lại trang để tiếp tục.',
     errorBoundaryButton: 'Tải lại trang',
 
+    // Zodiac Hour Finder
+    zodiacFinderTitle: 'Tìm Giờ Hoàng Đạo',
+    zodiacFinderSubtitle: 'Chọn một ngày để xem danh sách các giờ Hoàng Đạo (tốt) và Hắc Đạo (xấu) trong ngày.',
+    zodiacFinderSelectDate: 'Chọn ngày',
+    zodiacFinderButton: 'Xem Giờ Tốt Xấu',
+    zodiacFinderResultTitle: 'Kết quả cho ngày {{date}}',
+    zodiacFinderDayInfo: 'Ngày: {{dayCanChi}}',
+    zodiacFinderAuspicious: 'Hoàng Đạo (Tốt)',
+    zodiacFinderInauspicious: 'Hắc Đạo (Xấu)',
+
   },
   en: {
     // Common
@@ -167,13 +181,16 @@ export const translations = {
 
     // Home
     homeTitle: 'Explore Ancient Mysticism',
-    homeSubtitle: 'Use artificial intelligence to interpret two classic disciplines of Eastern culture. Start your journey to understand yourself and shape your future today.',
+    homeSubtitle: 'Use artificial intelligence to interpret classic disciplines of Eastern culture. Start your journey to understand yourself and shape your future today.',
     astrologyTitle: 'Astrology (Tử Vi)',
     astrologyDesc: 'Generate and interpret detailed horoscopes based on your birth date and time. Discover your destiny map, palaces, and get guidance for the future.',
     astrologyButton: 'Generate Horoscope',
     physiognomyTitle: 'Physiognomy',
     physiognomyDesc: 'Analyze your facial features from a portrait. Interpret your personality and fortune through the Three Sections and Five Organs.',
     physiognomyButton: 'Analyze Face',
+    zodiacHourTitle: 'Auspicious Hour Finder',
+    zodiacHourDesc: 'Find the good (Auspicious) and bad (Inauspicious) hours of any day to effectively plan your important events and activities.',
+    zodiacHourButton: 'Find Auspicious Hours',
 
     // Birth Info Form
     formTitle: 'Create Your Destiny Map',
@@ -194,6 +211,7 @@ export const translations = {
     spinnerAstrology: 'The system is generating your horoscope. The stars are aligning... This process may take a few moments, please wait.',
     spinnerPhysiognomy: 'The AI is analyzing your facial features... Please stay on this page.',
     spinnerCamera: 'Starting camera...',
+    spinnerZodiac: 'Calculating the celestial stems and earthly branches to find the Zodiac Hours for your selected date...',
 
     // Face Scan
     faceScanTitle: 'Facial Physiognomy Analysis',
@@ -270,6 +288,16 @@ export const translations = {
     errorBoundaryTitle: 'An Error Occurred',
     errorBoundaryMessage: 'Sorry, the application encountered an unexpected problem. Please try reloading the page to continue.',
     errorBoundaryButton: 'Reload Page',
+
+    // Zodiac Hour Finder
+    zodiacFinderTitle: 'Find Auspicious Hours',
+    zodiacFinderSubtitle: 'Select a date to view the list of Auspicious (Hoàng Đạo) and Inauspicious (Hắc Đạo) hours.',
+    zodiacFinderSelectDate: 'Select a date',
+    zodiacFinderButton: 'Find Good/Bad Hours',
+    zodiacFinderResultTitle: 'Results for {{date}}',
+    zodiacFinderDayInfo: 'Day: {{dayCanChi}}',
+    zodiacFinderAuspicious: 'Auspicious (Good)',
+    zodiacFinderInauspicious: 'Inauspicious (Bad)',
   }
 };
 

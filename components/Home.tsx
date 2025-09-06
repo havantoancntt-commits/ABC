@@ -6,6 +6,7 @@ import { useLocalization } from '../hooks/useLocalization';
 interface Props {
     onStartAstrology: () => void;
     onStartPhysiognomy: () => void;
+    onStartZodiacFinder: () => void;
 }
 
 const FeatureCard: React.FC<{
@@ -14,10 +15,14 @@ const FeatureCard: React.FC<{
     buttonText: string;
     icon: React.ReactNode;
     onClick: () => void;
-    buttonVariant: 'primary' | 'special';
+    buttonVariant: 'primary' | 'special' | 'secondary';
 }> = ({ title, description, buttonText, icon, onClick, buttonVariant }) => (
     <div className="group relative h-full">
-        <div className="absolute -inset-1 bg-gradient-to-r from-yellow-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+        <div className={`absolute -inset-1 bg-gradient-to-r ${
+            buttonVariant === 'primary' ? 'from-yellow-600 to-purple-600' : 
+            buttonVariant === 'special' ? 'from-purple-600 to-indigo-600' :
+            'from-cyan-600 to-blue-600'
+        } rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200`}></div>
         <Card className="relative flex flex-col text-center items-center h-full">
             <div className="p-4 bg-gray-900/50 rounded-full mb-4 border border-gray-700">
                 {icon}
@@ -32,10 +37,10 @@ const FeatureCard: React.FC<{
 );
 
 
-const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy }) => {
+const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZodiacFinder }) => {
     const { t } = useLocalization();
     return (
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
             <div className="text-center pt-8 pb-16">
                 <h1 className="text-5xl md:text-6xl font-bold text-gray-100 font-serif leading-tight animate-fade-in-down">
                     {t('homeTitle')}
@@ -44,7 +49,7 @@ const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy }) => {
                     {t('homeSubtitle')}
                 </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                 <div className="animate-fade-in" style={{ animationDelay: '0.6s' }}>
                     <FeatureCard
                         title={t('astrologyTitle')}
@@ -63,6 +68,16 @@ const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy }) => {
                         onClick={onStartPhysiognomy}
                         buttonVariant="special"
                         icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>}
+                    />
+                </div>
+                 <div className="animate-fade-in md:col-span-2 lg:col-span-1" style={{ animationDelay: '1.2s' }}>
+                    <FeatureCard
+                        title={t('zodiacHourTitle')}
+                        description={t('zodiacHourDesc')}
+                        buttonText={t('zodiacHourButton')}
+                        onClick={onStartZodiacFinder}
+                        buttonVariant="secondary"
+                        icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
                     />
                 </div>
             </div>

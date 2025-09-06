@@ -48,6 +48,19 @@ export interface PhysiognomyData {
     loiKhuyen: string;
 }
 
+export interface ZodiacHour {
+    name: string;
+    timeRange: string;
+    isAuspicious: boolean;
+    governingStar: string;
+}
+
+export interface ZodiacHourData {
+    dayCanChi: string;
+    hours: ZodiacHour[];
+}
+
+
 export enum AppState {
   HOME,
   SAVED_CHARTS,
@@ -57,4 +70,6 @@ export enum AppState {
   FACE_SCAN_CAPTURE,
   FACE_SCAN_LOADING,
   FACE_SCAN_RESULT,
+  ZODIAC_HOUR_FINDER,
+  ZODIAC_HOUR_LOADING,
 }

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData } from '../types';
+import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, ZodiacHourData } from '../types';
 import { AppState } from '../types';
-import { generateAstrologyChart, analyzePhysiognomy } from '../geminiService';
+import { generateAstrologyChart, analyzePhysiognomy, findZodiacHours } from '../geminiService';
 import Header from './Header';
 import BirthInfoForm from './BirthInfoForm';
 import DonationModal from './PaymentModal';
@@ -13,6 +13,7 @@ import ConfirmationModal from './ConfirmationModal';
 import FaceScan from './FaceScan';
 import PhysiognomyResult from './PhysiognomyResult';
 import Home from './Home';
+import ZodiacHourFinder from './ZodiacHourFinder';
 import { SUPPORT_INFO } from '../constants';
 import { useLocalization } from '../hooks/useLocalization';
 
@@ -26,6 +27,7 @@ const App: React.FC = () => {
   const [birthInfo, setBirthInfo] = useState<BirthInfo | null>(null);
   const [chartData, setChartData] = useState<AstrologyChartData | null>(null);
   const [physiognomyData, setPhysiognomyData] = useState<PhysiognomyData | null>(null);
+  const [zodiacHourData, setZodiacHourData] = useState<ZodiacHourData | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedCharts, setSavedCharts] = useState<SavedChart[]>([]);
@@ -74,6 +76,15 @@ const App: React.FC = () => {
       setAppState(AppState.HOME);
     }
   }, [savedCharts, appState]);
+  
+  const resetAllDynamicData = useCallback(() => {
+    setBirthInfo(null);
+    setChartData(null);
+    setPhysiognomyData(null);
+    setCapturedImage(null);
+    setZodiacHourData(null);
+    setError(null);
+  }, []);
 
   const handleGenerateChart = useCallback(async (info: BirthInfo) => {
     setBirthInfo(info);
@@ -123,6 +134,20 @@ const App: React.FC = () => {
     }
   }, [capturedImage, language, t]);
 
+  const handleFindZodiacHours = useCallback(async (date: { day: number, month: number, year: number }) => {
+    setAppState(AppState.ZODIAC_HOUR_LOADING);
+    setError(null);
+    try {
+        const data = await findZodiacHours(date, language);
+        setZodiacHourData(data);
+        setAppState(AppState.ZODIAC_HOUR_FINDER);
+    } catch (err) {
+        console.error(err);
+        setError(err instanceof Error ? err.message : t('errorUnknown'));
+        setAppState(AppState.ZODIAC_HOUR_FINDER);
+    }
+  }, [language, t]);
+
   const handleCaptureImage = useCallback((imageDataUrl: string) => {
     setCapturedImage(imageDataUrl);
   }, []);
@@ -151,15 +176,16 @@ const App: React.FC = () => {
     } else {
         setAppState(AppState.HOME);
     }
-    setBirthInfo(null);
-    setChartData(null);
-    setPhysiognomyData(null);
-    setCapturedImage(null);
-    setError(null);
-  }, [savedCharts]);
+    resetAllDynamicData();
+  }, [savedCharts, resetAllDynamicData]);
   
   const handleStartAstrology = useCallback(() => setAppState(AppState.ASTROLOGY_FORM), []);
   const handleStartPhysiognomy = useCallback(() => setAppState(AppState.FACE_SCAN_CAPTURE), []);
+  const handleStartZodiacFinder = useCallback(() => {
+      setZodiacHourData(null);
+      setError(null);
+      setAppState(AppState.ZODIAC_HOUR_FINDER);
+  }, []);
 
   const handleViewChart = useCallback((chart: SavedChart) => {
     setBirthInfo(chart.birthInfo);
@@ -199,7 +225,7 @@ const App: React.FC = () => {
   const content = useMemo(() => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} />;
       case AppState.SAVED_CHARTS:
         return <SavedCharts 
           charts={savedCharts}
@@ -231,10 +257,14 @@ const App: React.FC = () => {
               onBackToHome={handleResetToHome} 
               onOpenDonationModal={() => setIsDonationModalOpen(true)} 
           />;
+      case AppState.ZODIAC_HOUR_FINDER:
+          return <ZodiacHourFinder onFind={handleFindZodiacHours} data={zodiacHourData} />;
+      case AppState.ZODIAC_HOUR_LOADING:
+          return <Spinner message={t('spinnerZodiac')} />;
       default:
         return null;
     }
-  }, [appState, handleStartAstrology, handleStartPhysiognomy, savedCharts, handleViewChart, handleDeleteChart, handleCreateNew, handleFormSubmit, chartData, birthInfo, handleResetToHome, handleAnalyzeFace, handleCaptureImage, handleRetakeCapture, capturedImage, physiognomyData, handleResetFaceScan, t]);
+  }, [appState, handleStartAstrology, handleStartPhysiognomy, handleStartZodiacFinder, savedCharts, handleViewChart, handleDeleteChart, handleCreateNew, handleFormSubmit, chartData, birthInfo, handleResetToHome, handleAnalyzeFace, handleCaptureImage, handleRetakeCapture, capturedImage, physiognomyData, handleResetFaceScan, t, handleFindZodiacHours, zodiacHourData]);
 
   return (
     <div className="min-h-screen text-gray-200">
