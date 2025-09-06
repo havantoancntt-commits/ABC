@@ -61,6 +61,7 @@ export const translations = {
     spinnerAstrology: 'Hệ thống đang khởi tạo lá số tử vi cho bạn. Các vì sao đang dịch chuyển vào đúng vị trí... Quá trình này có thể mất vài phút, xin vui lòng chờ...',
     spinnerPhysiognomy: 'AI đang phân tích các đường nét trên khuôn mặt bạn... Xin vui lòng giữ nguyên trang...',
     spinnerCamera: 'Đang khởi động camera...',
+    spinnerZodiac: 'Đang tính toán Can Chi và tìm giờ tốt xấu cho ngày bạn chọn...',
 
     // Face Scan
     faceScanTitle: 'Xem Nhân Tướng Qua Ảnh',
@@ -210,6 +211,7 @@ export const translations = {
     spinnerAstrology: 'The system is generating your horoscope. The stars are aligning... This process may take a few moments, please wait.',
     spinnerPhysiognomy: 'The AI is analyzing your facial features... Please stay on this page.',
     spinnerCamera: 'Starting camera...',
+    spinnerZodiac: 'Calculating Stem-Branch and finding good/bad hours for your selected date...',
 
     // Face Scan
     faceScanTitle: 'Facial Physiognomy Analysis',
