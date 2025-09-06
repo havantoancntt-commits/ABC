@@ -15,6 +15,7 @@ import PhysiognomyResult from './PhysiognomyResult';
 import Home from './Home';
 import ZodiacHourFinder from './ZodiacHourFinder';
 import IChingDivination from './IChingDivination';
+import Shop from './Hero'; // Re-using Hero.tsx for the Shop component
 import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
 
@@ -174,6 +175,10 @@ const App: React.FC = () => {
       setError(null);
       setAppState(AppState.ICHING_DIVINATION);
   }, []);
+  const handleStartShop = useCallback(() => {
+      setError(null);
+      setAppState(AppState.SHOP);
+  }, []);
 
   const handleViewChart = useCallback((chart: SavedChart) => {
     setBirthInfo(chart.birthInfo);
@@ -213,7 +218,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} />;
       case AppState.SAVED_CHARTS:
         return <SavedCharts 
           charts={savedCharts}
@@ -249,6 +254,8 @@ const App: React.FC = () => {
           return <ZodiacHourFinder />;
       case AppState.ICHING_DIVINATION:
           return <IChingDivination onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.SHOP:
+          return <Shop onBack={handleResetToHome} />;
       default:
         return null;
     }

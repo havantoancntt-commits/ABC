@@ -44,6 +44,9 @@ export const translations = {
     iChingTitle: 'Kinh Dịch Luận Quẻ',
     iChingDesc: 'Gieo quẻ Kinh Dịch để nhận được sự chỉ dẫn cho các tình huống trong cuộc sống. Đặt câu hỏi và nhận luận giải sâu sắc từ 64 quẻ dịch.',
     iChingButton: 'Gieo Quẻ Dịch',
+    shopTitle: 'Huyền Phong Các',
+    shopDesc: 'Khám phá các vật phẩm phong thủy và tâm linh được tuyển chọn kỹ lưỡng, mang lại bình an, may mắn và vượng khí cho gia chủ.',
+    shopButton: 'Ghé Thăm Cửa Hàng',
 
     // Birth Info Form
     formTitle: 'Kiến Tạo Bản Đồ Vận Mệnh',
@@ -169,6 +172,16 @@ export const translations = {
     iChingSectionTransformed: 'Ý Nghĩa Quẻ Biến',
     iChingLine: 'Hào {{line}}',
     iChingCastAgain: 'Gieo Quẻ Khác',
+    
+    // Shop Page
+    shopPageTitle: 'Cửa Hàng Vật Phẩm Phong Thủy',
+    shopProductName: 'Tượng Phật Vàng Kim - An Nhiên Tự Tại',
+    shopProductBrand: 'Tuyệt tác từ Huyền Phong Phật Đạo',
+    shopProductDesc: 'Mỗi đường nét được chế tác tinh xảo, mang theo năng lượng của sự bình an và trí tuệ. Đặt trong không gian sống hoặc làm việc không chỉ là một vật phẩm trang trí đẳng cấp mà còn là nguồn cảm hứng cho sự tĩnh tại trong tâm hồn, thu hút vượng khí và may mắn.',
+    shopFeature1: 'Chất Liệu Cao Cấp',
+    shopFeature2: 'Chế Tác Thủ Công',
+    shopFeature3: 'Năng Lượng Bình An',
+    shopCTA: 'Mua Ngay trên TikTok Shop',
 
   },
   en: {
@@ -216,6 +229,9 @@ export const translations = {
     iChingTitle: 'I Ching Divination',
     iChingDesc: 'Cast an I Ching hexagram to receive guidance for life\'s situations. Ask a question and receive profound interpretations from the 64 hexagrams.',
     iChingButton: 'Cast Hexagram',
+    shopTitle: 'Mystic Pavilion',
+    shopDesc: 'Discover carefully selected feng shui and spiritual items that bring peace, luck, and prosperity to your home.',
+    shopButton: 'Visit the Shop',
 
     // Birth Info Form
     formTitle: 'Create Your Destiny Map',
@@ -342,6 +358,16 @@ export const translations = {
     iChingSectionTransformed: 'Meaning of Transformed Hexagram',
     iChingLine: 'Line {{line}}',
     iChingCastAgain: 'Cast Another Hexagram',
+    
+    // Shop Page
+    shopPageTitle: 'Feng Shui Items Shop',
+    shopProductName: 'Golden Buddha Statue - Serene Tranquility',
+    shopProductBrand: 'A masterpiece from Huyền Phong Phật Đạo',
+    shopProductDesc: 'Every line is exquisitely crafted, carrying the energy of peace and wisdom. Placed in a living or working space, it is not only a high-class decorative item but also a source of inspiration for inner tranquility, attracting prosperity and good fortune.',
+    shopFeature1: 'Premium Materials',
+    shopFeature2: 'Handcrafted',
+    shopFeature3: 'Peaceful Energy',
+    shopCTA: 'Buy Now on TikTok Shop',
   }
 };
 

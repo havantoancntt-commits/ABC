@@ -103,4 +103,5 @@ export enum AppState {
   FACE_SCAN_RESULT,
   ZODIAC_HOUR_FINDER,
   ICHING_DIVINATION,
+  SHOP,
 }
