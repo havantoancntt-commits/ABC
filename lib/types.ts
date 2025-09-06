@@ -91,6 +91,27 @@ export interface IChingInterpretation {
     queBienDoi: string | null;
 }
 
+export interface NumerologyNumber {
+  number: number;
+  interpretation: string;
+}
+
+export interface NumerologyInfo {
+  fullName: string;
+  year: number;
+  month: number;
+  day: number;
+}
+
+export interface NumerologyData {
+  lifePathNumber: NumerologyNumber;
+  destinyNumber: NumerologyNumber;
+  soulUrgeNumber: NumerologyNumber;
+  personalityNumber: NumerologyNumber;
+  birthdayNumber: NumerologyNumber;
+  summary: string;
+}
+
 
 export enum AppState {
   HOME,
@@ -105,4 +126,7 @@ export enum AppState {
   ZODIAC_HOUR_FINDER,
   ICHING_DIVINATION,
   SHOP,
+  NUMEROLOGY_FORM,
+  NUMEROLOGY_LOADING,
+  NUMEROLOGY_RESULT,
 }

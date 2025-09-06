@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -62,5 +62,18 @@ export const getIChingInterpretation = async (castResult: CastResult, question: 
             throw error;
         }
         throw new Error("Could not get interpretation due to a connection error or server issue. Please try again.");
+    }
+};
+
+export const generateNumerologyChart = async (info: NumerologyInfo, language: string): Promise<NumerologyData> => {
+    try {
+        const data = await callProxy('generateNumerologyChart', { info, language });
+        return data as NumerologyData;
+    } catch (error) {
+        console.error("Error generating numerology chart:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Could not generate numerology chart due to a connection error or server issue. Please try again.");
     }
 };

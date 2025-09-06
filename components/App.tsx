@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData } from '../lib/types';
+import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData } from '../lib/types';
 import { AppState } from '../lib/types';
-import { generateAstrologyChart, analyzePhysiognomy } from '../lib/gemini';
+import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart } from '../lib/gemini';
 import Header from './Header';
 import BirthInfoForm from './BirthInfoForm';
 import DonationModal from './PaymentModal';
@@ -16,6 +16,8 @@ import Home from './Home';
 import ZodiacHourFinder from './ZodiacHourFinder';
 import IChingDivination from './IChingDivination';
 import Shop from './Hero'; // Re-using Hero.tsx for the Shop component
+import NumerologyForm from './NumerologyForm';
+import NumerologyChart from './NumerologyChart';
 import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
 import Card from './Card';
@@ -148,6 +150,8 @@ const App: React.FC = () => {
   const [birthInfo, setBirthInfo] = useState<BirthInfo | null>(null);
   const [chartData, setChartData] = useState<AstrologyChartData | null>(null);
   const [physiognomyData, setPhysiognomyData] = useState<PhysiognomyData | null>(null);
+  const [numerologyInfo, setNumerologyInfo] = useState<NumerologyInfo | null>(null);
+  const [numerologyData, setNumerologyData] = useState<NumerologyData | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedCharts, setSavedCharts] = useState<SavedChart[]>([]);
@@ -204,6 +208,8 @@ const App: React.FC = () => {
     setChartData(null);
     setPhysiognomyData(null);
     setCapturedImage(null);
+    setNumerologyInfo(null);
+    setNumerologyData(null);
     setError(null);
   }, []);
 
@@ -255,6 +261,21 @@ const App: React.FC = () => {
     }
   }, [capturedImage, language, t]);
 
+  const handleGenerateNumerology = useCallback(async (info: NumerologyInfo) => {
+    setNumerologyInfo(info);
+    setAppState(AppState.NUMEROLOGY_LOADING);
+    setError(null);
+    try {
+        const data = await generateNumerologyChart(info, language);
+        setNumerologyData(data);
+        setAppState(AppState.NUMEROLOGY_RESULT);
+    } catch (err) {
+        console.error(err);
+        setError(err instanceof Error ? err.message : t('errorUnknown'));
+        setAppState(AppState.NUMEROLOGY_FORM);
+    }
+  }, [language, t]);
+
   const handleCaptureImage = useCallback((imageDataUrl: string) => {
     setCapturedImage(imageDataUrl);
   }, []);
@@ -296,6 +317,10 @@ const App: React.FC = () => {
     }
   }, []);
   const handleStartPhysiognomy = useCallback(() => setAppState(AppState.FACE_SCAN_CAPTURE), []);
+  const handleStartNumerology = useCallback(() => {
+      setError(null);
+      setAppState(AppState.NUMEROLOGY_FORM);
+  }, []);
   const handleStartZodiacFinder = useCallback(() => {
       setError(null);
       setAppState(AppState.ZODIAC_HOUR_FINDER);
@@ -368,7 +393,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} />;
       case AppState.SAVED_CHARTS:
         return <SavedCharts 
           charts={savedCharts}
@@ -408,6 +433,12 @@ const App: React.FC = () => {
           return <IChingDivination onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.SHOP:
           return <Shop onBack={handleResetToHome} />;
+      case AppState.NUMEROLOGY_FORM:
+          return <NumerologyForm onSubmit={handleGenerateNumerology} />;
+      case AppState.NUMEROLOGY_LOADING:
+          return <Spinner message={t('spinnerNumerology')} />;
+      case AppState.NUMEROLOGY_RESULT:
+          return numerologyData && <NumerologyChart data={numerologyData} info={numerologyInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       default:
         return null;
     }

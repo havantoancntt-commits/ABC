@@ -9,6 +9,7 @@ interface Props {
     onStartZodiacFinder: () => void;
     onStartIChing: () => void;
     onStartShop: () => void;
+    onStartNumerology: () => void;
 }
 
 const FeatureCard: React.FC<{
@@ -17,7 +18,7 @@ const FeatureCard: React.FC<{
     buttonText: string;
     icon: React.ReactNode;
     onClick: () => void;
-    buttonVariant: 'primary' | 'special' | 'secondary' | 'iching' | 'shop';
+    buttonVariant: 'primary' | 'special' | 'secondary' | 'iching' | 'shop' | 'numerology';
 }> = ({ title, description, buttonText, icon, onClick, buttonVariant }) => (
     <div className="group relative h-full">
         <div className={`absolute -inset-1 bg-gradient-to-r ${
@@ -25,6 +26,7 @@ const FeatureCard: React.FC<{
             buttonVariant === 'special' ? 'from-purple-600 to-indigo-600' :
             buttonVariant === 'iching' ? 'from-emerald-600 to-teal-600' :
             buttonVariant === 'shop' ? 'from-amber-600 to-yellow-600' :
+            buttonVariant === 'numerology' ? 'from-cyan-600 to-blue-600' :
             'from-cyan-600 to-blue-600'
         } rounded-2xl blur opacity-25 group-hover:opacity-100 group-hover:blur-md transition duration-500`}></div>
         <Card className="relative flex flex-col text-center items-center h-full">
@@ -41,7 +43,7 @@ const FeatureCard: React.FC<{
 );
 
 
-const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZodiacFinder, onStartIChing, onStartShop }) => {
+const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZodiacFinder, onStartIChing, onStartShop, onStartNumerology }) => {
     const { t } = useLocalization();
     return (
         <div className="max-w-7xl mx-auto">
@@ -74,7 +76,17 @@ const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZo
                         icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>}
                     />
                 </div>
-                 <div className="animate-fade-in" style={{ animationDelay: '1.0s' }}>
+                <div className="animate-fade-in" style={{ animationDelay: '1.0s' }}>
+                    <FeatureCard
+                        title={t('numerologyTitle')}
+                        description={t('numerologyDesc')}
+                        buttonText={t('numerologyButton')}
+                        onClick={onStartNumerology}
+                        buttonVariant="numerology"
+                        icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 011-1h1a2 2 0 100-4H7a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" /></svg>}
+                    />
+                </div>
+                 <div className="animate-fade-in" style={{ animationDelay: '1.2s' }}>
                      <FeatureCard
                         title={t('iChingTitle')}
                         description={t('iChingDesc')}
@@ -84,7 +96,7 @@ const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZo
                         icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><g strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18M12 3v18" strokeLinecap="round" strokeLinejoin="round" /></g></svg>}
                     />
                 </div>
-                 <div className="animate-fade-in lg:col-span-2" style={{ animationDelay: '1.2s' }}>
+                 <div className="animate-fade-in" style={{ animationDelay: '1.4s' }}>
                     <FeatureCard
                         title={t('zodiacHourTitle')}
                         description={t('zodiacHourDesc')}
@@ -94,7 +106,7 @@ const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZo
                         icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
                     />
                 </div>
-                 <div className="animate-fade-in lg:col-span-1" style={{ animationDelay: '1.4s' }}>
+                 <div className="animate-fade-in" style={{ animationDelay: '1.6s' }}>
                     <FeatureCard
                         title={t('shopTitle')}
                         description={t('shopDesc')}

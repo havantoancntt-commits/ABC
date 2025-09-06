@@ -1,7 +1,7 @@
 // This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
 import { GoogleGenAI, Type, BlockedReason } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
-import type { BirthInfo, CastResult } from '../lib/types';
+import type { BirthInfo, CastResult, NumerologyInfo } from '../lib/types';
 
 // By removing the `export const config = { runtime: 'edge' };`, this function
 // will default to the standard Node.js serverless runtime, which has a longer
@@ -79,6 +79,28 @@ const iChingSchema = {
     required: ['tongQuan', 'thoanTu', 'hinhTuong', 'haoDong', 'queBienDoi']
 };
 
+const numerologyNumberSchema = {
+    type: Type.OBJECT,
+    properties: {
+        number: { type: Type.INTEGER, description: "Con số chủ đạo (ví dụ: 8, 11, 22)." },
+        interpretation: { type: Type.STRING, description: "Luận giải chi tiết về ý nghĩa của con số này và ảnh hưởng của nó." }
+    },
+    required: ['number', 'interpretation']
+};
+
+const numerologySchema = {
+    type: Type.OBJECT,
+    properties: {
+        lifePathNumber: numerologyNumberSchema,
+        destinyNumber: numerologyNumberSchema,
+        soulUrgeNumber: numerologyNumberSchema,
+        personalityNumber: numerologyNumberSchema,
+        birthdayNumber: numerologyNumberSchema,
+        summary: { type: Type.STRING, description: "Tổng kết toàn bộ các chỉ số, mối liên kết giữa chúng và đưa ra lời khuyên tổng thể." }
+    },
+    required: ['lifePathNumber', 'destinyNumber', 'soulUrgeNumber', 'personalityNumber', 'birthdayNumber', 'summary']
+};
+
 
 // --- System Instructions for the AI Model ---
 const VI_ASTROLOGY_SYSTEM_INSTRUCTION = `Bạn là một chuyên gia Tử Vi Đẩu Số bậc thầy. Nhiệm vụ của bạn là lập một lá số tử vi chi tiết và trả về kết quả dưới dạng JSON theo schema đã định sẵn.
@@ -136,6 +158,28 @@ Requirements:
 5. 'haoDong' (Changing Lines): Interpret each changing line. This is the key to the reading and requires the most thorough analysis. Explain why the line is changing and what it signifies.
 6. 'queBienDoi' (Transformed Hexagram): Interpret the meaning of the transformed hexagram, indicating the trend and final outcome. If there are no changing lines, return null for this field.
 7. Maintain a formal, wise, yet understandable tone.`;
+
+const VI_NUMEROLOGY_SYSTEM_INSTRUCTION = `Bạn là một chuyên gia Thần Số Học theo trường phái Pythagoras. Nhiệm vụ của bạn là phân tích họ tên và ngày sinh được cung cấp, sau đó trả về kết quả dưới dạng JSON theo schema đã định sẵn.
+Quy tắc tính toán:
+1.  **Số Đường Đời (Life Path Number):** Cộng và rút gọn tất cả các chữ số trong ngày, tháng, năm sinh. Ví dụ: 12/03/1990 -> 1+2+3+1+9+9+0 = 25 -> 2+5 = 7. Luôn rút gọn về một chữ số, trừ khi kết quả cuối cùng là 11, 22, 33 (Master Numbers).
+2.  **Số Sứ Mệnh (Destiny Number):** Cộng và rút gọn giá trị số của tất cả các chữ cái trong họ tên đầy đủ (nguyên âm + phụ âm). Sử dụng bảng chữ cái Pythagoras: 1-AJS, 2-BKT, 3-CLU, 4-DMV, 5-ENW, 6-FOX, 7-GPY, 8-HQZ, 9-IR. Rút gọn về một chữ số (trừ 11, 22, 33).
+3.  **Số Linh Hồn (Soul Urge Number):** Chỉ cộng và rút gọn giá trị số của các NGUYÊN ÂM (A, E, I, O, U) trong họ tên. Y được coi là nguyên âm khi nó là âm thanh nguyên âm duy nhất trong một âm tiết. Rút gọn về một chữ số (trừ 11, 22, 33).
+4.  **Số Nhân Cách (Personality Number):** Chỉ cộng và rút gọn giá trị số của các PHỤ ÂM trong họ tên. Y được coi là phụ âm khi nó đứng cạnh một nguyên âm khác. Rút gọn về một chữ số (trừ 11, 22, 33).
+5.  **Số Ngày Sinh (Birthday Number):** Rút gọn ngày sinh. Ví dụ: ngày 25 -> 2+5 = 7; ngày 19 -> 1+9=10 -> 1.
+Yêu cầu luận giải:
+-   Mỗi luận giải phải súc tích (khoảng 100-150 từ), sâu sắc, và mang tính xây dựng.
+-   Giọng văn chuyên nghiệp, tích cực và định hướng.`;
+
+const EN_NUMEROLOGY_SYSTEM_INSTRUCTION = `You are an expert in Pythagorean Numerology. Your task is to analyze the provided full name and date of birth, then return the result as a JSON object according to the predefined schema.
+Calculation Rules:
+1.  **Life Path Number:** Sum and reduce all digits of the birth date (day, month, year). E.g., 03/12/1990 -> 1+2+3+1+9+9+0 = 25 -> 2+5 = 7. Always reduce to a single digit, unless the final result is 11, 22, or 33 (Master Numbers).
+2.  **Destiny Number:** Sum and reduce the numerical value of all letters in the full name (vowels + consonants). Use the Pythagorean alphabet chart: 1-AJS, 2-BKT, 3-CLU, 4-DMV, 5-ENW, 6-FOX, 7-GPY, 8-HQZ, 9-IR. Reduce to a single digit (except for 11, 22, 33).
+3.  **Soul Urge Number:** Sum and reduce the numerical value of only the VOWELS (A, E, I, O, U) in the name. Y is considered a vowel when it's the only vowel sound in a syllable. Reduce to a single digit (except for 11, 22, 33).
+4.  **Personality Number:** Sum and reduce the numerical value of only the CONSONANTS in the name. Y is considered a consonant when it's next to another vowel. Reduce to a single digit (except for 11, 22, 33).
+5.  **Birthday Number:** Reduce the day of birth. E.g., 25th -> 2+5 = 7; 19th -> 1+9=10 -> 1.
+Interpretation Requirements:
+-   Each interpretation must be concise (around 100-150 words), insightful, and constructive.
+-   Maintain a professional, positive, and guiding tone.`;
 
 
 // --- Main Handler ---
@@ -230,6 +274,24 @@ export default async function handler(req: any, res: any) {
                 responseMimeType: "application/json",
                 responseSchema: iChingSchema,
                 temperature: 0.8,
+            },
+        });
+    } else if (operation === 'generateNumerologyChart') {
+        const { info, language }: { info: NumerologyInfo, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_NUMEROLOGY_SYSTEM_INSTRUCTION : VI_NUMEROLOGY_SYSTEM_INSTRUCTION;
+
+        const userPrompt = language === 'en'
+            ? `Generate a detailed numerology report for:\n- Full Name: ${info.fullName}\n- Date of Birth: ${info.day}/${info.month}/${info.year}`
+            : `Lập sơ đồ thần số học chi tiết cho:\n- Họ và Tên: ${info.fullName}\n- Ngày sinh: ${info.day}/${info.month}/${info.year}`;
+        
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: numerologySchema,
+                temperature: 0.7,
             },
         });
     } else {
