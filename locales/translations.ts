@@ -136,7 +136,6 @@ export const translations = {
     footerSupportDesc: 'Để được luận giải chi tiết hơn hoặc theo dõi các kênh của chúng tôi:',
     followTikTok: 'Theo dõi trên TikTok',
     zaloTooltip: 'Chat qua Zalo',
-    footerTikTokShop: 'TikTok Shop',
 
     // Error Boundary
     errorBoundaryTitle: 'Đã xảy ra lỗi',
@@ -310,7 +309,6 @@ export const translations = {
     footerSupportDesc: 'For more detailed analysis or to follow our channels, please use the links below:',
     followTikTok: 'Follow on TikTok',
     zaloTooltip: 'Chat on Zalo',
-    footerTikTokShop: 'TikTok Shop',
     
     // Error Boundary
     errorBoundaryTitle: 'An Error Occurred',
