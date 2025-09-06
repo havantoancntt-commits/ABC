@@ -3,9 +3,6 @@ import type { AstrologyChartData, BirthInfo, Palace } from '../lib/types';
 import Button from './Button';
 import { useLocalization } from '../hooks/useLocalization';
 
-declare const html2canvas: any;
-declare const jspdf: any;
-
 interface Props {
   data: AstrologyChartData;
   birthInfo: BirthInfo;
@@ -126,25 +123,12 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
         data.cungTaiBach, data.cungTuTuc, data.cungPhuThe, data.cungHuynhDe
     ], [data]);
 
-    const loadScript = (src: string) => {
-        return new Promise<void>((resolve, reject) => {
-            if (document.querySelector(`script[src="${src}"]`)) {
-                return resolve();
-            }
-            const script = document.createElement('script');
-            script.src = src;
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error(`Script load error for ${src}`));
-            document.body.appendChild(script);
-        });
-    };
-
     const handleDownloadPdf = async () => {
         setIsDownloadingPdf(true);
         try {
-            await Promise.all([
-                loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
-                loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+            const [{ jsPDF }, { default: html2canvas }] = await Promise.all([
+                import('jspdf'),
+                import('html2canvas')
             ]);
             
             const chartElement = document.getElementById('laso-print-area');
@@ -152,7 +136,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
 
             const canvas = await html2canvas(chartElement, { scale: 2, useCORS: true, backgroundColor: '#0c0a1a' });
             const imgData = canvas.toDataURL('image/png');
-            const pdf = new jspdf.jsPDF({
+            const pdf = new jsPDF({
                 orientation: 'p',
                 unit: 'px',
                 format: [canvas.width, canvas.height]

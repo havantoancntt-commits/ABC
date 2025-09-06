@@ -39,14 +39,14 @@ const PasswordPrompt: React.FC<PasswordPromptProps> = ({ onSuccess, onBack }) =>
   const [copyStatus, setCopyStatus] = useState<Record<string, string>>({});
 
   const copyToClipboard = (text: string, field: string) => {
-    if (copyStatus[field]) return; // Prevent re-copying while message is shown
+    if (copyStatus[field]) return;
     navigator.clipboard.writeText(text).then(() => {
       setCopyStatus({ [field]: t('copied') });
       setTimeout(() => {
         setCopyStatus(prev => {
-            const newStatus = {...prev};
-            delete newStatus[field];
-            return newStatus;
+          const newStatus = { ...prev };
+          delete newStatus[field];
+          return newStatus;
         });
       }, 2000);
     }).catch(err => {
@@ -66,66 +66,77 @@ const PasswordPrompt: React.FC<PasswordPromptProps> = ({ onSuccess, onBack }) =>
   };
 
   return (
-    <div className="max-w-md mx-auto animate-slide-in-up">
-      <Card>
-        <h2 className="text-3xl font-bold text-center mb-4 text-yellow-400 font-serif">
-          {t('passwordPromptTitle')}
-        </h2>
-        <p className="text-center text-gray-400 mb-6">
-          {t('passwordPromptSubtitle')}
-        </p>
-
-        {/* Payment Instructions */}
-        <div className="mb-8 p-4 bg-gray-950/60 rounded-lg border border-yellow-500/30 text-center">
-            <h3 className="font-semibold text-lg text-yellow-300 font-serif mb-3">
-                {t('passwordPaymentTitle')}
-            </h3>
-            <div className="space-y-3 text-sm text-gray-300">
-                <p className="text-left px-2">
-                    {t('passwordPaymentStep1')}
-                </p>
-                <div className="flex items-center justify-between p-3 bg-black/30 rounded-md">
-                    <span className="font-mono text-white text-lg tracking-wider">
-                        {SUPPORT_INFO.zaloPhone}
-                    </span>
-                    <button
-                        type="button"
-                        onClick={() => copyToClipboard(SUPPORT_INFO.zaloPhone, 'zaloPhone')}
-                        className="text-yellow-400 hover:text-yellow-300 text-xs font-bold uppercase disabled:text-gray-500 transition-colors w-20 text-right"
-                        disabled={!!copyStatus['zaloPhone']}
-                    >
-                        {copyStatus['zaloPhone'] || t('copy')}
-                    </button>
-                </div>
-                <p className="text-left px-2">{t('passwordPaymentStep2')}</p>
+    <div className="max-w-4xl mx-auto animate-slide-in-up">
+      <Card className="overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="text-center md:text-left">
+            <div className="inline-block p-3 bg-gray-800/60 border border-yellow-500/30 rounded-full mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
             </div>
-        </div>
+            <h2 className="text-3xl font-bold font-serif text-yellow-300 leading-tight">
+              {t('passwordPromptTitle')}
+            </h2>
+            <p className="text-gray-300 mt-3 leading-relaxed">
+              {t('passwordPromptSubtitle')}
+            </p>
 
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="password-input" className="block text-sm font-medium text-gray-300 mb-2">
-            {t('passwordLabel')}
-          </label>
-          <input
-            type="password"
-            id="password-input"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              if (error) setError(null);
-            }}
-            className={`w-full bg-gray-900/50 border rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all ${error ? 'border-red-500' : 'border-gray-600'}`}
-            placeholder={t('passwordPlaceholder')}
-            required
-            aria-required="true"
-            aria-invalid={!!error}
-            aria-describedby={error ? "password-error" : undefined}
-          />
-          {error && <p id="password-error" className="text-red-500 text-xs mt-2 text-center">{error}</p>}
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Button onClick={onBack} variant="secondary" type="button">{t('back')}</Button>
-            <Button type="submit" variant="primary">{t('passwordSubmit')}</Button>
+            <form onSubmit={handleSubmit} className="mt-8">
+              <label htmlFor="password-input" className="sr-only">
+                {t('passwordLabel')}
+              </label>
+              <input
+                type="password"
+                id="password-input"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError(null);
+                }}
+                className={`w-full bg-gray-900/50 border rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all ${error ? 'border-red-500' : 'border-gray-600'}`}
+                placeholder={t('passwordPlaceholder')}
+                required
+                aria-required="true"
+                aria-invalid={!!error}
+                aria-describedby={error ? "password-error" : undefined}
+              />
+              {error && <p id="password-error" className="text-red-500 text-xs mt-2 text-center">{error}</p>}
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Button onClick={onBack} variant="secondary" type="button">{t('back')}</Button>
+                <Button type="submit" variant="primary">{t('passwordSubmit')}</Button>
+              </div>
+            </form>
           </div>
-        </form>
+          <div className="p-6 bg-gray-950/60 rounded-lg border border-yellow-500/30">
+            <h3 className="font-semibold text-xl text-yellow-300 font-serif mb-4 text-center">
+              {t('passwordPaymentTitle')}
+            </h3>
+            <ol className="space-y-4 text-sm text-gray-300">
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 font-bold text-yellow-400 bg-gray-800 rounded-full h-6 w-6 flex items-center justify-center">1</span>
+                <span>{t('passwordPaymentStep1')}</span>
+              </li>
+              <li className="pl-9">
+                <div className="flex items-center justify-between p-3 bg-black/30 rounded-md">
+                  <span className="font-mono text-white text-lg tracking-wider">
+                    {SUPPORT_INFO.zaloPhone}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(SUPPORT_INFO.zaloPhone, 'zaloPhone')}
+                    className="text-yellow-400 hover:text-yellow-300 text-xs font-bold uppercase disabled:text-gray-500 transition-colors w-20 text-right"
+                    disabled={!!copyStatus['zaloPhone']}
+                  >
+                    {copyStatus['zaloPhone'] || t('copy')}
+                  </button>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 font-bold text-yellow-400 bg-gray-800 rounded-full h-6 w-6 flex items-center justify-center">2</span>
+                <span>{t('passwordPaymentStep2')}</span>
+              </li>
+            </ol>
+          </div>
+        </div>
       </Card>
     </div>
   );
