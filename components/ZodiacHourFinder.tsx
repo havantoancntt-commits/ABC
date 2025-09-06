@@ -90,7 +90,7 @@ const ZodiacHourFinder: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 {data.hours.map((hour, index) => (
                     <div key={hour.name} className={`p-4 rounded-lg flex items-center gap-4 border-l-4 ${hour.isAuspicious ? 'bg-yellow-500/10 border-yellow-400' : 'bg-purple-500/10 border-purple-400'}`}
-                         style={{ animation: `fadeInUp 0.5s ${index * 50}ms ease-out forwards`, opacity: 0 }}>
+                         style={{ animation: `fadeInUp 0.5s ${index * 30}ms ease-out forwards`, opacity: 0 }}>
                         <div className={`text-2xl ${hour.isAuspicious ? 'text-yellow-400' : 'text-purple-400'}`}>
                             {hour.isAuspicious ? '☀️' : '🌙'}
                         </div>

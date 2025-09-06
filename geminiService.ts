@@ -50,16 +50,3 @@ export const analyzePhysiognomy = async (base64Image: string, language: string):
     throw new Error("Could not analyze face due to a connection error or server issue. Please try again.");
   }
 };
-
-export const findZodiacHours = async (date: { day: number, month: number, year: number }, language: string): Promise<ZodiacHourData> => {
-    try {
-        const data = await callProxy('findZodiacHours', { date, language });
-        return data as ZodiacHourData;
-    } catch (error) {
-        console.error("Error finding zodiac hours:", error);
-        if (error instanceof Error) {
-            throw error;
-        }
-        throw new Error("Could not find zodiac hours due to a connection error or server issue. Please try again.");
-    }
-};
