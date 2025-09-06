@@ -117,7 +117,6 @@ export default async function handler(req: any, res: any) {
           responseMimeType: "application/json",
           responseSchema: astrologySchema,
           temperature: 0.7,
-          thinkingConfig: { thinkingBudget: 0 },
         },
       });
     } else if (operation === 'analyzePhysiognomy') {
@@ -132,7 +131,6 @@ export default async function handler(req: any, res: any) {
           responseMimeType: "application/json",
           responseSchema: physiognomySchema,
           temperature: 0.6,
-          thinkingConfig: { thinkingBudget: 0 },
         },
       });
     } else {
