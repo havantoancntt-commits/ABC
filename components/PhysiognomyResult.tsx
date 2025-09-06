@@ -2,6 +2,7 @@ import React from 'react';
 import type { PhysiognomyData } from '../types';
 import Button from './Button';
 import Card from './Card';
+import { useLocalization } from '../hooks/useLocalization';
 
 interface Props {
   analysisData: PhysiognomyData;
@@ -29,36 +30,37 @@ const AnalysisSection: React.FC<{ title: string; content: string; icon: React.Re
 ));
 
 const PhysiognomyResult: React.FC<Props> = ({ analysisData, imageData, onReset, onBackToHome }) => {
+  const { t } = useLocalization();
   return (
     <div className="max-w-6xl mx-auto">
-      <h2 className="text-4xl font-bold text-center mb-8 text-yellow-400 font-serif animate-fade-in-down">Kết Quả Luận Giải Nhân Tướng</h2>
+      <h2 className="text-4xl font-bold text-center mb-8 text-yellow-400 font-serif animate-fade-in-down">{t('physiognomyResultTitle')}</h2>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-1 text-center p-6 bg-gray-900/50 rounded-lg border border-gray-700/50 lg:sticky lg:top-28">
-          <h3 className="text-2xl font-serif text-yellow-300 mb-4">Ảnh Chân Dung</h3>
+          <h3 className="text-2xl font-serif text-yellow-300 mb-4">{t('physiognomyResultImageTitle')}</h3>
           <img 
             src={imageData} 
-            alt="Ảnh chân dung để phân tích" 
+            alt={t('physiognomyResultImageAlt')} 
             className="rounded-lg shadow-2xl w-full mx-auto border-2 border-yellow-500/50"
           />
         </div>
         
         <div className="lg:col-span-2 space-y-6">
-          <AnalysisSection title="Tổng Quan Thần Sắc" content={analysisData.tongQuan} icon={ICONS.tongQuan} />
-          <AnalysisSection title="Phân Tích Tam Đình" content={analysisData.tamDinh} icon={ICONS.tamDinh} />
-          <AnalysisSection title="Phân Tích Ngũ Quan" content={analysisData.nguQuan} icon={ICONS.nguQuan} />
-          <AnalysisSection title="Lời Khuyên" content={analysisData.loiKhuyen} icon={ICONS.loiKhuyen} />
+          <AnalysisSection title={t('physiognomyResultSection1')} content={analysisData.tongQuan} icon={ICONS.tongQuan} />
+          <AnalysisSection title={t('physiognomyResultSection2')} content={analysisData.tamDinh} icon={ICONS.tamDinh} />
+          <AnalysisSection title={t('physiognomyResultSection3')} content={analysisData.nguQuan} icon={ICONS.nguQuan} />
+          <AnalysisSection title={t('physiognomyResultSection4')} content={analysisData.loiKhuyen} icon={ICONS.loiKhuyen} />
         </div>
       </div>
 
       <div className="mt-10 flex flex-wrap justify-center gap-4">
         <Button onClick={onBackToHome} variant="secondary">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-          Trang Chủ
+          {t('home')}
         </Button>
         <Button onClick={onReset} variant="primary">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-          Thử Lại Với Ảnh Khác
+          {t('physiognomyResultTryAgain')}
         </Button>
       </div>
     </div>

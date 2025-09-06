@@ -58,21 +58,38 @@ const physiognomySchema = {
 };
 
 // --- System Instructions for the AI Model ---
-const ASTROLOGY_SYSTEM_INSTRUCTION = `Bạn là một chuyên gia Tử Vi Đẩu Số bậc thầy. Nhiệm vụ của bạn là lập một lá số tử vi chi tiết và trả về kết quả dưới dạng JSON theo schema đã định sẵn.
+const VI_ASTROLOGY_SYSTEM_INSTRUCTION = `Bạn là một chuyên gia Tử Vi Đẩu Số bậc thầy. Nhiệm vụ của bạn là lập một lá số tử vi chi tiết và trả về kết quả dưới dạng JSON theo schema đã định sẵn.
 Yêu cầu:
 1. Luận giải phải thật súc tích và ngắn gọn nhưng vẫn sâu sắc. Cố gắng giới hạn mỗi phần luận giải (cho từng cung, Mệnh, Thân, và tổng kết) trong khoảng 100-150 từ để đảm bảo phản hồi nhanh chóng.
-2. An sao phải chính xác. Nếu không rõ giờ sinh, hãy an theo giờ Tý.
-3. Luận giải tổng quan Mệnh, Thân và xác định chính xác cung an Thân.
-4. Luận giải chi tiết tất cả 12 cung.
+2. An sao phải chính xác. Nếu không rõ giờ sinh, hãy an theo giờ Tý. Cung an Thân phải được xác định chính xác.
+3. Luận giải tổng quan Mệnh, Thân và xác định chính xác cung an Thân ('thanCungName').
+4. Luận giải chi tiết tất cả 12 cung. Tên các cung phải bằng tiếng Việt (ví dụ: 'Cung Mệnh', 'Cung Phụ Mẫu').
 5. Cung cấp một đoạn "Tổng kết" ngắn gọn, tóm lược điểm chính và đưa ra lời khuyên hữu ích.`;
 
-const PHYSIOGNOMY_SYSTEM_INSTRUCTION = `Bạn là một bậc thầy về Nhân tướng học phương Đông. Nhiệm vụ của bạn là phân tích hình ảnh khuôn mặt được cung cấp và trả về kết quả dưới dạng JSON theo schema đã định sẵn.
+const EN_ASTROLOGY_SYSTEM_INSTRUCTION = `You are a master astrologer of Tử Vi Đẩu Số (Purple Star Astrology). Your task is to create a detailed horoscope and return the result as a JSON object following the predefined schema.
+Requirements:
+1. The interpretation must be concise yet profound. Limit each interpretation section (for each palace, Mệnh, Thân, and summary) to about 100-150 words to ensure a quick response.
+2. The star placement must be accurate. If the birth hour is unknown, use the Hour of the Rat (Tý). The Thân palace must be identified correctly.
+3. Provide a general interpretation of Mệnh (Destiny) and Thân (Body), and accurately identify the palace where Thân resides ('thanCungName').
+4. Provide detailed interpretations for all 12 palaces. The palace names must be in Vietnamese (e.g., 'Cung Mệnh', 'Cung Phụ Mẫu').
+5. Provide a brief "Summary" that highlights the key points and offers useful advice.`;
+
+const VI_PHYSIOGNOMY_SYSTEM_INSTRUCTION = `Bạn là một bậc thầy về Nhân tướng học phương Đông. Nhiệm vụ của bạn là phân tích hình ảnh khuôn mặt được cung cấp và trả về kết quả dưới dạng JSON theo schema đã định sẵn.
 Yêu cầu:
 1. Phân tích phải thật súc tích và đi thẳng vào vấn đề. Cố gắng giới hạn mỗi phần luận giải (Tổng quan, Tam Đình, Ngũ Quan, Lời khuyên) trong khoảng 100-150 từ.
 2. Phân tích tổng quan thần thái, khí sắc.
 3. Phân tích chi tiết Tam Đình (Thượng đình, Trung đình, Hạ đình).
 4. Phân tích chi tiết Ngũ Quan (Mắt, Mũi, Miệng, Tai, Lông mày).
 5. Đưa ra lời khuyên hữu ích, ngắn gọn, mang tính xây dựng và tích cực.`;
+
+const EN_PHYSIOGNOMY_SYSTEM_INSTRUCTION = `You are a master of Eastern physiognomy. Your task is to analyze the provided facial image and return the result as a JSON object following the predefined schema.
+Requirements:
+1. The analysis must be concise and to the point. Limit each analysis section (Overview, Three Sections, Five Organs, Advice) to about 100-150 words.
+2. Analyze the overall spirit and complexion (thần thái, khí sắc).
+3. Provide a detailed analysis of the Three Sections (Tam Đình: Upper, Middle, Lower).
+4. Provide a detailed analysis of the Five Organs (Ngũ Quan: Eyes, Nose, Mouth, Ears, Eyebrows).
+5. Provide useful, concise, constructive, and positive advice.`;
+
 
 // --- Main Handler ---
 // Corrected signature for Vercel's Node.js runtime
@@ -88,46 +105,59 @@ export default async function handler(req: any, res: any) {
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
       console.error("API_KEY environment variable not set on Vercel.");
-      const errorMessage = 'API Key chưa được cấu hình trên máy chủ. Quản trị viên cần kiểm tra lại biến môi trường `API_KEY` trong cài đặt dự án và triển khai lại (redeploy).';
+      const errorMessage = 'API Key is not configured on the server. The administrator needs to check the `API_KEY` environment variable in the project settings and redeploy.';
       return res.status(500).json({ error: errorMessage });
     }
 
     if (!req.body) {
-      return res.status(400).json({ error: 'Yêu cầu không có nội dung.' });
+      return res.status(400).json({ error: 'Request body is missing.' });
     }
 
     const { operation, payload } = req.body;
     
     if(!operation || !payload) {
-      return res.status(400).json({ error: 'Yêu cầu thiếu "operation" hoặc "payload".' });
+      return res.status(400).json({ error: 'Request is missing "operation" or "payload".' });
     }
 
     const ai = new GoogleGenAI({ apiKey });
     let response: GenerateContentResponse;
 
     if (operation === 'generateAstrologyChart') {
-      const info: BirthInfo = payload.info;
-      const hourString = info.hour === -1 ? 'Không rõ' : `${info.hour} giờ`;
-      const userPrompt = `Lập lá số tử vi chi tiết cho người có thông tin sau:\n- Tên: ${info.name}\n- Giới tính: ${info.gender}\n- Ngày sinh (Dương Lịch): ${info.day}/${info.month}/${info.year}\n- Giờ sinh: ${hourString}`;
+      const { info, language }: { info: BirthInfo, language: 'vi' | 'en' } = payload;
+      const systemInstruction = language === 'en' ? EN_ASTROLOGY_SYSTEM_INSTRUCTION : VI_ASTROLOGY_SYSTEM_INSTRUCTION;
+      
+      const hourString = info.hour === -1 
+        ? (language === 'en' ? 'Unknown' : 'Không rõ') 
+        : `${info.hour}:00`;
+        
+      const genderString = info.gender === 'male'
+        ? (language === 'en' ? 'Male' : 'Nam')
+        : (language === 'en' ? 'Female' : 'Nữ');
+        
+      const userPrompt = language === 'en'
+        ? `Generate a detailed horoscope for the following person:\n- Name: ${info.name}\n- Gender: ${genderString}\n- Date of Birth (Gregorian): ${info.day}/${info.month}/${info.year}\n- Time of Birth: ${hourString}`
+        : `Lập lá số tử vi chi tiết cho người có thông tin sau:\n- Tên: ${info.name}\n- Giới tính: ${genderString}\n- Ngày sinh (Dương Lịch): ${info.day}/${info.month}/${info.year}\n- Giờ sinh: ${hourString}`;
+      
       response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: userPrompt,
         config: {
-          systemInstruction: ASTROLOGY_SYSTEM_INSTRUCTION,
+          systemInstruction: systemInstruction,
           responseMimeType: "application/json",
           responseSchema: astrologySchema,
           temperature: 0.7,
         },
       });
     } else if (operation === 'analyzePhysiognomy') {
-      const { base64Image } = payload;
-      const promptText = "Phân tích nhân tướng học cho khuôn mặt trong ảnh này.";
+      const { base64Image, language } = payload;
+      const systemInstruction = language === 'en' ? EN_PHYSIOGNOMY_SYSTEM_INSTRUCTION : VI_PHYSIOGNOMY_SYSTEM_INSTRUCTION;
+      const promptText = language === 'en' ? "Analyze the physiognomy of the face in this image." : "Phân tích nhân tướng học cho khuôn mặt trong ảnh này.";
       const imagePart = { inlineData: { mimeType: 'image/jpeg', data: base64Image } };
       response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: { parts: [imagePart, { text: promptText }] },
         config: {
-          systemInstruction: PHYSIOGNOMY_SYSTEM_INSTRUCTION,
+          systemInstruction: systemInstruction,
           responseMimeType: "application/json",
           responseSchema: physiognomySchema,
           temperature: 0.6,
@@ -142,10 +172,10 @@ export default async function handler(req: any, res: any) {
     if (!responseText) {
       const feedback = response.promptFeedback;
       console.error('Gemini response was blocked or empty. Feedback:', JSON.stringify(feedback, null, 2));
-      let userMessage = 'Không thể tạo nội dung. Phản hồi từ AI trống hoặc đã bị chặn bởi bộ lọc an toàn.';
+      let userMessage = 'Could not generate content. The response from the AI was empty or blocked by safety filters.';
       if (feedback?.blockReason) {
-        const reason = feedback.blockReason === BlockedReason.SAFETY ? 'an toàn' : `khác (${feedback.blockReason})`;
-        userMessage = `Yêu cầu của bạn đã bị chặn vì lý do ${reason}. Vui lòng thử lại với thông tin khác.`;
+        const reason = feedback.blockReason === BlockedReason.SAFETY ? 'safety' : `other (${feedback.blockReason})`;
+        userMessage = `Your request was blocked for ${reason} reasons. Please try again with different information.`;
       }
       return res.status(400).json({ error: userMessage });
     }
@@ -155,7 +185,7 @@ export default async function handler(req: any, res: any) {
       parsedJson = JSON.parse(responseText);
     } catch (e) {
       console.error('Gemini response is not valid JSON:', responseText);
-      const userMessage = 'Hệ thống AI đã trả về một định dạng dữ liệu không hợp lệ. Đây có thể là sự cố tạm thời, vui lòng thử lại.';
+      const userMessage = 'The AI system returned an invalid data format. This may be a temporary issue, please try again.';
       return res.status(500).json({ error: userMessage });
     }
 
@@ -163,19 +193,19 @@ export default async function handler(req: any, res: any) {
 
   } catch (error: unknown) {
     console.error('Critical error in Gemini proxy function:', error);
-    let userMessage = 'Đã xảy ra lỗi không mong muốn khi xử lý yêu cầu của bạn.';
+    let userMessage = 'An unexpected error occurred while processing your request.';
     let statusCode = 500;
 
     if (error instanceof Error) {
       const errorString = error.toString().toLowerCase();
       if (errorString.includes('api key not valid')) {
-        userMessage = 'Lỗi xác thực API Key. Vui lòng kiểm tra lại giá trị API Key trên máy chủ.';
+        userMessage = 'API Key validation failed. Please check the server-side API Key.';
         statusCode = 401;
       } else if (errorString.includes('503') || errorString.includes('unavailable') || errorString.includes('resource has been exhausted')) {
-        userMessage = 'Hệ thống AI hiện đang quá tải hoặc đã hết tài nguyên. Xin vui lòng thử lại sau giây lát.';
+        userMessage = 'The AI system is currently overloaded or has exhausted its resources. Please try again in a few moments.';
         statusCode = 503;
       } else {
-        userMessage = `Đã xảy ra lỗi phía máy chủ. Vui lòng thử lại sau.`;
+        userMessage = `A server-side error occurred. Please try again later.`;
       }
     }
     

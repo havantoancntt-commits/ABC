@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
 import { SUPPORT_INFO } from '../constants';
+import { useLocalization } from '../hooks/useLocalization';
 
 interface Props {
   variant?: 'form' | 'modal';
 }
 
 const DonationInfo: React.FC<Props> = ({ variant = 'form' }) => {
+  const { t } = useLocalization();
   const [copyStatus, setCopyStatus] = useState<Record<string, string>>({});
   const [transferContentWithId] = useState(`${SUPPORT_INFO.transferContent}${Math.floor(1000 + Math.random() * 9000)}`);
   const qrCodeUrl = `https://img.vietqr.io/image/${SUPPORT_INFO.bankBin}-${SUPPORT_INFO.accountNumber}-compact2.png?addInfo=${encodeURIComponent(transferContentWithId)}&accountName=${encodeURIComponent(SUPPORT_INFO.accountName)}`;
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text).then(() => {
-      setCopyStatus({ [field]: 'Đã chép!' });
+      setCopyStatus({ [field]: t('copied') });
       setTimeout(() => setCopyStatus(prev => ({ ...prev, [field]: '' })), 2000);
     }).catch(err => {
-      console.error('Không thể sao chép: ', err);
-      setCopyStatus({ [field]: 'Lỗi!' });
+      console.error('Could not copy text: ', err);
+      setCopyStatus({ [field]: t('copyError') });
     });
   };
 
@@ -26,9 +28,9 @@ const DonationInfo: React.FC<Props> = ({ variant = 'form' }) => {
 
   return (
     <div className={`text-center ${containerClass}`}>
-      <h3 className="text-xl font-semibold text-yellow-300 font-serif mb-2">Tùy Hỷ Công Đức</h3>
+      <h3 className="text-xl font-semibold text-yellow-300 font-serif mb-2">{t('donationTitle')}</h3>
       <p className="text-amber-100 mb-4 text-sm leading-relaxed max-w-lg mx-auto">
-        Mỗi lá số là kết tinh của tâm huyết và tri thức. Sự ủng hộ của quý vị là động lực vô giá để chúng tôi duy trì và lan tỏa giá trị của Tử Vi Đẩu Số đến cộng đồng.
+        {t('donationMessage')}
       </p>
       <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-4">
         <div className="p-2 bg-white rounded-md shadow-md shrink-0">
@@ -36,25 +38,25 @@ const DonationInfo: React.FC<Props> = ({ variant = 'form' }) => {
         </div>
         <div className="text-left space-y-2 text-sm w-full sm:max-w-xs">
           <div className="flex justify-between items-center p-2 bg-black/30 rounded-md">
-            <span className="text-amber-200/80 mr-2 shrink-0">Ngân hàng:</span>
+            <span className="text-amber-200/80 mr-2 shrink-0">{t('donationBank')}:</span>
             <span className="font-semibold text-white text-right">{SUPPORT_INFO.bank}</span>
           </div>
           <div className="flex justify-between items-center p-2 bg-black/30 rounded-md">
-            <span className="text-amber-200/80 mr-2 shrink-0">Số TK:</span>
+            <span className="text-amber-200/80 mr-2 shrink-0">{t('donationAccountNo')}:</span>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-white">{SUPPORT_INFO.accountNumber}</span>
-              <button type="button" onClick={() => copyToClipboard(SUPPORT_INFO.accountNumber, 'stk')} className="text-yellow-300 hover:text-yellow-200 text-xs font-bold shrink-0 w-16 text-center transition-all">{copyStatus['stk'] || 'CHÉP'}</button>
+              <button type="button" onClick={() => copyToClipboard(SUPPORT_INFO.accountNumber, 'stk')} className="text-yellow-300 hover:text-yellow-200 text-xs font-bold shrink-0 w-16 text-center transition-all">{copyStatus['stk'] || t('copy')}</button>
             </div>
           </div>
           <div className="flex justify-between items-center p-2 bg-black/30 rounded-md">
-            <span className="text-amber-200/80 mr-2 shrink-0">Chủ TK:</span>
+            <span className="text-amber-200/80 mr-2 shrink-0">{t('donationAccountName')}:</span>
             <span className="font-semibold text-white text-right">{SUPPORT_INFO.accountName}</span>
           </div>
           <div className="flex justify-between items-center p-2 bg-black/30 rounded-md">
-            <span className="text-amber-200/80 mr-2 shrink-0">Nội dung:</span>
+            <span className="text-amber-200/80 mr-2 shrink-0">{t('donationContent')}:</span>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-white">{transferContentWithId}</span>
-              <button type="button" onClick={() => copyToClipboard(transferContentWithId, 'nd')} className="text-yellow-300 hover:text-yellow-200 text-xs font-bold shrink-0 w-16 text-center transition-all">{copyStatus['nd'] || 'CHÉP'}</button>
+              <button type="button" onClick={() => copyToClipboard(transferContentWithId, 'nd')} className="text-yellow-300 hover:text-yellow-200 text-xs font-bold shrink-0 w-16 text-center transition-all">{copyStatus['nd'] || t('copy')}</button>
             </div>
           </div>
         </div>

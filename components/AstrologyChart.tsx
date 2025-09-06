@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import type { AstrologyChartData, BirthInfo, Palace } from '../types';
 import Button from './Button';
+import { useLocalization } from '../hooks/useLocalization';
 
 declare const html2canvas: any;
 declare const jspdf: any;
@@ -32,6 +33,7 @@ const PalaceIcon: React.FC<{ palaceName: string }> = ({ palaceName }) => {
 };
 
 const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; onClick: () => void; }> = React.memo(({ palace, isMenh, isThan, onClick }) => {
+    const { t } = useLocalization();
     const borderClass = isMenh 
         ? 'border-yellow-400 border-2 shadow-[0_0_20px_rgba(250,204,21,0.5)]' 
         : isThan 
@@ -45,19 +47,21 @@ const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; o
         'Cung Tài Bạch': 'Tuất', 'Cung Tử Tức': 'Hợi', 'Cung Phu Thê': 'Tý', 'Cung Huynh Đệ': 'Sửu'
     };
 
+    const displayName = palace.name.replace('Cung ', '').replace('Palace of ', '');
+
     return (
         <button onClick={onClick} className={`w-full h-full relative bg-gray-900/50 rounded-lg p-2 sm:p-3 text-[10px] sm:text-xs border ${borderClass} flex flex-col transition-all duration-300 hover:bg-gray-900 hover:shadow-lg hover:-translate-y-1`}>
-            {isMenh && <span className="absolute top-1 right-1 text-[10px] sm:text-xs font-bold text-yellow-300 bg-black/50 px-1.5 py-0.5 rounded">MỆNH</span>}
-            {isThan && !isMenh && <span className="absolute top-1 right-1 text-[10px] sm:text-xs font-bold text-fuchsia-300 bg-black/50 px-1.5 py-0.5 rounded">THÂN</span>}
+            {isMenh && <span className="absolute top-1 right-1 text-[10px] sm:text-xs font-bold text-yellow-300 bg-black/50 px-1.5 py-0.5 rounded">{t('menh')}</span>}
+            {isThan && !isMenh && <span className="absolute top-1 right-1 text-[10px] sm:text-xs font-bold text-fuchsia-300 bg-black/50 px-1.5 py-0.5 rounded">{t('than')}</span>}
             
             <span className="absolute bottom-1 left-2 text-sm font-serif text-gray-600">{branchMap[palace.name]}</span>
             
             <h3 className={`font-bold text-center text-xs sm:text-sm mb-1 sm:mb-2 flex items-center justify-center gap-2 ${textClass}`}>
                 <PalaceIcon palaceName={palace.name} />
-                {palace.name.replace('Cung ', '')}
+                {displayName}
             </h3>
             <div className="text-center text-purple-300 font-semibold flex-grow min-h-[2.5rem] sm:min-h-[3rem] flex items-center justify-center break-words">{palace.stars.join(', ')}</div>
-            <div className="mt-auto text-center text-yellow-500 hover:text-yellow-400 text-xs font-semibold">Chi tiết</div>
+            <div className="mt-auto text-center text-yellow-500 hover:text-yellow-400 text-xs font-semibold">{t('details')}</div>
         </button>
     );
 });
@@ -112,6 +116,7 @@ const palaceToGridArea: Record<string, string> = {
 };
 
 const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonationModal }) => {
+    const { t } = useLocalization();
     const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
     const [viewingPalace, setViewingPalace] = useState<Palace | null>(null);
 
@@ -154,15 +159,21 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
             });
 
             pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-            pdf.save(`LaSoTuVi-${birthInfo.name.replace(/\s/g, '_')}.pdf`);
+            pdf.save(`Horoscope-${birthInfo.name.replace(/\s/g, '_')}.pdf`);
 
         } catch (error) {
             console.error("Failed to download PDF:", error);
-            alert("Đã xảy ra lỗi khi tạo file PDF. Vui lòng thử lại.");
+            alert(t('errorPdf'));
         } finally {
             setIsDownloadingPdf(false);
         }
     };
+
+    const birthDate = new Intl.DateTimeFormat(t('locale'), {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    }).format(new Date(birthInfo.year, birthInfo.month - 1, birthInfo.day));
 
     return (
         <div className="max-w-7xl mx-auto">
@@ -182,15 +193,15 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                     <div className="p-2 sm:p-4 bg-gray-900/70 rounded-lg border border-yellow-500/30 flex flex-col justify-center text-center shadow-[0_0_20px_rgba(250,204,21,0.2)]" style={{gridArea: 'center'}}>
                         <div className="flex-grow flex flex-col justify-center">
                             <h2 className="text-lg sm:text-2xl font-bold text-yellow-400 font-serif">{birthInfo.name}</h2>
-                            <p className="text-gray-300 text-xs sm:text-sm">{birthInfo.gender} - {`Ngày ${birthInfo.day}/${birthInfo.month}/${birthInfo.year}`}</p>
-                            <p className="text-gray-400 text-[10px] sm:text-xs">{birthInfo.hour === -1 ? 'Không rõ giờ' : `${birthInfo.hour} giờ`}</p>
+                            <p className="text-gray-300 text-xs sm:text-sm">{t(birthInfo.gender)} - {birthDate}</p>
+                            <p className="text-gray-400 text-[10px] sm:text-xs">{birthInfo.hour === -1 ? t('formHourUnknown') : t('formHourUnit', { hour: birthInfo.hour })}</p>
                          </div>
                          <div className="text-[10px] sm:text-xs space-y-1 text-gray-300 my-2 py-2 border-y border-gray-700/50">
-                           <p><strong className="text-gray-400">Mệnh:</strong> {data.tongQuan.menh}</p>
-                           <p><strong className="text-gray-400">Thân:</strong> {data.tongQuan.than}</p>
+                           <p><strong className="text-gray-400">{t('menh')}:</strong> {data.tongQuan.menh}</p>
+                           <p><strong className="text-gray-400">{t('than')}:</strong> {data.tongQuan.than}</p>
                         </div>
                         <details className="text-xs mt-auto">
-                           <summary className="text-center text-yellow-500 cursor-pointer hover:text-yellow-400 list-none font-semibold">Bảng An Sao</summary>
+                           <summary className="text-center text-yellow-500 cursor-pointer hover:text-yellow-400 list-none font-semibold">{t('starChart')}</summary>
                            <pre className="text-gray-400 whitespace-pre-wrap font-sans text-left mt-2 p-2 bg-gray-900/70 rounded max-h-24 overflow-y-auto text-[10px]">{data.anSao}</pre>
                         </details>
                     </div>
@@ -211,7 +222,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                 `}</style>
 
                 <div className="mt-4 p-6 bg-gray-900/50 rounded-lg border border-gray-700/80">
-                    <h3 className="text-xl font-bold text-yellow-400 font-serif mb-3">Tổng Kết Luận Giải</h3>
+                    <h3 className="text-xl font-bold text-yellow-400 font-serif mb-3">{t('summary')}</h3>
                     <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{data.tongKet}</p>
                 </div>
             </div>
@@ -221,7 +232,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
             <div className="mt-8 flex flex-wrap justify-center gap-4">
                 <Button onClick={onReset} variant="secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                    Trang Chủ
+                    {t('home')}
                 </Button>
                 <Button onClick={handleDownloadPdf} disabled={isDownloadingPdf} variant="secondary" className="bg-blue-600 hover:bg-blue-700 text-white">
                      {isDownloadingPdf ? (
@@ -229,11 +240,11 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                      ) : (
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                      )}
-                    {isDownloadingPdf ? 'Đang tạo...' : 'Tải PDF'}
+                    {isDownloadingPdf ? t('creating') : t('downloadPdf')}
                 </Button>
                 <Button onClick={onOpenDonationModal} variant="special">
                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                    Ủng hộ tác giả
+                    {t('donate')}
                 </Button>
             </div>
         </div>

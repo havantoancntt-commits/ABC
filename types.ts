@@ -1,6 +1,6 @@
 export interface BirthInfo {
   name: string;
-  gender: 'Nam' | 'Nữ';
+  gender: 'male' | 'female';
   year: number;
   month: number;
   day: number;

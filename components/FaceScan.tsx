@@ -1,8 +1,8 @@
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Card from './Card';
 import Button from './Button';
 import Spinner from './Spinner';
+import { useLocalization } from '../hooks/useLocalization';
 
 // Note: The FaceDetector API is experimental. We handle its absence gracefully.
 declare var FaceDetector: any;
@@ -18,10 +18,11 @@ interface Props {
 type OverlayStatus = 'idle' | 'detecting' | 'good_position' | 'capturing';
 
 const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, capturedImage }) => {
+  const { t } = useLocalization();
   const [error, setError] = useState<string | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isStartingCamera, setIsStartingCamera] = useState(false);
-  const [feedback, setFeedback] = useState('Căn chỉnh khuôn mặt vào trong vòng tròn.');
+  const [feedback, setFeedback] = useState(t('faceScanInitial'));
   const [overlayStatus, setOverlayStatus] = useState<OverlayStatus>('idle');
   const [isCapturing, setIsCapturing] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -61,8 +62,8 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
     }
     setIsCameraOn(false);
     setOverlayStatus('idle');
-    setFeedback('Căn chỉnh khuôn mặt vào trong vòng tròn.');
-  }, [stopDetectionLoop, cancelCountdown]);
+    setFeedback(t('faceScanInitial'));
+  }, [stopDetectionLoop, cancelCountdown, t]);
 
   const handleManualCapture = useCallback(() => {
     if (isCapturing || !videoRef.current || !canvasRef.current) return;
@@ -99,7 +100,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
     if (isCountingDownRef.current) return;
 
     isCountingDownRef.current = true;
-    setFeedback('Tuyệt vời! Giữ yên...');
+    setFeedback(t('faceScanHold'));
     setOverlayStatus('good_position');
     setCountdown(3);
 
@@ -115,14 +116,14 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         return prev - 1;
       });
     }, 1000);
-  }, [handleManualCapture]);
+  }, [handleManualCapture, t]);
 
   const runFaceDetection = useCallback(async () => {
     const video = videoRef.current;
     if (video && !video.paused && video.readyState >= 3 && detectorRef.current) {
         try {
             const faces = await detectorRef.current.detect(video);
-            let newFeedback = 'Không tìm thấy khuôn mặt. Vui lòng căn chỉnh lại.';
+            let newFeedback = t('faceScanNotFound');
             let isPositionGood = false;
 
             if (faces.length === 1) {
@@ -139,42 +140,38 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
 
                     let visibleVideoWidth = videoWidth;
                     
-                    // The video element uses 'object-cover', which means it might be cropped.
-                    // We need to calculate the actual visible area of the video to determine
-                    // if the face is centered in the user's view.
-                    if (videoRatio > containerRatio) { // Video is wider than its container (cropped left/right)
+                    if (videoRatio > containerRatio) {
                         const scale = containerHeight / videoHeight;
                         visibleVideoWidth = containerWidth / scale;
                     } 
-                    // If video is taller, vertical centering is symmetrical so we don't need to adjust Y calcs.
                     
                     const smallerDim = Math.min(visibleVideoWidth, videoHeight);
-                    const targetSize = smallerDim * 0.45; // Ideal face size relative to the visible area.
-                    const tolerance = 0.25; // How much deviation from the ideal size is acceptable.
+                    const targetSize = smallerDim * 0.45;
+                    const tolerance = 0.25;
 
                     const faceCenterX = face.x + face.width / 2;
                     const faceCenterY = face.y + face.height / 2;
                     
-                    const frameCenterX = videoWidth / 2; // Center of the full video frame
+                    const frameCenterX = videoWidth / 2;
                     const frameCenterY = videoHeight / 2;
                     
                     const distance = Math.sqrt(Math.pow(faceCenterX - frameCenterX, 2) + Math.pow(faceCenterY - frameCenterY, 2));
-                    const positionOffset = distance / smallerDim; // How far from the center the face is.
+                    const positionOffset = distance / smallerDim;
                     
                     const faceSize = (face.width + face.height) / 2;
                     
                     if (faceSize < targetSize * (1 - tolerance)) {
-                        newFeedback = 'Vui lòng tiến lại gần hơn một chút.';
+                        newFeedback = t('faceScanCloser');
                     } else if (faceSize > targetSize * (1 + tolerance)) {
-                        newFeedback = 'Vui lòng lùi ra xa hơn một chút.';
-                    } else if (positionOffset > 0.20) { // Check if face is reasonably centered.
-                        newFeedback = 'Căn khuôn mặt vào giữa khung hình.';
+                        newFeedback = t('faceScanFurther');
+                    } else if (positionOffset > 0.20) {
+                        newFeedback = t('faceScanCenter');
                     } else {
                         isPositionGood = true;
                     }
                 }
             } else if (faces.length > 1) {
-                newFeedback = 'Vui lòng chỉ để một người trong khung hình.';
+                newFeedback = t('faceScanOnePerson');
             }
 
             if (isPositionGood) {
@@ -185,7 +182,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
             } else {
                 if (isCountingDownRef.current) {
                     cancelCountdown();
-                    setFeedback('Đã hủy. ' + newFeedback);
+                    setFeedback(t('faceScanCancelled', { newFeedback }));
                 } else {
                    setFeedback(newFeedback);
                 }
@@ -200,7 +197,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
     if (streamRef.current) {
         animationFrameRef.current = requestAnimationFrame(runFaceDetection);
     }
-  }, [startCountdown, cancelCountdown, stopDetectionLoop]);
+  }, [startCountdown, cancelCountdown, stopDetectionLoop, t]);
   
   const startCamera = useCallback(async () => {
     if(isCameraOn || isStartingCamera) return;
@@ -220,31 +217,31 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
              if (isAutoDetectSupported) {
                 try {
                     detectorRef.current = new FaceDetector({ fastMode: true });
-                    stopDetectionLoop(); // Ensure no old loop is running
-                    animationFrameRef.current = requestAnimationFrame(runFaceDetection); // Start loop
+                    stopDetectionLoop();
+                    animationFrameRef.current = requestAnimationFrame(runFaceDetection);
                 } catch (e) {
                      console.error("FaceDetector init failed:", e);
-                     setFeedback('Tự động nhận diện không được hỗ trợ. Vui lòng tự căn chỉnh và chụp.');
+                     setFeedback(t('faceScanNotSupported'));
                 }
              } else {
-                setFeedback('Tự động nhận diện không được hỗ trợ. Vui lòng tự căn chỉnh và chụp.');
+                setFeedback(t('faceScanNotSupported'));
              }
         };
       }
       setIsCameraOn(true);
     } catch (err) {
       console.error("Camera error:", err);
-      let message = 'Đã xảy ra lỗi không xác định với camera.';
+      let message = t('errorCameraUnknown');
       if (err instanceof Error) {
-          if (err.name === 'NotAllowedError') message = 'Bạn đã từ chối quyền truy cập camera. Vui lòng cấp quyền trong cài đặt trình duyệt và tải lại trang.';
-          else if (err.name === 'NotFoundError') message = 'Không tìm thấy camera trên thiết bị của bạn.';
-          else message = 'Không thể khởi động camera. Thiết bị khác có thể đang sử dụng nó.';
+          if (err.name === 'NotAllowedError') message = t('errorCameraPermission');
+          else if (err.name === 'NotFoundError') message = t('errorCameraNotFound');
+          else message = t('errorCameraInUse');
       }
       setError(message);
     } finally {
       setIsStartingCamera(false);
     }
-  }, [stopCamera, isAutoDetectSupported, runFaceDetection, isCameraOn, isStartingCamera, stopDetectionLoop]);
+  }, [stopCamera, isAutoDetectSupported, runFaceDetection, isCameraOn, isStartingCamera, stopDetectionLoop, t]);
 
   useEffect(() => {
     return () => {
@@ -257,10 +254,10 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = () => { onCapture(reader.result as string); setError(null); };
-      reader.onerror = () => { setError('Không thể đọc file ảnh.'); };
+      reader.onerror = () => { setError(t('errorFileRead')); };
       reader.readAsDataURL(file);
     } else {
-      setError('Vui lòng chọn một file ảnh hợp lệ.');
+      setError(t('errorFileInvalid'));
     }
   };
   
@@ -281,8 +278,8 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
 
   return (
     <Card className="max-w-3xl mx-auto flex flex-col items-center">
-      <h2 className="text-3xl font-bold text-center mb-4 text-yellow-400 font-serif">Xem Nhân Tướng Qua Ảnh</h2>
-      <p className="text-center text-gray-400 mb-6 max-w-lg">Để có kết quả chính xác nhất, vui lòng sử dụng ảnh chân dung rõ nét, chính diện, đủ sáng và không bị che khuất.</p>
+      <h2 className="text-3xl font-bold text-center mb-4 text-yellow-400 font-serif">{t('faceScanTitle')}</h2>
+      <p className="text-center text-gray-400 mb-6 max-w-lg">{t('faceScanSubtitle')}</p>
       
       {error && (
         <div className="my-4 p-4 w-full bg-red-900/50 border border-red-600 rounded-lg text-center">
@@ -294,7 +291,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
         <canvas ref={canvasRef} className="hidden" />
         
-        {capturedImage && <img src={capturedImage} alt="Ảnh đã chụp" className="w-full h-full object-contain" />}
+        {capturedImage && <img src={capturedImage} alt={t('faceScanCapturedAlt')} className="w-full h-full object-contain" />}
 
         {!capturedImage && (
             <video ref={videoRef} autoPlay playsInline muted className={`w-full h-full object-cover transform -scale-x-100 ${isCameraOn ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`} />
@@ -305,7 +302,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
                 <div className="absolute inset-0 bg-black/20"></div>
                 <div className={`absolute inset-[10%] rounded-full border-4 ${overlayBorderColor} transition-all duration-300`}></div>
                 <div className="absolute bottom-4 left-4 right-4 p-3 bg-black/60 rounded-lg text-center text-white font-semibold text-sm">
-                    {countdown === null ? feedback : `Giữ yên...`}
+                    {countdown === null ? feedback : t('faceScanHold')}
                 </div>
                 {countdown !== null && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm">
@@ -319,20 +316,20 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         
         {isCapturing && <div className="absolute inset-0 bg-white animate-shutter-flash" />}
 
-        {isStartingCamera && <Spinner message="Đang khởi động camera..." />}
+        {isStartingCamera && <Spinner message={t('spinnerCamera')} />}
         
         {!isCameraOn && !capturedImage && !isStartingCamera && (
              <div className="text-center p-4 flex flex-col items-center justify-center h-full">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                <p className="font-semibold text-gray-300 mt-2">Bắt đầu bằng cách mở camera hoặc tải ảnh lên</p>
+                <p className="font-semibold text-gray-300 mt-2">{t('faceScanStart')}</p>
                 <div className="mt-6 flex flex-col sm:flex-row gap-4 w-full max-w-xs">
                     <Button onClick={startCamera} variant="primary" className="w-full">
                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                        Mở Camera
+                        {t('faceScanOpenCamera')}
                     </Button>
                      <Button onClick={triggerFileSelect} variant="secondary" className="w-full">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                      Tải Ảnh
+                      {t('faceScanUpload')}
                     </Button>
                 </div>
             </div>
@@ -344,26 +341,26 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
             <div className="grid grid-cols-2 gap-4">
                 <Button onClick={handleRetake} variant="secondary" className="w-full">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5m9-1-9 9-9-9" /></svg>
-                  Chụp/Chọn Lại
+                  {t('faceScanRetake')}
                 </Button>
                 <Button onClick={onAnalyze} variant="primary" className="text-lg w-full">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                  Luận Giải
+                  {t('faceScanAnalyze')}
                 </Button>
             </div>
         ) : isCameraOn ? (
             <div className="flex flex-col items-center gap-4">
                <Button onClick={handleManualCapture} variant="special" className="w-full text-lg animate-pulse-button" disabled={isCapturing || (isAutoDetectSupported && countdown !== null)}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    Chụp Ảnh Thủ Công
+                    {t('faceScanManualCapture')}
                 </Button>
                 <Button onClick={stopCamera} variant="secondary" className="w-full">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 5.25v13.5m-7.5-13.5v13.5" /></svg>
-                  Tắt Camera
+                  {t('faceScanStopCamera')}
                 </Button>
             </div>
         ) : (
-            <Button onClick={onBack} variant="secondary" className="w-full">Quay Lại</Button>
+            <Button onClick={onBack} variant="secondary" className="w-full">{t('back')}</Button>
         )}
       </div>
 

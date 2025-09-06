@@ -14,6 +14,7 @@ import FaceScan from './FaceScan';
 import PhysiognomyResult from './PhysiognomyResult';
 import Home from './Home';
 import { SUPPORT_INFO } from '../constants';
+import { useLocalization } from '../hooks/useLocalization';
 
 const createChartId = (info: BirthInfo): string => {
   const hourPart = info.hour === -1 ? 'unknown' : info.hour;
@@ -31,6 +32,7 @@ const App: React.FC = () => {
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
   const [chartToDelete, setChartToDelete] = useState<SavedChart | null>(null);
   const [visitCount, setVisitCount] = useState<number>(0);
+  const { language, t } = useLocalization();
 
   useEffect(() => {
     try {
@@ -43,12 +45,12 @@ const App: React.FC = () => {
                setAppState(AppState.SAVED_CHARTS);
             }
         } else {
-            console.warn("Dữ liệu lá số trong localStorage không hợp lệ, đang xóa...");
+            console.warn("Invalid chart data in localStorage, clearing...");
             localStorage.removeItem('astrologyCharts');
         }
       }
     } catch (e) {
-      console.error("Không thể tải lá số từ localStorage", e);
+      console.error("Could not load charts from localStorage", e);
       localStorage.removeItem('astrologyCharts');
     }
 
@@ -78,7 +80,7 @@ const App: React.FC = () => {
     setAppState(AppState.LOADING);
     setError(null);
     try {
-      const data = await generateAstrologyChart(info);
+      const data = await generateAstrologyChart(info, language);
       setChartData(data);
       
       const newChart: SavedChart = {
@@ -93,10 +95,10 @@ const App: React.FC = () => {
       setAppState(AppState.RESULT);
     } catch (err) {
       console.error(err);
-      setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định. Vui lòng thử lại.');
+      setError(err instanceof Error ? err.message : t('errorUnknown'));
       setAppState(AppState.ASTROLOGY_FORM);
     }
-  }, [savedCharts]);
+  }, [savedCharts, language, t]);
   
   const handleAnalyzeFace = useCallback(async () => {
     if (!capturedImage) return;
@@ -105,21 +107,21 @@ const App: React.FC = () => {
     setError(null);
     const base64Data = capturedImage.split(',')[1];
     if(!base64Data) {
-        setError('Dữ liệu ảnh không hợp lệ.');
+        setError(t('errorInvalidImageData'));
         setAppState(AppState.FACE_SCAN_CAPTURE);
         return;
     }
 
     try {
-      const data = await analyzePhysiognomy(base64Data);
+      const data = await analyzePhysiognomy(base64Data, language);
       setPhysiognomyData(data);
       setAppState(AppState.FACE_SCAN_RESULT);
     } catch (err) {
        console.error(err);
-       setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định. Vui lòng thử lại.');
+       setError(err instanceof Error ? err.message : t('errorUnknown'));
        setAppState(AppState.FACE_SCAN_CAPTURE);
     }
-  }, [capturedImage]);
+  }, [capturedImage, language, t]);
 
   const handleCaptureImage = useCallback((imageDataUrl: string) => {
     setCapturedImage(imageDataUrl);
@@ -208,7 +210,7 @@ const App: React.FC = () => {
       case AppState.ASTROLOGY_FORM:
         return <BirthInfoForm onSubmit={handleFormSubmit} />;
       case AppState.LOADING:
-        return <Spinner message="Hệ thống đang khởi tạo lá số tử vi cho bạn. Các vì sao đang dịch chuyển vào đúng vị trí... Quá trình này có thể mất vài phút, xin vui lòng chờ..." />;
+        return <Spinner message={t('spinnerAstrology')} />;
       case AppState.RESULT:
         return chartData && <AstrologyChart data={chartData} birthInfo={birthInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.FACE_SCAN_CAPTURE:
@@ -220,13 +222,13 @@ const App: React.FC = () => {
             capturedImage={capturedImage}
         />;
       case AppState.FACE_SCAN_LOADING:
-        return <Spinner message="AI đang phân tích các đường nét trên khuôn mặt bạn... Xin vui lòng giữ nguyên trang..." />;
+        return <Spinner message={t('spinnerPhysiognomy')} />;
       case AppState.FACE_SCAN_RESULT:
           return physiognomyData && capturedImage && <PhysiognomyResult analysisData={physiognomyData} imageData={capturedImage} onReset={handleResetFaceScan} onBackToHome={handleResetToHome} />;
       default:
         return null;
     }
-  }, [appState, handleStartAstrology, handleStartPhysiognomy, savedCharts, handleViewChart, handleDeleteChart, handleCreateNew, handleFormSubmit, chartData, birthInfo, handleResetToHome, handleAnalyzeFace, handleCaptureImage, handleRetakeCapture, capturedImage, physiognomyData, handleResetFaceScan]);
+  }, [appState, handleStartAstrology, handleStartPhysiognomy, savedCharts, handleViewChart, handleDeleteChart, handleCreateNew, handleFormSubmit, chartData, birthInfo, handleResetToHome, handleAnalyzeFace, handleCaptureImage, handleRetakeCapture, capturedImage, physiognomyData, handleResetFaceScan, t]);
 
   return (
     <div className="min-h-screen text-gray-200">
@@ -238,11 +240,11 @@ const App: React.FC = () => {
               <div className="flex items-start">
                 <svg className="w-6 h-6 mr-3 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 <div>
-                  <strong className="font-bold text-red-300">Đã xảy ra lỗi!</strong>
+                  <strong className="font-bold text-red-300">{t('errorTitle')}</strong>
                   <span className="block mt-1">{error}</span>
                 </div>
               </div>
-              <button onClick={() => setError(null)} className="p-1 rounded-full hover:bg-red-500/20 transition-colors ml-4" aria-label="Đóng thông báo lỗi">
+              <button onClick={() => setError(null)} className="p-1 rounded-full hover:bg-red-500/20 transition-colors ml-4" aria-label={t('errorCloseAriaLabel')}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
@@ -254,13 +256,13 @@ const App: React.FC = () => {
         <footer className="text-center py-8 text-gray-400 bg-black bg-opacity-50 mt-8 border-t border-gray-700/50">
           <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="text-left">
-              <h4 className="font-bold text-lg text-yellow-400 font-serif mb-2">Lá Số Tử Vi & Nhân Tướng Học</h4>
-              <p className="text-sm text-gray-500">&copy; {new Date().getFullYear()} - {SUPPORT_INFO.channelName}. | Lượt truy cập: {visitCount > 0 ? visitCount.toLocaleString('vi-VN') : '...'}</p>
-              <p className="text-xs text-gray-600 mt-2">Mọi thông tin trong ứng dụng chỉ mang tính chất tham khảo, chiêm nghiệm và định hướng. Vận mệnh nằm trong tay bạn.</p>
+              <h4 className="font-bold text-lg text-yellow-400 font-serif mb-2">{t('appName')}</h4>
+              <p className="text-sm text-gray-500">&copy; {new Date().getFullYear()} - {SUPPORT_INFO.channelName}. | {t('footerVisits')}: {visitCount > 0 ? visitCount.toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US') : '...'}</p>
+              <p className="text-xs text-gray-600 mt-2">{t('footerDisclaimer')}</p>
             </div>
             <div className="bg-gray-900/40 p-4 rounded-lg border border-gray-700/50 text-left md:text-right">
-              <h4 className="font-bold text-lg text-yellow-400 font-serif mb-2">Hỗ Trợ & Tư Vấn Chuyên Sâu</h4>
-              <p className="text-sm">Liên hệ qua Zalo để được luận giải chi tiết hơn:</p>
+              <h4 className="font-bold text-lg text-yellow-400 font-serif mb-2">{t('footerSupportTitle')}</h4>
+              <p className="text-sm">{t('footerSupportDesc')}</p>
               <a 
                 href={`https://zalo.me/${SUPPORT_INFO.zaloPhone}`}
                 target="_blank" 
@@ -281,8 +283,8 @@ const App: React.FC = () => {
           isOpen={!!chartToDelete}
           onClose={() => setChartToDelete(null)}
           onConfirm={confirmDeleteChart}
-          title="Xác nhận xóa"
-          message={`Bạn có chắc chắn muốn xóa lá số của ${chartToDelete?.birthInfo.name}? Hành động này không thể hoàn tác.`}
+          title={t('confirmDeleteTitle')}
+          message={t('confirmDeleteMessage', { name: chartToDelete?.birthInfo.name || '' })}
         />
       </div>
     </div>

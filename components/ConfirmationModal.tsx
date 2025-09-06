@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import Button from './Button';
+import { useLocalization } from '../hooks/useLocalization';
 
 interface Props {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const ConfirmationModal: React.FC<Props> = ({ isOpen, onClose, onConfirm, title, message }) => {
+  const { t } = useLocalization();
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -40,10 +42,10 @@ const ConfirmationModal: React.FC<Props> = ({ isOpen, onClose, onConfirm, title,
         <p className="text-center text-gray-300 mb-8">{message}</p>
         <div className="flex justify-center gap-4">
           <Button onClick={onClose} variant="secondary" className="w-full">
-            Hủy bỏ
+            {t('cancel')}
           </Button>
           <Button onClick={onConfirm} variant="danger" className="w-full">
-            Xác nhận
+            {t('confirm')}
           </Button>
         </div>
       </div>
