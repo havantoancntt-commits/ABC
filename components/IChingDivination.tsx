@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import type { IChingLine, CastResult, IChingInterpretation } from '../lib/types';
 import { useLocalization } from '../hooks/useLocalization';
-import { castHexagram } from '../lib/iching';
+import { getCastResultFromLines } from '../lib/iching';
 import { getIChingInterpretation } from '../lib/gemini';
 import Card from './Card';
 import Button from './Button';
@@ -30,14 +30,34 @@ const HexagramLine: React.FC<{ line: IChingLine }> = React.memo(({ line }) => {
 });
 
 const HexagramDisplay: React.FC<{ lines: IChingLine[] }> = ({ lines }) => (
-    <div className="w-20 mx-auto flex flex-col-reverse">
+    <div className="w-20 mx-auto flex flex-col-reverse h-32">
         {lines.map((line, index) => (
-            <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms`, opacity: 0 }}>
+            <div key={index} className="animate-fade-in" style={{ animationDelay: `0ms` }}>
                 <HexagramLine line={line} />
             </div>
         ))}
     </div>
 );
+
+const tossCoins = (): number => {
+    let sum = 0;
+    // A standard I Ching cast uses 3 coins. Heads = 3 (Yang), Tails = 2 (Yin).
+    for (let i = 0; i < 3; i++) {
+        sum += Math.floor(Math.random() * 2) + 2; 
+    }
+    // Sum can be 6 (Changing Yin), 7 (Static Yang), 8 (Static Yin), or 9 (Changing Yang).
+    return sum;
+};
+
+const getLineFromTossValue = (value: number): IChingLine => {
+    switch (value) {
+        case 6: return { value, isChanging: true, isYang: false };
+        case 7: return { value, isChanging: false, isYang: true };
+        case 8: return { value, isChanging: false, isYang: false };
+        case 9: return { value, isChanging: true, isYang: true };
+        default: throw new Error('Invalid coin toss value');
+    }
+};
 
 
 const IChingDivination: React.FC<Props> = ({ onOpenDonationModal }) => {
@@ -46,28 +66,49 @@ const IChingDivination: React.FC<Props> = ({ onOpenDonationModal }) => {
     const [castResult, setCastResult] = useState<CastResult | null>(null);
     const [interpretation, setInterpretation] = useState<IChingInterpretation | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isCasting, setIsCasting] = useState(false);
+    const [castLines, setCastLines] = useState<IChingLine[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const [castingStep, setCastingStep] = useState(0); // 0: idle, 1-6: casting, 7: done
     
-    const handleCast = async () => {
-        if (isLoading || castingStep > 0) return;
-        
-        setIsLoading(true);
+    useEffect(() => {
+        if (!isCasting) return;
+    
+        if (castLines.length >= 6) {
+            const fetchInterpretation = async () => {
+                const result = getCastResultFromLines(castLines);
+                setCastResult(result);
+                setIsLoading(true);
+                setIsCasting(false); 
+                try {
+                    const interpretationData = await getIChingInterpretation(result, question, language);
+                    setInterpretation(interpretationData);
+                } catch (err) {
+                    setError(err instanceof Error ? err.message : t('errorUnknown'));
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            // A short delay after the last line appears for dramatic effect
+            const finalTimer = setTimeout(fetchInterpretation, 500);
+            return () => clearTimeout(finalTimer);
+        }
+    
+        const timer = setTimeout(() => {
+            const line = getLineFromTossValue(tossCoins());
+            setCastLines(prev => [...prev, line]);
+        }, 400); // Delay between each line appearing
+    
+        return () => clearTimeout(timer);
+    }, [isCasting, castLines, question, language, t]);
+
+
+    const handleCast = () => {
+        if (isCasting || isLoading) return;
         setError(null);
         setInterpretation(null);
         setCastResult(null);
-        
-        const result = castHexagram();
-        setCastResult(result);
-        
-        try {
-            const interpretationData = await getIChingInterpretation(result, question, language);
-            setInterpretation(interpretationData);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : t('errorUnknown'));
-        } finally {
-            setIsLoading(false);
-        }
+        setCastLines([]);
+        setIsCasting(true);
     };
 
     const handleReset = () => {
@@ -75,8 +116,9 @@ const IChingDivination: React.FC<Props> = ({ onOpenDonationModal }) => {
         setCastResult(null);
         setInterpretation(null);
         setIsLoading(false);
+        setIsCasting(false);
+        setCastLines([]);
         setError(null);
-        setCastingStep(0);
     };
 
     const renderInitialState = () => (
@@ -93,6 +135,16 @@ const IChingDivination: React.FC<Props> = ({ onOpenDonationModal }) => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                 {t('iChingCastButton')}
             </Button>
+        </Card>
+    );
+
+    const renderCastingState = () => (
+        <Card className="text-center">
+             <h2 className="text-3xl font-bold font-serif mb-4 text-emerald-300">
+                {t('iChingCastingMessage', {count: Math.min(castLines.length + 1, 6)})}
+             </h2>
+             <p className="text-gray-400 mb-6">{t('spinnerIChing')}</p>
+             <HexagramDisplay lines={castLines} />
         </Card>
     );
     
@@ -112,7 +164,6 @@ const IChingDivination: React.FC<Props> = ({ onOpenDonationModal }) => {
                 <div className="md:col-span-2 flex justify-center gap-4">
                     <Card className="flex-1 text-center">
                         <h3 className="font-bold text-lg text-yellow-300 font-serif mb-3">{t('iChingPrimaryHexagram')}</h3>
-                        {/* FIX: Pass castResult.lines which is IChingLine[] instead of castResult.primaryHexagram which is an object. */}
                         {castResult && <HexagramDisplay lines={castResult.lines} />}
                         <p className="font-semibold mt-3 text-white">{castResult?.primaryHexagram.name[language]}</p>
                         <p className="text-sm text-gray-400">{castResult?.primaryHexagram.name.pinyin}</p>
@@ -120,7 +171,6 @@ const IChingDivination: React.FC<Props> = ({ onOpenDonationModal }) => {
                     {castResult?.secondaryHexagram && (
                          <Card className="flex-1 text-center bg-gray-900/40">
                              <h3 className="font-bold text-lg text-emerald-300 font-serif mb-3">{t('iChingSecondaryHexagram')}</h3>
-                             {/* FIX: Derive secondary lines by flipping the changing lines from the primary hexagram's lines. */}
                              <HexagramDisplay lines={castResult.lines.map(l => ({ ...l, isYang: l.isChanging ? !l.isYang : l.isYang, isChanging: false }))} />
                              <p className="font-semibold mt-3 text-white">{castResult.secondaryHexagram.name[language]}</p>
                              <p className="text-sm text-gray-400">{castResult.secondaryHexagram.name.pinyin}</p>
@@ -179,9 +229,15 @@ const IChingDivination: React.FC<Props> = ({ onOpenDonationModal }) => {
         </div>;
     }
 
+    const renderContent = () => {
+        if (interpretation) return renderResultState();
+        if (isCasting) return renderCastingState();
+        return renderInitialState();
+    }
+
     return (
         <div className="max-w-6xl mx-auto">
-            {interpretation ? renderResultState() : renderInitialState()}
+            {renderContent()}
         </div>
     );
 };
