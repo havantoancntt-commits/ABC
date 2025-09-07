@@ -9,8 +9,10 @@ interface Props {
 
 const Shop: React.FC<Props> = ({ onBack }) => {
   const { t } = useLocalization();
-  // Using the image provided by the user as the brand avatar for the shop page.
-  const SHOP_AVATAR_URL = 'https://i.imgur.com/Yg339sW.png';
+  // Using an optimized and proxied image for reliability and performance.
+  // This resolves potential display issues and significantly improves loading speed.
+  const SHOP_AVATAR_URL_WEBP = 'https://images.weserv.nl/?url=i.imgur.com/Yg339sW.png&w=800&h=800&q=85&output=webp';
+  const SHOP_AVATAR_URL_PNG = 'https://images.weserv.nl/?url=i.imgur.com/Yg339sW.png&w=800&h=800&q=85&output=png';
   const TIKTOK_SHOP_URL = 'https://vt.tiktok.com/ZSHtp8VBv97Sw-X46jh/';
 
   const iconClass = "w-8 h-8 text-amber-300";
@@ -49,15 +51,19 @@ const Shop: React.FC<Props> = ({ onBack }) => {
             {/* The main brand image */}
             <div className="relative group w-full max-w-md mb-12 animate-slide-in-up">
               <div className="absolute -inset-2 bg-gradient-to-br from-yellow-500 via-amber-600 to-yellow-700 rounded-3xl blur-2xl opacity-25 group-hover:opacity-40 transition duration-1000 animate-pulse-glow" style={{ animationDuration: '6s' }}></div>
-              <img 
-                src={SHOP_AVATAR_URL}
-                alt={t('shopPageTitle')} 
-                width="1024"
-                height="1024"
-                loading="eager"
-                decoding="async"
-                className="relative rounded-3xl w-full h-auto drop-shadow-[0_10px_30px_rgba(250,204,21,0.3)] transition-transform duration-500 group-hover:scale-105"
-              />
+              <picture>
+                <source srcSet={SHOP_AVATAR_URL_WEBP} type="image/webp" />
+                <source srcSet={SHOP_AVATAR_URL_PNG} type="image/png" />
+                <img 
+                  src={SHOP_AVATAR_URL_PNG}
+                  alt={t('shopPageTitle')} 
+                  width="800"
+                  height="800"
+                  loading="eager"
+                  decoding="async"
+                  className="relative rounded-3xl w-full h-auto drop-shadow-[0_10px_30px_rgba(250,204,21,0.3)] transition-transform duration-500 group-hover:scale-105"
+                />
+              </picture>
             </div>
 
             {/* Features Section */}
