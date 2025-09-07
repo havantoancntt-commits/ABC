@@ -90,6 +90,7 @@ export const translations = {
     palmReadingSection3: 'Đường Trí Đạo (Tư Duy)',
     palmReadingSection4: 'Đường Sinh Đạo (Năng Lượng)',
     palmReadingSection5: 'Lời Khuyên & Định Hướng',
+    palmScanInitial: 'Đặt lòng bàn tay của bạn vào trong khung hình.',
 
     // Birth Info Form
     formTitle: 'Kiến Tạo Bản Đồ Vận Mệnh',
@@ -112,7 +113,7 @@ export const translations = {
     spinnerCamera: 'Đang khởi động camera...',
     spinnerIChing: 'Đang luận giải quẻ Dịch... Vũ trụ đang gửi thông điệp đến bạn, xin vui lòng chờ trong giây lát.',
 
-    // Face Scan
+    // Face Scan & Camera
     faceScanTitle: 'Xem Nhân Tướng Qua Ảnh',
     faceScanSubtitle: 'Để có kết quả chính xác nhất, vui lòng sử dụng ảnh chân dung rõ nét, chính diện, đủ sáng và không bị che khuất.',
     faceScanCapturedAlt: 'Ảnh đã chụp',
@@ -124,14 +125,8 @@ export const translations = {
     faceScanManualCapture: 'Chụp Ảnh',
     faceScanStopCamera: 'Tắt Camera',
     faceScanInitial: 'Căn chỉnh khuôn mặt của bạn vào trong khung hình.',
-    faceScanHold: 'Tuyệt vời! Giữ yên...',
-    faceScanNotFound: 'Không tìm thấy khuôn mặt. Vui lòng căn chỉnh lại.',
-    faceScanCloser: 'Vui lòng tiến lại gần hơn một chút.',
-    faceScanFurther: 'Vui lòng lùi ra xa hơn một chút.',
-    faceScanCenter: 'Căn khuôn mặt vào giữa khung hình.',
-    faceScanOnePerson: 'Vui lòng chỉ để một người trong khung hình.',
-    faceScanCancelled: 'Đã hủy. {{newFeedback}}',
-    faceScanNotSupported: 'Tự động nhận diện không được hỗ trợ. Vui lòng tự căn chỉnh và chụp.',
+    cameraSwitch: 'Đổi Camera',
+    cameraSwitchAria: 'Chuyển đổi giữa camera trước và sau',
     errorCameraUnknown: 'Đã xảy ra lỗi không xác định với camera.',
     errorCameraPermission: 'Bạn đã từ chối quyền truy cập camera. Vui lòng cấp quyền trong cài đặt trình duyệt và tải lại trang.',
     errorCameraNotFound: 'Không tìm thấy camera trên thiết bị của bạn.',
@@ -330,6 +325,7 @@ export const translations = {
     palmReadingSection3: 'Head Line (Intellect)',
     palmReadingSection4: 'Life Line (Vitality)',
     palmReadingSection5: 'Advice & Guidance',
+    palmScanInitial: 'Place your palm within the frame.',
 
     // Birth Info Form
     formTitle: 'Create Your Destiny Map',
@@ -352,7 +348,7 @@ export const translations = {
     spinnerCamera: 'Starting camera...',
     spinnerIChing: 'Interpreting the hexagram... The universe is sending its message to you, please wait a moment.',
 
-    // Face Scan
+    // Face Scan & Camera
     faceScanTitle: 'Facial Physiognomy Analysis',
     faceScanSubtitle: 'For the most accurate results, please use a clear, front-facing portrait with good lighting and no obstructions.',
     faceScanCapturedAlt: 'Captured image',
@@ -364,14 +360,8 @@ export const translations = {
     faceScanManualCapture: 'Capture Photo',
     faceScanStopCamera: 'Stop Camera',
     faceScanInitial: 'Please position your face within the frame.',
-    faceScanHold: 'Great! Hold still...',
-    faceScanNotFound: 'Face not found. Please adjust your position.',
-    faceScanCloser: 'Please move a little closer.',
-    faceScanFurther: 'Please move a little further away.',
-    faceScanCenter: 'Center your face in the frame.',
-    faceScanOnePerson: 'Please ensure only one person is in the frame.',
-    faceScanCancelled: 'Cancelled. {{newFeedback}}',
-    faceScanNotSupported: 'Auto-detection is not supported. Please align manually and capture.',
+    cameraSwitch: 'Switch Camera',
+    cameraSwitchAria: 'Switch between front and rear cameras',
     errorCameraUnknown: 'An unknown camera error occurred.',
     errorCameraPermission: 'You have denied camera access. Please grant permission in your browser settings and reload the page.',
     errorCameraNotFound: 'No camera was found on your device.',

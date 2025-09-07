@@ -18,6 +18,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isStartingCamera, setIsStartingCamera] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -29,42 +30,58 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-    setIsCameraOn(false);
   }, []);
 
   useEffect(() => {
-    return () => stopCamera();
-  }, [stopCamera]);
-  
-  const startCamera = useCallback(async () => {
-    if(isCameraOn || isStartingCamera) return;
-    stopCamera();
-    setError(null);
-    setIsStartingCamera(true);
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play().catch(err => console.error("Video play failed:", err));
-      }
-      setIsCameraOn(true);
-    } catch (err) {
-      console.error("Camera error:", err);
-      let message = t('errorCameraUnknown');
-      if (err instanceof Error) {
-          if (err.name === 'NotAllowedError') message = t('errorCameraPermission');
-          else if (err.name === 'NotFoundError') message = t('errorCameraNotFound');
-          else message = t('errorCameraInUse');
-      }
-      setError(message);
-    } finally {
-      setIsStartingCamera(false);
+    if (!isCameraOn) {
+        stopCamera();
+        return;
     }
-  }, [isCameraOn, isStartingCamera, stopCamera, t]);
+
+    let didCancel = false;
+
+    const startStream = async () => {
+        stopCamera(); // Stop previous stream before starting a new one
+        setIsStartingCamera(true);
+        setError(null);
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } }
+            });
+            if (didCancel) {
+                stream.getTracks().forEach(track => track.stop());
+                return;
+            }
+            streamRef.current = stream;
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                await videoRef.current.play();
+            }
+        } catch (err) {
+            console.error("Camera error:", err);
+            let message = t('errorCameraUnknown');
+            if (err instanceof Error) {
+                if (err.name === 'NotAllowedError') message = t('errorCameraPermission');
+                else if (err.name === 'NotFoundError') message = t('errorCameraNotFound');
+                else message = t('errorCameraInUse');
+            }
+            setError(message);
+            setIsCameraOn(false); // Turn off camera state on error
+        } finally {
+            if (!didCancel) {
+                setIsStartingCamera(false);
+            }
+        }
+    };
+
+    startStream();
+
+    return () => {
+        didCancel = true;
+        stopCamera();
+    };
+  }, [isCameraOn, facingMode, stopCamera, t]);
   
   const handleManualCapture = useCallback(() => {
     if (isCapturing || !videoRef.current || !canvasRef.current) return;
@@ -78,24 +95,29 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         
-        context.translate(canvas.width, 0);
-        context.scale(-1, 1); // Flip horizontally
+        if (facingMode === 'user') {
+            context.translate(canvas.width, 0);
+            context.scale(-1, 1); // Flip horizontally for front camera
+        }
         
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         onCapture(canvas.toDataURL('image/jpeg'));
         
-        context.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+        if (facingMode === 'user') {
+            context.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+        }
     }
     
     setTimeout(() => {
-      stopCamera();
+      setIsCameraOn(false);
       setIsCapturing(false);
-    }, 500); 
-  }, [onCapture, stopCamera, isCapturing]);
+    }, 400); 
+  }, [onCapture, isCapturing, facingMode]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
+      setIsCameraOn(false);
       const reader = new FileReader();
       reader.onload = () => { onCapture(reader.result as string); setError(null); };
       reader.onerror = () => { setError(t('errorFileRead')); };
@@ -110,8 +132,14 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
       setError(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
   }, [onRetake]);
+
+  const handleSwitchCamera = () => {
+    if (isStartingCamera) return;
+    setFacingMode(prev => (prev === 'user' ? 'environment' : 'user'));
+  };
   
   const triggerFileSelect = () => fileInputRef.current?.click();
+  const handleOpenCamera = () => setIsCameraOn(true);
 
   return (
     <Card className="max-w-xl mx-auto flex flex-col items-center">
@@ -124,27 +152,26 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         </div>
       )}
       
-      <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden bg-gray-900/50 border-2 border-dashed border-gray-600 flex items-center justify-center text-gray-400 group">
+      <div className="relative w-full max-w-md aspect-[3/4] rounded-2xl overflow-hidden bg-gray-950/80 border-2 border-dashed border-gray-600 flex items-center justify-center text-gray-400 group">
         <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
         <canvas ref={canvasRef} className="hidden" />
         
         {capturedImage && <img src={capturedImage} alt={t('faceScanCapturedAlt')} className="w-full h-full object-contain" />}
 
         {!capturedImage && (
-            <video ref={videoRef} autoPlay playsInline muted className={`w-full h-full object-cover transform -scale-x-100 ${isCameraOn ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`} />
+            <video ref={videoRef} autoPlay playsInline muted className={`w-full h-full object-cover ${facingMode === 'user' ? '-scale-x-100' : ''} ${isCameraOn ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`} />
         )}
         
         {isCameraOn && !capturedImage && (
             <>
-                <div className="absolute inset-0 shadow-[0_0_100px_40px_rgba(0,0,0,0.7)_inset]" style={{ maskImage: 'radial-gradient(ellipse 50% 60% at center, transparent 0%, transparent 60%, black 100%)' }}></div>
-                <div className="absolute bottom-5 left-5 right-5 p-3 bg-black/60 rounded-lg text-center text-white font-semibold text-sm backdrop-blur-sm border border-white/10">
+                <div className="absolute inset-0" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.7)', maskImage: 'radial-gradient(ellipse 50% 60% at center, white 50%, transparent 100%)' }}></div>
+                <div className="absolute top-4 left-4 right-4 p-2 bg-black/60 rounded-lg text-center text-white font-semibold text-sm backdrop-blur-sm border border-white/10">
                     {t('faceScanInitial')}
                 </div>
             </>
         )}
         
         {isCapturing && <div className="absolute inset-0 bg-white animate-shutter-flash" />}
-
         {isStartingCamera && <Spinner message={t('spinnerCamera')} />}
         
         {!isCameraOn && !capturedImage && !isStartingCamera && (
@@ -152,7 +179,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 <p className="font-semibold text-gray-300 mt-2">{t('faceScanStart')}</p>
                 <div className="mt-6 flex flex-col sm:flex-row gap-4 w-full max-w-xs">
-                    <Button onClick={startCamera} variant="primary" className="w-full">
+                    <Button onClick={handleOpenCamera} variant="primary" className="w-full">
                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                         {t('faceScanOpenCamera')}
                     </Button>
@@ -161,6 +188,28 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
                       {t('faceScanUpload')}
                     </Button>
                 </div>
+            </div>
+        )}
+        
+        {isCameraOn && !capturedImage && !isStartingCamera && (
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent flex justify-center items-center gap-6">
+                <button 
+                    onClick={handleSwitchCamera}
+                    className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+                    aria-label={t('cameraSwitchAria')}
+                    title={t('cameraSwitch')}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5m9-1-9 9-9-9" /></svg>
+                </button>
+                <button
+                    onClick={handleManualCapture}
+                    disabled={isCapturing}
+                    className="w-20 h-20 rounded-full bg-white border-4 border-white/50 p-1 transition-transform hover:scale-105 active:scale-95"
+                    aria-label={t('faceScanManualCapture')}
+                >
+                    <div className="w-full h-full rounded-full bg-white/80"></div>
+                </button>
+                <div className="w-14 h-14"></div>
             </div>
         )}
       </div>
@@ -177,20 +226,9 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
                   {t('faceScanAnalyze')}
                 </Button>
             </div>
-        ) : isCameraOn ? (
-            <div className="flex flex-col items-center gap-4">
-               <Button onClick={handleManualCapture} variant="special" className="w-full text-lg animate-pulse-button" disabled={isCapturing}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    {t('faceScanManualCapture')}
-                </Button>
-                <Button onClick={stopCamera} variant="secondary" className="w-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 5.25v13.5m-7.5-13.5v13.5" /></svg>
-                  {t('faceScanStopCamera')}
-                </Button>
-            </div>
-        ) : (
+        ) : !isCameraOn ? (
             <Button onClick={onBack} variant="secondary" className="w-full">{t('back')}</Button>
-        )}
+        ) : null}
       </div>
     </Card>
   );
