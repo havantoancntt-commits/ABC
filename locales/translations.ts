@@ -269,7 +269,7 @@ export const translations = {
     passwordSubmit: 'Mở Khóa',
     passwordIncorrect: 'Mã truy cập không chính xác. Vui lòng thử lại.',
     passwordPaymentTitle: 'Nhận Mã Truy Cập',
-    passwordPaymentStep1: '1. Gieo duyên tùy tâm qua ZaloPay đến SĐT:',
+    passwordPaymentStep1: '1. Gieo duyên tùy tâm (Gợi ý: 50,000 VNĐ) qua ZaloPay đến SĐT:',
     passwordPaymentStep2: '2. Gửi ảnh chụp giao dịch qua Zalo để nhận mã truy cập ngay lập tức.',
 
   },
@@ -544,7 +544,7 @@ export const translations = {
     passwordSubmit: 'Unlock',
     passwordIncorrect: 'Incorrect access code. Please try again.',
     passwordPaymentTitle: 'Receive Access Code',
-    passwordPaymentStep1: '1. Make a discretionary contribution via ZaloPay to the phone number:',
+    passwordPaymentStep1: '1. Make a discretionary contribution (Suggested: 50,000 VND) via ZaloPay to the phone number:',
     passwordPaymentStep2: '2. Send a transaction screenshot via Zalo to receive the access code immediately.',
   }
 };
