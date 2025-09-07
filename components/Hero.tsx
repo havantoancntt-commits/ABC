@@ -9,7 +9,7 @@ interface Props {
 
 const Shop: React.FC<Props> = ({ onBack }) => {
   const { t } = useLocalization();
-  const PRODUCT_IMAGE_URL = 'https://i.imgur.com/r6nJN4D.jpeg';
+  const PRODUCT_IMAGE_URL = 'https://i.imgur.com/A6gO14c.png';
   const TIKTOK_SHOP_URL = 'https://vt.tiktok.com/ZSHtp8VBv97Sw-X46jh/';
 
   const iconClass = "w-6 h-6 text-amber-300";
