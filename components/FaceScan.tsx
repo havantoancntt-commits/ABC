@@ -199,7 +199,11 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
                     aria-label={t('cameraSwitchAria')}
                     title={t('cameraSwitch')}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5m9-1-9 9-9-9" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21H6a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v3m-6 9.5a4.5 4.5 0 110-9 4.5 4.5 0 010 9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 16.5L8 19l2.5 2.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m16.5 16.5 2.5 2.5-2.5 2.5" />
+                  </svg>
                 </button>
                 <button
                     onClick={handleManualCapture}

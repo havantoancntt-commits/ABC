@@ -165,8 +165,12 @@ const PalmScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         {isCameraOn && !capturedImage && (
             <>
                  <div className="absolute inset-0" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.7)' }}></div>
-                 <svg viewBox="0 0 100 130" className="absolute w-[70%] h-[70%] text-white/40 drop-shadow-lg" style={{ maskImage: 'radial-gradient(black 50%, transparent 100%)' }}>
-                    <path d="M74.6,122.2C55.4,132,1,123.7,1,88.7c0-26,14.5-30.1,19.3-52.3c3.4-15.6,1.4-28.9,13.2-35.2c11.8-6.3,28.8-1.5,35.8,11.2 c7,12.7,4.3,27.9,10.7,35.8C86.7,56,92,62.1,87,73.7C82,85.3,77.1,101.3,74.6,122.2z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="5 5"></path>
+                 <svg viewBox="0 0 24 24" className="absolute w-[65%] h-[65%] text-white/40 drop-shadow-lg" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 12.5V10a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2.5" />
+                    <path d="M14 12.5V8a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4.5" />
+                    <path d="M10 12.5V9a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v3.5" />
+                    <path d="M6 12.5V9a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2.5" />
+                    <path d="M21 12.5V10a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2.5" />
                  </svg>
                  <div className="absolute top-4 left-4 right-4 p-2 bg-black/60 rounded-lg text-center text-white font-semibold text-sm backdrop-blur-sm border border-white/10">
                     {t('palmScanInitial')}
@@ -202,7 +206,11 @@ const PalmScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
                     aria-label={t('cameraSwitchAria')}
                     title={t('cameraSwitch')}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5m9-1-9 9-9-9" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21H6a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v3m-6 9.5a4.5 4.5 0 110-9 4.5 4.5 0 010 9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 16.5L8 19l2.5 2.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m16.5 16.5 2.5 2.5-2.5 2.5" />
+                  </svg>
                 </button>
                 <button
                     onClick={handleManualCapture}
