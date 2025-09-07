@@ -226,15 +226,17 @@ export const translations = {
     iChingCastAgain: 'Gieo Quẻ Khác',
     
     // Shop Page
-    shopPageTitle: 'Cửa Hàng Vật Phẩm Phong Thủy',
-    shopProductName: 'Tượng Phật Vàng Kim - An Nhiên Tự Tại',
-    shopProductBrand: 'Tuyệt tác từ Huyền Phong Phật Đạo',
-    shopProductDesc: 'Mỗi đường nét được chế tác tinh xảo, mang theo năng lượng của sự bình an và trí tuệ. Đặt trong không gian sống hoặc làm việc không chỉ là một vật phẩm trang trí đẳng cấp mà còn là nguồn cảm hứng cho sự tĩnh tại trong tâm hồn, thu hút vượng khí và may mắn.',
-    shopFeature1: 'Chất Liệu Cao Cấp',
-    shopFeature2: 'Chế Tác Thủ Công',
-    shopFeature3: 'Năng Lượng Bình An',
-    shopCTA: 'Mua Ngay trên TikTok Shop',
-    
+    shopPageTitle: 'Huyền Phong Phật Đạo',
+    shopProductName: 'Ấn Phẩm Tâm Linh Độc Quyền',
+    shopProductBrand: 'Nghệ Thuật Chữa Lành Tâm Hồn',
+    shopProductDesc: 'Đây không chỉ là một vật phẩm, mà là một tác phẩm nghệ thuật số mang đậm dấu ấn tâm linh, được sáng tạo độc quyền bởi Huyền Phong Phật Đạo. Hình tượng Đức Phật tọa thiền trên đài sen, được thể hiện bằng tông màu vàng kim và kỹ thuật chạm nổi 3D tinh xảo, tỏa ra năng lượng của sự bình an, trí tuệ và giác ngộ. Sở hữu ấn phẩm này là một cách để mang sự tĩnh tại vào không gian sống của bạn và kết nối sâu sắc hơn với con đường tâm linh.',
+    shopFeature1: 'Thiết Kế Độc Quyền',
+    shopFeature2: 'Chất Lượng Vượt Trội',
+    shopFeature3: 'Năng Lượng Tĩnh Tại',
+    shopCTA: 'Khám Phá trên TikTok Shop',
+    shopPhilosophyTitle: 'Triết Lý Sáng Tạo',
+    shopPhilosophyText: 'Tại Huyền Phong Phật Đạo, chúng tôi tin rằng nghệ thuật là một con đường dẫn đến sự giác ngộ. Mỗi tác phẩm đều được tạo ra với sự thành tâm, kết hợp giữa mỹ học truyền thống và công nghệ hiện đại để lan tỏa những giá trị tâm linh tốt đẹp.',
+
     // Password Prompt
     passwordPromptTitle: 'Yêu Cầu Đăng Nhập',
     passwordPromptSubtitle: 'Chức năng này yêu cầu mật khẩu để truy cập.',
@@ -475,14 +477,16 @@ export const translations = {
     iChingCastAgain: 'Cast Another Hexagram',
     
     // Shop Page
-    shopPageTitle: 'Feng Shui Items Shop',
-    shopProductName: 'Golden Buddha Statue - Serene Tranquility',
-    shopProductBrand: 'A masterpiece from Huyền Phong Phật Đạo',
-    shopProductDesc: 'Every line is exquisitely crafted, carrying the energy of peace and wisdom. Placed in a living or working space, it is not only a high-class decorative item but also a source of inspiration for inner tranquility, attracting prosperity and good fortune.',
-    shopFeature1: 'Premium Materials',
-    shopFeature2: 'Handcrafted',
-    shopFeature3: 'Peaceful Energy',
-    shopCTA: 'Buy Now on TikTok Shop',
+    shopPageTitle: 'Huyền Phong Phật Đạo',
+    shopProductName: 'Exclusive Spiritual Artwork',
+    shopProductBrand: 'The Art of Healing the Soul',
+    shopProductDesc: 'This is not just an item, but a digital work of art imbued with a spiritual mark, exclusively created by Huyền Phong Phật Đạo. The image of the Buddha meditating on a lotus throne, rendered in golden tones with exquisite 3D embossed techniques, radiates an energy of peace, wisdom, and enlightenment. Owning this artwork is a way to bring tranquility into your living space and connect more deeply with your spiritual path.',
+    shopFeature1: 'Exclusive Design',
+    shopFeature2: 'Superior Quality',
+    shopFeature3: 'Tranquil Energy',
+    shopCTA: 'Explore on TikTok Shop',
+    shopPhilosophyTitle: 'Creator\'s Philosophy',
+    shopPhilosophyText: 'At Huyền Phong Phật Đạo, we believe that art is a path to enlightenment. Each work is created with sincerity, combining traditional aesthetics with modern technology to spread beautiful spiritual values.',
 
     // Password Prompt
     passwordPromptTitle: 'Login Required',
