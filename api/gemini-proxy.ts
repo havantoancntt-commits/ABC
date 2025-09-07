@@ -1,7 +1,7 @@
 // This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
 import { GoogleGenAI, Type, BlockedReason } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
-import type { BirthInfo, CastResult, NumerologyInfo, TarotCard } from '../lib/types';
+import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo } from '../lib/types';
 
 // By removing the `export const config = { runtime: 'edge' };`, this function
 // will default to the standard Node.js serverless runtime, which has a longer
@@ -155,6 +155,47 @@ const tarotReadingSchema = {
         summary: { type: Type.STRING, description: 'Tổng kết toàn bộ 3 lá bài, kết nối chúng thành một câu chuyện mạch lạc và đưa ra lời khuyên chiến lược cuối cùng cho người hỏi. (Khoảng 200-250 từ)' }
     },
     required: ['past', 'present', 'future', 'summary']
+};
+
+const flowAstrologySchema = {
+    type: Type.OBJECT,
+    properties: {
+        flow: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    period: { type: Type.STRING, enum: ['7days', '1month', '6months'] },
+                    energyType: { type: Type.STRING, enum: ['luck', 'love', 'challenge', 'helper'] },
+                    intensity: { type: Type.INTEGER, description: "1 to 10" },
+                    symbols: { type: Type.ARRAY, items: { type: Type.STRING, enum: ['goldfish', 'lotus', 'dragon', 'none'] } },
+                    interpretation: { type: Type.STRING, description: "Interpretation for the river segment."}
+                },
+                required: ['period', 'energyType', 'intensity', 'symbols', 'interpretation']
+            },
+            minItems: 3,
+            maxItems: 3
+        },
+        predictions: {
+            type: Type.OBJECT,
+            properties: {
+                '7days': { type: Type.STRING, description: "Detailed prediction for the next 7 days." },
+                '1month': { type: Type.STRING, description: "Detailed prediction for the next month." },
+                '6months': { type: Type.STRING, description: "Detailed prediction for the next six months." }
+            },
+            required: ['7days', '1month', '6months']
+        },
+        talisman: {
+            type: Type.OBJECT,
+            properties: {
+                name: { type: Type.STRING },
+                description: { type: Type.STRING },
+                svg: { type: Type.STRING, description: "A complete, well-formed SVG string for the talisman graphic." }
+            },
+            required: ['name', 'description', 'svg']
+        }
+    },
+    required: ['flow', 'predictions', 'talisman']
 };
 
 
@@ -329,6 +370,44 @@ const EN_TAROT_SYSTEM_INSTRUCTION = `**Persona:** You are a wise, insightful, an
 3.  **Insightful Summary:** The 'summary' must be a skillful synthesis of the three cards, weaving them into a coherent narrative. It should show the flow of energy from past to future and provide overarching, actionable advice.
 4.  **Psychological Language:** Use terms like "subconscious," "energy," "lessons," "opportunity for growth" instead of "fate," "omen."`;
 
+// FIX: Replaced backticks with single quotes for inline code examples to prevent parsing errors.
+const VI_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một nhà chiêm tinh năng lượng hiện đại, kết hợp Tử Vi, Thần số học và trực giác để tạo ra một "Bản đồ Dòng Chảy Năng Lượng" độc đáo. Giọng văn của bạn truyền cảm hứng, tích cực và mang tính định hướng.
+
+**Nhiệm vụ:** Phân tích thông tin của người dùng và con số trực giác của họ để tạo ra một bản đồ năng lượng và luận giải chi tiết theo JSON schema.
+
+**Yêu cầu cốt lõi:**
+1.  **Phân tích tổng hợp:** Dựa vào ngày sinh để xác định năng lượng chiêm tinh cơ bản. Dựa vào "con số trực giác" để nắm bắt trạng thái năng lượng hiện tại của người dùng. Kết hợp cả hai để đưa ra dự báo.
+2.  **Dòng chảy năng lượng (flow):**
+    *   Tạo 3 phân đoạn: 7 ngày, 1 tháng, 6 tháng.
+    *   Mỗi đoạn phải có một 'energyType' chính: 'luck' (tài lộc, may mắn), 'love' (tình cảm, hạnh phúc), 'challenge' (thử thách để phát triển), 'helper' (quý nhân, sự giúp đỡ).
+    *   'intensity' (1-10) thể hiện mức độ mạnh mẽ của năng lượng đó.
+    *   'symbols': Chọn các biểu tượng phù hợp: 'goldfish' (tài lộc), 'lotus' (bình an, tình cảm), 'dragon' (bước ngoặt lớn, cơ hội). Có thể không có biểu tượng ('none').
+    *   'interpretation': Viết một đoạn luận giải ngắn (50-70 từ) cho mỗi phân đoạn, giải thích ý nghĩa của dòng chảy.
+3.  **Luận giải chi tiết (predictions):** Viết các đoạn văn sâu sắc (150-200 từ) cho mỗi mốc thời gian, giải thích cụ thể các sự kiện, cơ hội và thách thức.
+4.  **Lá bùa Năng lượng (talisman):**
+    *   Thiết kế một lá bùa độc đáo dưới dạng SVG. SVG phải hoàn chỉnh, có thể hiển thị.
+    *   Sử dụng các hình dạng hình học, biểu tượng chiêm tinh, và màu sắc hài hòa. Ví dụ: một hình tròn với các đường nét bên trong.
+    *   Đặt tên và mô tả ý nghĩa cho lá bùa.`;
+
+// FIX: Replaced backticks with single quotes for inline code examples to prevent parsing errors.
+const EN_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION = `**Persona:** You are a modern energy astrologer, combining Eastern Astrology, Numerology, and intuition to create a unique "Energy Flow Map." Your tone is inspiring, positive, and guiding.
+
+**Task:** Analyze the user's information and their intuitive number to generate an energy map and detailed interpretation according to the JSON schema.
+
+**Core Requirements:**
+1.  **Synthesized Analysis:** Use the birth date to determine the basic astrological energy. Use the "intuitive number" to capture the user's current energy state. Combine both for the forecast.
+2.  **Energy Flow (flow):**
+    *   Create 3 segments: 7 days, 1 month, 6 months.
+    *   Each segment must have one main 'energyType': 'luck' (finance, fortune), 'love' (relationships, happiness), 'challenge' (trials for growth), 'helper' (supportive people, aid).
+    *   'intensity' (1-10) reflects the strength of that energy.
+    *   'symbols': Choose appropriate symbols: 'goldfish' (wealth), 'lotus' (peace, love), 'dragon' (major turning point, opportunity). 'none' is also an option.
+    *   'interpretation': Write a short interpretation (50-70 words) for each segment explaining the flow.
+3.  **Detailed Predictions (predictions):** Write insightful paragraphs (150-200 words) for each time period, explaining specific events, opportunities, and challenges.
+4.  **Energy Talisman (talisman):**
+    *   Design a unique talisman as an SVG. The SVG must be complete and renderable.
+    *   Use geometric shapes, astrological symbols, and harmonious colors. Example: a circle with inner patterns.
+    *   Give the talisman a name and describe its meaning.`;
+
 // --- Main Handler ---
 // Corrected signature for Vercel's Node.js runtime
 export default async function handler(req: any, res: any) {
@@ -474,6 +553,24 @@ export default async function handler(req: any, res: any) {
                 responseMimeType: "application/json",
                 responseSchema: tarotReadingSchema,
                 temperature: 0.8,
+            },
+        });
+    } else if (operation === 'generateFlowAstrology') {
+        const { info, language }: { info: FlowAstrologyInfo, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION : VI_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION;
+
+        const userPrompt = language === 'en'
+            ? `Generate a Flow Astrology chart for:\n- Name: ${info.name}\n- Date of Birth: ${info.day}/${info.month}/${info.year}\n- Hour: ${info.hour}\n- Intuitive Number: ${info.intuitiveNumber}`
+            : `Tạo biểu đồ Tử Vi Dòng Chảy Năng Lượng cho:\n- Tên: ${info.name}\n- Ngày sinh: ${info.day}/${info.month}/${info.year}\n- Giờ sinh: ${info.hour}\n- Số Trực Giác: ${info.intuitiveNumber}`;
+
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: flowAstrologySchema,
+                temperature: 0.9,
             },
         });
     } else {

@@ -12,6 +12,7 @@ interface Props {
     onStartNumerology: () => void;
     onStartPalmReading: () => void;
     onStartTarot: () => void;
+    onStartFlowAstrology: () => void;
 }
 
 const FeatureCard: React.FC<{
@@ -20,7 +21,7 @@ const FeatureCard: React.FC<{
     buttonText: string;
     icon: React.ReactNode;
     onClick: () => void;
-    buttonVariant: 'primary' | 'special' | 'secondary' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot';
+    buttonVariant: 'primary' | 'special' | 'secondary' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow';
 }> = ({ title, description, buttonText, icon, onClick, buttonVariant }) => (
     <div className="group relative h-full">
         <div className={`absolute -inset-0.5 bg-gradient-to-r ${
@@ -31,6 +32,7 @@ const FeatureCard: React.FC<{
             buttonVariant === 'numerology' ? 'from-cyan-600 to-blue-600' :
             buttonVariant === 'palm' ? 'from-rose-600 to-pink-600' :
             buttonVariant === 'tarot' ? 'from-purple-600 to-pink-600' :
+            buttonVariant === 'flow' ? 'from-sky-500 to-fuchsia-600' :
             'from-cyan-600 to-blue-600'
         } rounded-2xl blur opacity-0 group-hover:opacity-60 transition duration-500`}></div>
         <Card className="relative flex flex-col text-center items-center h-full transition-all duration-300 group-hover:-translate-y-1">
@@ -47,13 +49,18 @@ const FeatureCard: React.FC<{
 );
 
 
-const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZodiacFinder, onStartIChing, onStartShop, onStartNumerology, onStartPalmReading, onStartTarot }) => {
+const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZodiacFinder, onStartIChing, onStartShop, onStartNumerology, onStartPalmReading, onStartTarot, onStartFlowAstrology }) => {
     const { t } = useLocalization();
     const features = [
         {
             title: t('astrologyTitle'), description: t('astrologyDesc'), buttonText: t('astrologyButton'),
             onClick: onStartAstrology, buttonVariant: 'primary' as const,
             icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-12v4m-2-2h4m5 4v4m-2-2h4M5 11h14M5 11a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 01-2 2M5 11v2a2 2 0 002 2h10a2 2 0 002-2v-2" /></svg>
+        },
+        {
+            title: t('flowAstrologyTitle'), description: t('flowAstrologyDesc'), buttonText: t('flowAstrologyButton'),
+            onClick: onStartFlowAstrology, buttonVariant: 'flow' as const,
+            icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /><path d="M4 14a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3" opacity="0.4"/><path d="M20 10a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-3" opacity="0.4"/></svg>
         },
         {
             title: t('physiognomyTitle'), description: t('physiognomyDesc'), buttonText: t('physiognomyButton'),
@@ -102,7 +109,7 @@ const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZo
                     {t('homeSubtitle')}
                 </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-10">
                 {features.map((feature, index) => (
                     <div key={feature.title} className="animate-fade-in" style={{ animationDelay: `${0.6 + index * 0.1}s` }}>
                         <FeatureCard {...feature} />

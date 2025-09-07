@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -101,5 +101,18 @@ export const getTarotReading = async (cards: TarotCard[], question: string, lang
             throw error;
         }
         throw new Error("Could not get Tarot reading due to a connection error or server issue. Please try again.");
+    }
+};
+
+export const generateFlowAstrology = async (info: FlowAstrologyInfo, language: string): Promise<FlowAstrologyData> => {
+    try {
+        const data = await callProxy('generateFlowAstrology', { info, language });
+        return data as FlowAstrologyData;
+    } catch (error) {
+        console.error("Error generating flow astrology chart:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Could not generate flow astrology chart due to a connection error or server issue. Please try again.");
     }
 };

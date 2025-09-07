@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData } from '../lib/types';
+import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData } from '../lib/types';
 import { AppState } from '../lib/types';
-import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm } from '../lib/gemini';
+import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology } from '../lib/gemini';
 import Header from './Header';
 import BirthInfoForm from './BirthInfoForm';
 import DonationModal from './PaymentModal';
@@ -21,6 +21,8 @@ import NumerologyChart from './NumerologyChart';
 import PalmScan from './PalmScan';
 import PalmReadingResult from './PalmReadingResult';
 import TarotReading from './TarotReading';
+import FlowAstrologyForm from './FlowAstrologyForm';
+import FlowAstrologyResult from './FlowAstrologyResult';
 import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
 import Card from './Card';
@@ -157,6 +159,8 @@ const App: React.FC = () => {
   const [numerologyData, setNumerologyData] = useState<NumerologyData | null>(null);
   const [palmReadingData, setPalmReadingData] = useState<PalmReadingData | null>(null);
   const [tarotReadingData, setTarotReadingData] = useState<TarotReadingData | null>(null);
+  const [flowAstrologyInfo, setFlowAstrologyInfo] = useState<FlowAstrologyInfo | null>(null);
+  const [flowAstrologyData, setFlowAstrologyData] = useState<FlowAstrologyData | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedPalmImage, setCapturedPalmImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -218,6 +222,8 @@ const App: React.FC = () => {
     setPalmReadingData(null);
     setCapturedPalmImage(null);
     setTarotReadingData(null);
+    setFlowAstrologyInfo(null);
+    setFlowAstrologyData(null);
     setError(null);
   }, []);
 
@@ -307,6 +313,21 @@ const App: React.FC = () => {
     }
   }, [language, t]);
 
+  const handleGenerateFlowAstrology = useCallback(async (info: FlowAstrologyInfo) => {
+    setFlowAstrologyInfo(info);
+    setAppState(AppState.FLOW_ASTROLOGY_LOADING);
+    setError(null);
+    try {
+        const data = await generateFlowAstrology(info, language);
+        setFlowAstrologyData(data);
+        setAppState(AppState.FLOW_ASTROLOGY_RESULT);
+    } catch (err) {
+        console.error(err);
+        setError(err instanceof Error ? err.message : t('errorUnknown'));
+        setAppState(AppState.FLOW_ASTROLOGY_FORM);
+    }
+  }, [language, t]);
+
   const handleCaptureImage = useCallback((imageDataUrl: string) => {
     setCapturedImage(imageDataUrl);
   }, []);
@@ -364,6 +385,10 @@ const App: React.FC = () => {
   const handleStartNumerology = useCallback(() => {
       setError(null);
       setAppState(AppState.NUMEROLOGY_FORM);
+  }, []);
+  const handleStartFlowAstrology = useCallback(() => {
+    setError(null);
+    setAppState(AppState.FLOW_ASTROLOGY_FORM);
   }, []);
   const handleStartZodiacFinder = useCallback(() => {
       setError(null);
@@ -442,7 +467,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} />;
       case AppState.SAVED_CHARTS:
         return <SavedCharts 
           charts={savedCharts}
@@ -508,6 +533,12 @@ const App: React.FC = () => {
           return <Spinner message={t('spinnerNumerology')} />;
       case AppState.NUMEROLOGY_RESULT:
           return numerologyData && <NumerologyChart data={numerologyData} info={numerologyInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.FLOW_ASTROLOGY_FORM:
+          return <FlowAstrologyForm onSubmit={handleGenerateFlowAstrology} />;
+      case AppState.FLOW_ASTROLOGY_LOADING:
+          return <Spinner message={t('spinnerFlowAstrology')} />;
+      case AppState.FLOW_ASTROLOGY_RESULT:
+          return flowAstrologyData && <FlowAstrologyResult data={flowAstrologyData} info={flowAstrologyInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       default:
         return null;
     }

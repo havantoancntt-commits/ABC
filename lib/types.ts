@@ -147,6 +147,34 @@ export interface TarotReadingData {
     summary: string;
 }
 
+export interface FlowAstrologyInfo extends BirthInfo {
+  intuitiveNumber: number;
+}
+
+export interface FlowSegment {
+    period: '7days' | '1month' | '6months';
+    energyType: 'luck' | 'love' | 'challenge' | 'helper';
+    intensity: number; // 1 to 10
+    symbols: ('goldfish' | 'lotus' | 'dragon' | 'none')[];
+    interpretation: string;
+}
+
+export interface TalismanData {
+    name: string;
+    description: string;
+    svg: string;
+}
+
+export interface FlowAstrologyData {
+    flow: FlowSegment[];
+    predictions: {
+        '7days': string;
+        '1month': string;
+        '6months': string;
+    };
+    talisman: TalismanData;
+}
+
 
 export enum AppState {
   HOME,
@@ -168,4 +196,7 @@ export enum AppState {
   PALM_SCAN_LOADING,
   PALM_SCAN_RESULT,
   TAROT_READING,
+  FLOW_ASTROLOGY_FORM,
+  FLOW_ASTROLOGY_LOADING,
+  FLOW_ASTROLOGY_RESULT,
 }
