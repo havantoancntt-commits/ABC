@@ -57,8 +57,8 @@ const PalaceCard: React.FC<{ palace: Palace; isMenh: boolean; isThan: boolean; o
                 <PalaceIcon palaceName={palace.name} />
                 {displayName}
             </h3>
-            <div className="text-center text-purple-300 font-semibold flex-grow min-h-[2.5rem] sm:min-h-[3rem] flex items-center justify-center break-words">{palace.stars.join(', ')}</div>
-            <div className="mt-auto text-center text-yellow-500 hover:text-yellow-400 text-xs font-semibold">{t('details')}</div>
+            <div className="text-center text-gray-300 flex-grow min-h-[2.5rem] sm:min-h-[3rem] flex items-center justify-center break-words">{palace.stars.join(', ')}</div>
+            <div className="mt-auto text-center text-yellow-500/80 hover:text-yellow-400 text-[10px] sm:text-xs font-semibold uppercase">{t('details')}</div>
         </button>
     );
 });
@@ -199,7 +199,10 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
 
             {viewingPalace && <PalaceDetailModal palace={viewingPalace} onClose={() => setViewingPalace(null)} />}
 
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <div className="mt-8 text-center text-amber-100/80 max-w-3xl mx-auto text-sm">
+                <p>{t('resultSupportMessage')}</p>
+            </div>
+            <div className="mt-6 flex flex-wrap justify-center gap-4">
                 <Button onClick={onReset} variant="secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
                     {t('home')}
@@ -212,7 +215,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                      )}
                     {isDownloadingPdf ? t('creating') : t('downloadPdf')}
                 </Button>
-                <Button onClick={onOpenDonationModal} variant="special">
+                <Button onClick={onOpenDonationModal} variant="primary">
                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                     {t('donate')}
                 </Button>

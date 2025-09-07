@@ -18,7 +18,7 @@ export const translations = {
     details: 'Chi tiết',
     creating: 'Đang tạo...',
     downloadPdf: 'Tải PDF',
-    donate: 'Ủng hộ Tác giả',
+    donate: 'Gieo Duyên',
     day: 'Ngày',
     month: 'Tháng',
     year: 'Năm',
@@ -28,6 +28,7 @@ export const translations = {
     summary: 'Tổng Kết Luận Giải',
     errorPdf: 'Đã xảy ra lỗi khi tạo file PDF. Vui lòng thử lại.',
     locale: 'vi-VN',
+    resultSupportMessage: 'Hy vọng bản luận giải này mang lại cho bạn những góc nhìn giá trị. Sự ủng hộ của bạn là động lực để chúng tôi tiếp tục phát triển và duy trì ứng dụng miễn phí.',
 
     // Home
     homeTitle: 'Khám Phá Huyền Học Cổ Đại',
@@ -170,15 +171,15 @@ export const translations = {
     confirmDeleteMessage: 'Bạn có chắc chắn muốn xóa lá số của {{name}}? Hành động này không thể hoàn tác.',
     
     // Donation
-    donationTitle: 'Tùy Hỷ Công Đức',
-    donationSubtitle: 'Sự ủng hộ của bạn, dù lớn hay nhỏ, đều là nguồn động viên quý báu để chúng tôi tiếp tục duy trì và phát triển ứng dụng.',
-    donationMessage: 'Mỗi lá số là kết tinh của tâm huyết và tri thức. Sự ủng hộ của quý vị qua chuyển khoản ngân hàng hoặc PayPal là động lực vô giá để chúng tôi duy trì và lan tỏa giá trị của Tử Vi Đẩu Số đến cộng đồng.',
+    donationTitle: 'Gieo Duyên Lành',
+    donationSubtitle: 'Sự ủng hộ của bạn là nguồn năng lượng quý giá để chúng tôi duy trì và phát triển ứng dụng.',
+    donationMessage: 'Mỗi luận giải bạn nhận được là kết quả của quá trình nghiên cứu và ứng dụng AI phức tạp. Sự ủng hộ tùy tâm của bạn là nguồn năng lượng trực tiếp giúp chúng tôi duy trì máy chủ, nâng cấp thuật toán và tiếp tục sứ mệnh lan tỏa tri thức huyền học đến cộng đồng. Xin trân trọng từng duyên lành!',
     donationBank: 'Ngân hàng',
     donationAccountNo: 'Số TK',
     donationAccountName: 'Chủ TK',
     donationContent: 'Nội dung',
     donationOr: 'Hoặc',
-    donationPayPal: 'Ủng hộ qua PayPal',
+    donationPayPal: 'Gieo duyên qua PayPal',
     donationZaloPayMessage: 'Chuyển khoản qua SĐT',
     copy: 'CHÉP',
     copied: 'Đã chép!',
@@ -186,10 +187,10 @@ export const translations = {
 
     // Footer
     footerVisits: 'Lượt truy cập',
-    footerDisclaimer: 'Mọi thông tin trong ứng dụng chỉ mang tính chất tham khảo, chiêm nghiệm và định hướng. Vận mệnh nằm trong tay bạn.',
+    footerDisclaimer: 'Mọi thông tin trong ứng dụng chỉ mang tính chất tham khảo và chiêm nghiệm. Vận mệnh nằm trong tay bạn.',
     footerAIDisclaimer: 'Nội dung được tạo bởi Trí Tuệ Nhân Tạo và có thể chứa thông tin không chính xác.',
-    footerSupportTitle: 'Hỗ Trợ & Tư Vấn Chuyên Sâu',
-    footerSupportDesc: 'Để được luận giải chi tiết hơn hoặc theo dõi các kênh của chúng tôi:',
+    footerSupportTitle: 'Hỗ Trợ & Kết Nối',
+    footerSupportDesc: 'Để được tư vấn chuyên sâu hoặc theo dõi các kênh của chúng tôi:',
     followTikTok: 'Theo dõi trên TikTok',
     zaloTooltip: 'Chat qua Zalo',
 
@@ -239,15 +240,15 @@ export const translations = {
     shopPhilosophyText: 'Tại Huyền Phong Phật Đạo, chúng tôi tin rằng nghệ thuật là một con đường dẫn đến sự giác ngộ. Mỗi tác phẩm đều được tạo ra với sự thành tâm, kết hợp giữa mỹ học truyền thống và công nghệ hiện đại để lan tỏa những giá trị tâm linh tốt đẹp.',
 
     // Password Prompt
-    passwordPromptTitle: 'Yêu Cầu Đăng Nhập',
-    passwordPromptSubtitle: 'Chức năng này yêu cầu mật khẩu để truy cập.',
-    passwordLabel: 'Mật khẩu',
-    passwordPlaceholder: 'Nhập mật khẩu...',
-    passwordSubmit: 'Đăng Nhập',
-    passwordIncorrect: 'Mật khẩu không chính xác. Vui lòng thử lại.',
-    passwordPaymentTitle: 'Cách Nhận Mật Khẩu',
-    passwordPaymentStep1: '1. Thanh toán tuỳ tâm qua ZaloPay đến SĐT:',
-    passwordPaymentStep2: '2. Gửi ảnh chụp giao dịch qua Zalo để nhận mật khẩu ngay lập tức.',
+    passwordPromptTitle: 'Truy Cập Chuyên Sâu',
+    passwordPromptSubtitle: 'Để mở khóa toàn bộ luận giải chi tiết của Tử Vi Đẩu Số, một trong những công cụ mạnh mẽ nhất, xin quý vị gieo duyên để nhận mã truy cập.',
+    passwordLabel: 'Mã truy cập',
+    passwordPlaceholder: 'Nhập mã truy cập...',
+    passwordSubmit: 'Mở Khóa',
+    passwordIncorrect: 'Mã truy cập không chính xác. Vui lòng thử lại.',
+    passwordPaymentTitle: 'Nhận Mã Truy Cập',
+    passwordPaymentStep1: '1. Gieo duyên tùy tâm qua ZaloPay đến SĐT:',
+    passwordPaymentStep2: '2. Gửi ảnh chụp giao dịch qua Zalo để nhận mã truy cập ngay lập tức.',
 
   },
   en: {
@@ -269,7 +270,7 @@ export const translations = {
     details: 'Details',
     creating: 'Creating...',
     downloadPdf: 'Download PDF',
-    donate: 'Support Author',
+    donate: 'Contribute',
     day: 'Day',
     month: 'Month',
     year: 'Year',
@@ -279,6 +280,7 @@ export const translations = {
     summary: 'Summary & Analysis',
     errorPdf: 'Failed to create PDF file. Please try again.',
     locale: 'en-US',
+    resultSupportMessage: 'We hope this analysis provides you with valuable insights. Your support is the motivation that allows us to continue developing and maintaining this application for free.',
 
     // Home
     homeTitle: 'Explore Ancient Mysticism',
@@ -422,15 +424,15 @@ export const translations = {
     confirmDeleteMessage: 'Are you sure you want to delete the horoscope for {{name}}? This action cannot be undone.',
     
     // Donation
-    donationTitle: 'Support the Project',
-    donationSubtitle: 'Your support, big or small, is a valuable source of motivation for us to continue maintaining and developing this application.',
-    donationMessage: 'Each analysis is a product of dedication and knowledge. Your support, via bank transfer or PayPal, is invaluable in helping us maintain and spread the value of these ancient arts to the global community.',
+    donationTitle: 'Support the Mission',
+    donationSubtitle: 'Your support is the energy that allows us to maintain and grow this application.',
+    donationMessage: 'Each analysis you receive is the result of deep research and complex AI computation. Your discretionary support directly helps us maintain our servers, upgrade our algorithms, and continue our mission of sharing esoteric knowledge with the community. We are grateful for every contribution!',
     donationBank: 'Bank',
     donationAccountNo: 'Account No.',
     donationAccountName: 'Account Name',
     donationContent: 'Content',
     donationOr: 'Or',
-    donationPayPal: 'Donate with PayPal',
+    donationPayPal: 'Support with PayPal',
     donationZaloPayMessage: 'Transfer via Phone',
     copy: 'COPY',
     copied: 'Copied!',
@@ -438,10 +440,10 @@ export const translations = {
     
     // Footer
     footerVisits: 'Visits',
-    footerDisclaimer: 'All information in this application is for reference, contemplation, and guidance purposes only. Your destiny is in your hands.',
+    footerDisclaimer: 'All information in this application is for reference and contemplation purposes only. Your destiny is in your hands.',
     footerAIDisclaimer: 'Content is generated by AI and may contain inaccuracies.',
-    footerSupportTitle: 'Support & In-depth Consultation',
-    footerSupportDesc: 'For more detailed analysis or to follow our channels, please use the links below:',
+    footerSupportTitle: 'Support & Connect',
+    footerSupportDesc: 'For in-depth consultations or to follow our channels:',
     followTikTok: 'Follow on TikTok',
     zaloTooltip: 'Chat on Zalo',
     
@@ -491,15 +493,15 @@ export const translations = {
     shopPhilosophyText: 'At Huyền Phong Phật Đạo, we believe that art is a path to enlightenment. Each work is created with sincerity, combining traditional aesthetics with modern technology to spread beautiful spiritual values.',
 
     // Password Prompt
-    passwordPromptTitle: 'Login Required',
-    passwordPromptSubtitle: 'This feature requires a password to access.',
-    passwordLabel: 'Password',
-    passwordPlaceholder: 'Enter password...',
-    passwordSubmit: 'Login',
-    passwordIncorrect: 'Incorrect password. Please try again.',
-    passwordPaymentTitle: 'How to Get the Password',
-    passwordPaymentStep1: '1. Make a discretionary payment via ZaloPay to the phone number:',
-    passwordPaymentStep2: '2. Send a transaction screenshot via Zalo to receive the password immediately.',
+    passwordPromptTitle: 'In-Depth Access',
+    passwordPromptSubtitle: 'To unlock the full, detailed analysis of Tử Vi Đẩu Số, one of the most powerful tools, please support the project to receive your access code.',
+    passwordLabel: 'Access Code',
+    passwordPlaceholder: 'Enter access code...',
+    passwordSubmit: 'Unlock',
+    passwordIncorrect: 'Incorrect access code. Please try again.',
+    passwordPaymentTitle: 'Receive Access Code',
+    passwordPaymentStep1: '1. Make a discretionary contribution via ZaloPay to the phone number:',
+    passwordPaymentStep2: '2. Send a transaction screenshot via Zalo to receive the access code immediately.',
   }
 };
 

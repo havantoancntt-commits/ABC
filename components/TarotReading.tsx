@@ -130,14 +130,17 @@ const TarotReading: React.FC<Props> = ({ onOpenDonationModal, onBack }) => {
                 </div>
             )}
             
-            <div className="mt-10 flex flex-wrap justify-center gap-4">
+            <div className="mt-10 text-center text-amber-100/80 max-w-3xl mx-auto text-sm">
+                <p>{t('resultSupportMessage')}</p>
+            </div>
+            <div className="mt-6 flex flex-wrap justify-center gap-4">
                 <Button onClick={onBack} variant="secondary">
                   {t('home')}
                 </Button>
-                <Button onClick={handleReset} variant="tarot">
+                <Button onClick={handleReset} variant="secondary">
                   {t('tarotDrawAgain')}
                 </Button>
-                <Button onClick={onOpenDonationModal} variant="special">
+                <Button onClick={onOpenDonationModal} variant="primary">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                     {t('donate')}
                 </Button>
