@@ -7,10 +7,51 @@ interface Props {
   onBack: () => void;
 }
 
-// To guarantee image display and bypass potential network/proxy issues,
-// the optimized image has been embedded directly as a Base64 data URI.
-// This ensures reliability, with a minor trade-off in the component's initial load size.
-const SHOP_AVATAR_BASE64_WEBP = 'data:image/webp;base64,UklGRqYdAABXRUJQVlA4WAoAAAAIAAAA/wEA/wEAVlA4IJYeAABw6QCdASo+Aj4BPrVUp02nJaOiK/H5AnAniWNu/C8Yg95yQ9d1t1u3G/vf/t6v8r/sX/V8L/y7/Xv3C+AD/N/6z+5X8L/2H/U/sN/YfAD/oH/Q/u19//8B+wH8g/0n/Z/sV/kvqA/0X/m/2e/un9s/VX/sP8J/sP7N/2f/D9wP/C9QD/R/9X/a/uR/lv/n/3L/if8x/n/8x/lP9p/3P/L/yH/G/6v/mf5T/gP9l/uP/l/3X/O/yH/Z/6H/rf5//5f9zP8B/rv+N/6H+4/4n/Vf/L/wf/X8//9t+gD+Vf1X/s/+B/0n/d/9r/If63/3f+p/////+BH8W/q//F/0v+y/63/c/+H////+9AH8n/u//v/rf+T/8X///9b8////9gD+A/4z/rf7//+8/7P38f///83/2P//5gf///yH/wA2/aLDBa0VdFWirorAaAAADw/hY5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+YPmD5g+-';
+// A new, reliable SVG logo to replace the problematic Base64 image.
+// This is a "smarter" approach that is lightweight, scalable, and maintainable.
+const ShopLogo: React.FC = () => {
+    const textStyle = {
+        fontFamily: "'Playfair Display', serif",
+        fill: 'url(#logo-gradient)',
+        textAnchor: 'middle' as const
+    };
+
+    return (
+        <div className="relative w-full max-w-sm mx-auto transition-transform duration-500 group-hover:scale-105">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto drop-shadow-[0_10px_30px_rgba(250,204,21,0.3)]">
+                <defs>
+                    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#FDE68A" />
+                        <stop offset="100%" stopColor="#F59E0B" />
+                    </linearGradient>
+                    <filter id="logo-glow-filter">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+                        <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.5 0" result="glowMatrix" />
+                        <feMerge>
+                            <feMergeNode in="glowMatrix" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <g filter="url(#logo-glow-filter)">
+                    {/* Outer Circle with dashed effect */}
+                    <circle cx="100" cy="100" r="95" fill="none" stroke="url(#logo-gradient)" strokeWidth="1" strokeDasharray="2 4" opacity="0.6" />
+                    <circle cx="100" cy="100" r="90" fill="none" stroke="url(#logo-gradient)" strokeWidth="2" />
+                    
+                    {/* Main Initials */}
+                    <text x="100" y="120" style={textStyle} fontSize="72" fontWeight="bold">
+                        HP
+                    </text>
+                    <text x="100" y="155" style={textStyle} fontSize="22" fontWeight="normal" letterSpacing="1">
+                        Phật Các
+                    </text>
+                </g>
+            </svg>
+        </div>
+    );
+};
+
 
 const Shop: React.FC<Props> = ({ onBack }) => {
   const { t } = useLocalization();
@@ -52,15 +93,7 @@ const Shop: React.FC<Props> = ({ onBack }) => {
             {/* The main brand image */}
             <div className="relative group w-full max-w-md mb-12 animate-slide-in-up">
               <div className="absolute -inset-2 bg-gradient-to-br from-yellow-500 via-amber-600 to-yellow-700 rounded-3xl blur-2xl opacity-25 group-hover:opacity-40 transition duration-1000 animate-pulse-glow" style={{ animationDuration: '6s' }}></div>
-               <img 
-                  src={SHOP_AVATAR_BASE64_WEBP}
-                  alt={t('shopPageTitle')} 
-                  width="800"
-                  height="800"
-                  loading="eager"
-                  decoding="async"
-                  className="relative rounded-3xl w-full h-auto drop-shadow-[0_10px_30px_rgba(250,204,21,0.3)] transition-transform duration-500 group-hover:scale-105"
-                />
+               <ShopLogo />
             </div>
 
             {/* Features Section */}
