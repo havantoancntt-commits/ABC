@@ -228,16 +228,16 @@ export const translations = {
     iChingCastAgain: 'Gieo Quẻ Khác',
     
     // Shop Page
-    shopPageTitle: 'Huyền Phong Phật Đạo',
-    shopProductName: 'Ấn Phẩm Tâm Linh Độc Quyền',
-    shopProductBrand: 'Nghệ Thuật Chữa Lành Tâm Hồn',
-    shopProductDesc: 'Đây không chỉ là một vật phẩm, mà là một tác phẩm nghệ thuật số mang đậm dấu ấn tâm linh, được sáng tạo độc quyền bởi Huyền Phong Phật Đạo. Hình tượng Đức Phật tọa thiền trên đài sen, được thể hiện bằng tông màu vàng kim và kỹ thuật chạm nổi 3D tinh xảo, tỏa ra năng lượng của sự bình an, trí tuệ và giác ngộ. Sở hữu ấn phẩm này là một cách để mang sự tĩnh tại vào không gian sống của bạn và kết nối sâu sắc hơn với con đường tâm linh.',
-    shopFeature1: 'Thiết Kế Độc Quyền',
-    shopFeature2: 'Chất Lượng Vượt Trội',
-    shopFeature3: 'Năng Lượng Tĩnh Tại',
-    shopCTA: 'Khám Phá trên TikTok Shop',
-    shopPhilosophyTitle: 'Triết Lý Sáng Tạo',
-    shopPhilosophyText: 'Tại Huyền Phong Phật Đạo, chúng tôi tin rằng nghệ thuật là một con đường dẫn đến sự giác ngộ. Mỗi tác phẩm đều được tạo ra với sự thành tâm, kết hợp giữa mỹ học truyền thống và công nghệ hiện đại để lan tỏa những giá trị tâm linh tốt đẹp.',
+    shopPageTitle: 'Huyền Phong Phật Các',
+    shopProductName: 'Tượng Quan Âm Tự Tại Vàng',
+    shopProductBrand: 'Tác Phẩm Phong Thủy Cao Cấp',
+    shopProductDesc: 'Là một kiệt tác nghệ thuật số, tượng Quan Âm Tự Tại bằng vàng ròng tỏa ra năng lượng của lòng từ bi, trí tuệ và sự bình an vô hạn. Tác phẩm được chế tác tinh xảo, thể hiện hình tướng thanh thoát của Bồ Tát trong tư thế thư thái, tự tại, biểu trưng cho khả năng quán chiếu vạn vật mà không bị ràng buộc. Thỉnh đặt ấn phẩm này trong không gian sống hoặc làm việc không chỉ giúp tăng cường vượng khí, hóa giải hung khí mà còn là một lời nhắc nhở về sự tĩnh tại, an nhiên trong tâm hồn giữa dòng đời vạn biến.',
+    shopFeature1: 'Thiết Kế Độc Quyền 3D',
+    shopFeature2: 'Chất Liệu Vàng Ròng',
+    shopFeature3: 'Năng Lượng Từ Bi & Bình An',
+    shopViewOnTiktok: 'Xem trên TikTok Shop',
+    shopRatingLabel: 'đánh giá',
+    shopStockInStock: 'Còn Hàng',
 
     // Password Prompt
     passwordPromptTitle: 'Truy Cập Chuyên Sâu',
@@ -481,16 +481,16 @@ export const translations = {
     iChingCastAgain: 'Cast Another Hexagram',
     
     // Shop Page
-    shopPageTitle: 'Huyền Phong Phật Đạo',
-    shopProductName: 'Exclusive Spiritual Artwork',
-    shopProductBrand: 'The Art of Healing the Soul',
-    shopProductDesc: 'This is not just an item, but a digital work of art imbued with a spiritual mark, exclusively created by Huyền Phong Phật Đạo. The image of the Buddha meditating on a lotus throne, rendered in golden tones with exquisite 3D embossed techniques, radiates an energy of peace, wisdom, and enlightenment. Owning this artwork is a way to bring tranquility into your living space and connect more deeply with your spiritual path.',
-    shopFeature1: 'Exclusive Design',
-    shopFeature2: 'Superior Quality',
-    shopFeature3: 'Tranquil Energy',
-    shopCTA: 'Explore on TikTok Shop',
-    shopPhilosophyTitle: 'Creator\'s Philosophy',
-    shopPhilosophyText: 'At Huyền Phong Phật Đạo, we believe that art is a path to enlightenment. Each work is created with sincerity, combining traditional aesthetics with modern technology to spread beautiful spiritual values.',
+    shopPageTitle: 'Mystic Wind Buddha Pavilion',
+    shopProductName: 'Golden Guan Yin Statue',
+    shopProductBrand: 'Premium Feng Shui Artwork',
+    shopProductDesc: 'A masterpiece of digital art, the solid gold Guan Yin statue radiates an energy of infinite compassion, wisdom, and peace. This piece is exquisitely crafted, showing the elegant form of the Bodhisattva in a relaxed, sovereign posture, symbolizing the ability to perceive all things without attachment. Placing this artwork in your living or workspace not only enhances positive energy and dispels negativity but also serves as a reminder of inner tranquility and serenity amidst the ever-changing currents of life.',
+    shopFeature1: 'Exclusive 3D Design',
+    shopFeature2: 'Solid Gold Material',
+    shopFeature3: 'Compassion & Peace Energy',
+    shopViewOnTiktok: 'View on TikTok Shop',
+    shopRatingLabel: 'reviews',
+    shopStockInStock: 'In Stock',
 
     // Password Prompt
     passwordPromptTitle: 'In-Depth Access',
