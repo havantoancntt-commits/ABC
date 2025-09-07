@@ -229,15 +229,16 @@ export const translations = {
     
     // Shop Page
     shopPageTitle: 'Huyền Phong Phật Các',
-    shopProductName: 'Tượng Quan Âm Tự Tại Vàng',
-    shopProductBrand: 'Tác Phẩm Phong Thủy Cao Cấp',
-    shopProductDesc: 'Là một kiệt tác nghệ thuật số, tượng Quan Âm Tự Tại bằng vàng ròng tỏa ra năng lượng của lòng từ bi, trí tuệ và sự bình an vô hạn. Tác phẩm được chế tác tinh xảo, thể hiện hình tướng thanh thoát của Bồ Tát trong tư thế thư thái, tự tại, biểu trưng cho khả năng quán chiếu vạn vật mà không bị ràng buộc. Thỉnh đặt ấn phẩm này trong không gian sống hoặc làm việc không chỉ giúp tăng cường vượng khí, hóa giải hung khí mà còn là một lời nhắc nhở về sự tĩnh tại, an nhiên trong tâm hồn giữa dòng đời vạn biến.',
-    shopFeature1: 'Thiết Kế Độc Quyền 3D',
-    shopFeature2: 'Chất Liệu Vàng Ròng',
-    shopFeature3: 'Năng Lượng Từ Bi & Bình An',
-    shopViewOnTiktok: 'Xem trên TikTok Shop',
-    shopRatingLabel: 'đánh giá',
-    shopStockInStock: 'Còn Hàng',
+    shopPageSubtitle: 'Nơi hội tụ tinh hoa vật phẩm phong thủy và tâm linh, được tuyển chọn và trì chú để mang lại vượng khí, bình an và may mắn cho quý vị.',
+    shopFeature1Title: 'Vật Phẩm Tuyển Chọn',
+    shopFeature1Desc: 'Mỗi vật phẩm đều được chúng tôi lựa chọn cẩn thận về nguồn gốc, chất liệu và năng lượng.',
+    shopFeature2Title: 'Năng Lượng Thanh Tịnh',
+    shopFeature2Desc: 'Tất cả vật phẩm đều trải qua các nghi lễ thanh tẩy và trì chú đặc biệt để khuếch đại năng lượng tích cực.',
+    shopFeature3Title: 'Tư Vấn Tận Tâm',
+    shopFeature3Desc: 'Chúng tôi sẵn lòng hỗ trợ bạn tìm kiếm vật phẩm phù hợp nhất với nhu cầu và vận mệnh của mình.',
+    shopCTAHeader: 'Khám Phá Bộ Sưu Tập',
+    shopCTADesc: 'Ghé thăm gian hàng của chúng tôi trên TikTok Shop để xem chi tiết các vật phẩm và đặt hàng.',
+    shopViewOnTiktok: 'Vào TikTok Shop',
 
     // Password Prompt
     passwordPromptTitle: 'Truy Cập Chuyên Sâu',
@@ -481,16 +482,17 @@ export const translations = {
     iChingCastAgain: 'Cast Another Hexagram',
     
     // Shop Page
-    shopPageTitle: 'Mystic Wind Buddha Pavilion',
-    shopProductName: 'Golden Guan Yin Statue',
-    shopProductBrand: 'Premium Feng Shui Artwork',
-    shopProductDesc: 'A masterpiece of digital art, the solid gold Guan Yin statue radiates an energy of infinite compassion, wisdom, and peace. This piece is exquisitely crafted, showing the elegant form of the Bodhisattva in a relaxed, sovereign posture, symbolizing the ability to perceive all things without attachment. Placing this artwork in your living or workspace not only enhances positive energy and dispels negativity but also serves as a reminder of inner tranquility and serenity amidst the ever-changing currents of life.',
-    shopFeature1: 'Exclusive 3D Design',
-    shopFeature2: 'Solid Gold Material',
-    shopFeature3: 'Compassion & Peace Energy',
-    shopViewOnTiktok: 'View on TikTok Shop',
-    shopRatingLabel: 'reviews',
-    shopStockInStock: 'In Stock',
+    shopPageTitle: 'Huyền Phong Phật Các',
+    shopPageSubtitle: 'A convergence of the finest feng shui and spiritual artifacts, selected and consecrated to bring prosperity, peace, and luck to you.',
+    shopFeature1Title: 'Curated Selection',
+    shopFeature1Desc: 'Each item is carefully chosen for its origin, material, and inherent energy.',
+    shopFeature2Title: 'Purified Energy',
+    shopFeature2Desc: 'All items undergo special cleansing and consecration rituals to amplify their positive energies.',
+    shopFeature3Title: 'Dedicated Consultation',
+    shopFeature3Desc: 'We are ready to assist you in finding the most suitable artifact for your needs and destiny.',
+    shopCTAHeader: 'Explore The Collection',
+    shopCTADesc: 'Visit our TikTok Shop to view detailed information about our items and to place an order.',
+    shopViewOnTiktok: 'Visit TikTok Shop',
 
     // Password Prompt
     passwordPromptTitle: 'In-Depth Access',
