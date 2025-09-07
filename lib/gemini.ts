@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -114,5 +114,18 @@ export const generateFlowAstrology = async (info: FlowAstrologyInfo, language: s
             throw error;
         }
         throw new Error("Could not generate flow astrology chart due to a connection error or server issue. Please try again.");
+    }
+};
+
+export const getAuspiciousDayAnalysis = async (info: AuspiciousDayInfo, language: string): Promise<AuspiciousDayData> => {
+    try {
+        const data = await callProxy('getAuspiciousDayAnalysis', { info, language });
+        return data as AuspiciousDayData;
+    } catch (error) {
+        console.error("Error getting auspicious day analysis:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Could not get auspicious day analysis due to a connection error or server issue. Please try again.");
     }
 };

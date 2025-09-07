@@ -23,6 +23,7 @@ import PalmReadingResult from './PalmReadingResult';
 import TarotReading from './TarotReading';
 import FlowAstrologyForm from './FlowAstrologyForm';
 import FlowAstrologyResult from './FlowAstrologyResult';
+import AuspiciousDayFinder from './AuspiciousDayFinder';
 import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
 import Card from './Card';
@@ -394,6 +395,10 @@ const App: React.FC = () => {
       setError(null);
       setAppState(AppState.ZODIAC_HOUR_FINDER);
   }, []);
+  const handleStartAuspiciousDayFinder = useCallback(() => {
+    setError(null);
+    setAppState(AppState.AUSPICIOUS_DAY_FINDER);
+  }, []);
   const handleStartIChing = useCallback(() => {
       setError(null);
       setAppState(AppState.ICHING_DIVINATION);
@@ -467,7 +472,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} />;
       case AppState.SAVED_CHARTS:
         return <SavedCharts 
           charts={savedCharts}
@@ -521,6 +526,8 @@ const App: React.FC = () => {
           />;
       case AppState.ZODIAC_HOUR_FINDER:
           return <ZodiacHourFinder />;
+      case AppState.AUSPICIOUS_DAY_FINDER:
+          return <AuspiciousDayFinder />;
       case AppState.ICHING_DIVINATION:
           return <IChingDivination onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
        case AppState.TAROT_READING:

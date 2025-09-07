@@ -175,6 +175,31 @@ export interface FlowAstrologyData {
     talisman: TalismanData;
 }
 
+export interface AuspiciousDayInfo {
+    day: number;
+    month: number;
+    year: number;
+    event: string;
+}
+
+export interface AuspiciousDayData {
+    // FIX: Added missing 'gregorianDate' property to align with API response schema.
+    gregorianDate: string;
+    lunarDate: string;
+    dayCanChi: string;
+    monthCanChi: string;
+    yearCanChi: string;
+    tietKhi: string;
+    truc: string;
+    goodStars: string[];
+    badStars: string[];
+    recommendedActivities: string[];
+    avoidActivities: string[];
+    overallAnalysis: string;
+    eventAnalysis: string;
+    auspiciousHours: string[];
+}
+
 
 export enum AppState {
   HOME,
@@ -199,4 +224,5 @@ export enum AppState {
   FLOW_ASTROLOGY_FORM,
   FLOW_ASTROLOGY_LOADING,
   FLOW_ASTROLOGY_RESULT,
+  AUSPICIOUS_DAY_FINDER,
 }

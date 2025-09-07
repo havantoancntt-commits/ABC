@@ -1,7 +1,7 @@
 // This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
 import { GoogleGenAI, Type, BlockedReason } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
-import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo } from '../lib/types';
+import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo } from '../lib/types';
 
 // By removing the `export const config = { runtime: 'edge' };`, this function
 // will default to the standard Node.js serverless runtime, which has a longer
@@ -196,6 +196,31 @@ const flowAstrologySchema = {
         }
     },
     required: ['flow', 'predictions', 'talisman']
+};
+
+const auspiciousDaySchema = {
+    type: Type.OBJECT,
+    properties: {
+        gregorianDate: { type: Type.STRING, description: "Ngày dương lịch đầy đủ (dd/mm/yyyy)." },
+        lunarDate: { type: Type.STRING, description: "Ngày âm lịch đầy đủ (dd/mm/yyyy)." },
+        dayCanChi: { type: Type.STRING, description: "Can Chi của ngày." },
+        monthCanChi: { type: Type.STRING, description: "Can Chi của tháng." },
+        yearCanChi: { type: Type.STRING, description: "Can Chi của năm." },
+        tietKhi: { type: Type.STRING, description: "Tiết khí của ngày." },
+        truc: { type: Type.STRING, description: "Trực của ngày (ví dụ: Kiến, Trừ, Mãn...)." },
+        goodStars: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Danh sách các sao tốt chính trong ngày." },
+        badStars: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Danh sách các sao xấu chính trong ngày." },
+        recommendedActivities: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Danh sách các việc nên làm trong ngày." },
+        avoidActivities: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Danh sách các việc cần tránh trong ngày." },
+        overallAnalysis: { type: Type.STRING, description: "Luận giải tổng quan về năng lượng của ngày, tốt xấu chung." },
+        eventAnalysis: { type: Type.STRING, description: "Phân tích chuyên sâu về sự phù hợp của ngày đối với sự việc cụ thể mà người dùng đã nhập." },
+        auspiciousHours: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Danh sách các giờ hoàng đạo trong ngày, định dạng 'Tên (hh:mm-hh:mm)'." },
+    },
+    required: [
+        'gregorianDate', 'lunarDate', 'dayCanChi', 'monthCanChi', 'yearCanChi', 'tietKhi',
+        'truc', 'goodStars', 'badStars', 'recommendedActivities', 'avoidActivities',
+        'overallAnalysis', 'eventAnalysis', 'auspiciousHours'
+    ]
 };
 
 
@@ -408,6 +433,38 @@ const EN_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION = `**Persona:** You are a modern ener
     *   Use geometric shapes, astrological symbols, and harmonious colors. Example: a circle with inner patterns.
     *   Give the talisman a name and describe its meaning.`;
 
+const VI_AUSPICIOUS_DAY_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một chuyên gia Trạch Nhật (chọn ngày tốt) cao cấp, am hiểu sâu sắc về Âm Lịch, Ngũ Hành, Can Chi, và các hệ thống sao trong việc chọn ngày lành tháng tốt. Lời văn của bạn phải rõ ràng, uy tín, và mang tính hướng dẫn cụ thể.
+
+**Nhiệm vụ:** Phân tích một ngày cụ thể cho một sự việc cụ thể và trả về kết quả JSON theo schema đã định.
+
+**Yêu cầu cốt lõi:**
+1.  **Tính toán chính xác:**
+    *   Chuyển đổi ngày Dương Lịch sang Âm Lịch chính xác, bao gồm cả Can Chi của ngày, tháng, năm và Tiết Khí hiện tại.
+    *   Xác định Trực của ngày (ví dụ: Trực Kiến, Trực Trừ, ...).
+    *   Liệt kê các sao tốt và sao xấu quan trọng trong ngày (ví dụ: Thiên Đức, Nguyệt Đức, Sinh Khí, Thiên Cương, Kiếp Sát...).
+    *   Xác định các giờ Hoàng Đạo (giờ tốt) trong ngày.
+2.  **Luận giải chuyên sâu:**
+    *   'overallAnalysis': Đưa ra nhận định tổng quan về năng lượng của ngày, tốt hay xấu, mạnh hay yếu.
+    *   'eventAnalysis': Đây là phần quan trọng nhất. Phân tích sự tương hợp giữa năng lượng của ngày (Can Chi, Ngũ Hành, Trực, Sao) với bản chất của sự việc người dùng đưa ra. Ví dụ: ngày có Trực Phá và sao Đại Hao có tốt cho việc khai trương không? Ngày có sao Cô Thần, Quả Tú có nên làm đám cưới?
+    *   'recommendedActivities' & 'avoidActivities': Dựa vào Trực, các sao, và Ngũ Hành để đưa ra danh sách các việc nên và không nên làm.
+3.  **Ngôn ngữ:** Sử dụng thuật ngữ chuyên ngành nhưng giải thích một cách dễ hiểu. Kết quả phải mạch lạc và có tính ứng dụng cao.`;
+    
+const EN_AUSPICIOUS_DAY_SYSTEM_INSTRUCTION = `**Persona:** You are a high-level expert in "Trạch Nhật" (Auspicious Date Selection), with profound knowledge of the Lunar Calendar, Five Elements, Heavenly Stems, Earthly Branches, and various star systems. Your writing must be clear, authoritative, and provide specific guidance.
+
+**Task:** Analyze a specific date for a specific event and return the result as a JSON object according to the predefined schema.
+
+**Core Requirements:**
+1.  **Accurate Calculations:**
+    *   Correctly convert the Gregorian date to the Lunar date, including the Stem-Branch for the day, month, and year, and the current Solar Term.
+    *   Identify the day's "Duty Officer" (Trực), e.g., Establishment, Removal, Fullness...
+    *   List the most important good and bad stars for the day (e.g., Heavenly Virtue, Monthly Virtue, Life Qi, Heavenly Obstruction, Calamity Sha...).
+    *   Determine the Auspicious Hours (Hoàng Đạo) for the day.
+2.  **In-depth Interpretation:**
+    *   'overallAnalysis': Provide a general assessment of the day's energy—whether it's generally auspicious, inauspicious, strong, or weak.
+    *   'eventAnalysis': This is the most critical part. Analyze the compatibility of the day's energy (Stem-Branch, Five Elements, Duty Officer, Stars) with the nature of the user's event. For example, is a day with the "Destruction" duty officer and "Great Consumer" star good for a grand opening? Should a wedding be held on a day with the "Solitude" or "Lonesome" star?
+    *   'recommendedActivities' & 'avoidActivities': Based on the Duty Officer, stars, and Five Elements, provide lists of suitable and unsuitable activities.
+3.  **Language:** Use specialized terminology but explain it in an easy-to-understand manner. The result must be coherent and highly practical.`;
+
 // --- Main Handler ---
 // Corrected signature for Vercel's Node.js runtime
 export default async function handler(req: any, res: any) {
@@ -571,6 +628,24 @@ export default async function handler(req: any, res: any) {
                 responseMimeType: "application/json",
                 responseSchema: flowAstrologySchema,
                 temperature: 0.9,
+            },
+        });
+    } else if (operation === 'getAuspiciousDayAnalysis') {
+        const { info, language }: { info: AuspiciousDayInfo, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_AUSPICIOUS_DAY_SYSTEM_INSTRUCTION : VI_AUSPICIOUS_DAY_SYSTEM_INSTRUCTION;
+
+        const userPrompt = language === 'en'
+            ? `Analyze the following date for a specific event:\n- Gregorian Date: ${info.day}/${info.month}/${info.year}\n- Event: "${info.event}"`
+            : `Phân tích ngày sau đây cho một sự việc cụ thể:\n- Ngày Dương Lịch: ${info.day}/${info.month}/${info.year}\n- Sự việc: "${info.event}"`;
+
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: auspiciousDaySchema,
+                temperature: 0.7,
             },
         });
     } else {
