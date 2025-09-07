@@ -6,6 +6,16 @@ interface Props {
   variant?: 'form' | 'modal';
 }
 
+const ZaloPayIcon: React.FC = () => (
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+        <g fill="none" fillRule="evenodd">
+            <path d="M24 48c13.255 0 24-10.745 24-24S37.255 0 24 0 0 10.745 0 24s10.745 24 24 24z" fill="#0068FF"></path>
+            <path d="M36.538 24.052c0 1.233-.35 2.393-1.049 3.483-.7 1.09-1.685 1.956-2.956 2.6a8.44 8.44 0 0 1-3.92 1.048c-1.233 0-2.393-.35-3.483-1.05-1.09-.7-1.956-1.684-2.6-2.955a8.44 8.44 0 0 1-1.048-3.92c0-1.233.35-2.393 1.05-3.484.7-1.09 1.684-1.955 2.955-2.6a8.44 8.44 0 0 1 3.92-1.048c1.233 0 2.393.35 3.483 1.05 1.09.7 1.956 1.684 2.6 2.956.699.948 1.048 2.064 1.048 3.34zm-7.05-4.482a4.425 4.425 0 0 0-1.743-.882 4.09 4.09 0 0 0-1.905-.315c-.7.034-1.365.22-1.995.556a4.425 4.425 0 0 0-1.743.882c-.448.483-.816 1.036-1.104 1.658-.288.622-.432 1.3-.432 2.034 0 .734.144 1.41.432 2.034.288.622.656 1.175 1.104 1.658.482.448 1.036.816 1.658 1.104.622.288 1.3.432 2.034.432.734 0 1.41-.144 2.034-.432.622-.288 1.175-.656 1.658-1.104.448-.483.816-1.036 1.104-1.658.288-.622.432-1.3.432-2.034 0-.734-.144-1.41-.432-2.034a5.04 5.04 0 0 0-1.104-1.658z" fill="#FFF"></path>
+            <path d="M19.324 22.843a.89.89 0 0 0-.588.196l-4.134 3.093a.92.92 0 0 0-.34 1.116c.143.375.5.6.903.6h2.238c.403 0 .76-.225.903-.6a.92.92 0 0 0-.34-1.116l-1.02-1.066-1.01-1.05a.15.15 0 0 1-.01-.196c.03-.04.1-.06.15-.06h5.36c.05 0 .12.02.15.06a.15.15 0 0 1-.01.196l-2.03 2.116a.92.92 0 0 0-.34 1.116c.143.375.5.6.903.6h2.238c.403 0 .76-.225.903-.6a.92.92 0 0 0-.34-1.116l-4.134-3.093a.89.89 0 0 0-.588-.196h-1.39z" fill="#0068FF"></path>
+        </g>
+    </svg>
+);
+
 const PaypalIcon: React.FC = () => (
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
         <path fillRule="evenodd" clipRule="evenodd" d="M3.522 6.095c.214-1.22.99-2.18 2.222-2.18h10.363c1.99 0 2.622 1.05 2.333 2.924l-2.002 12.87c-.16 1.023-.74 1.39-1.63 1.39H8.785c-1.14 0-1.8-.74-2.023-1.812L3.522 6.095zm5.55 9.112c.307.36.757.54 1.285.54h.43c2.22 0 3.255-1.57 3.59-3.768.14-1.002.05-1.5-.27-1.92-.32-.43-.88-.71-1.62-.71h-1.5c-1.4 0-2.43.91-2.73 2.454a2.2 2.2 0 00-.01.32c-.01.27-.04.6-.26 1.154l.055-.08zm3.266-5.268c.55-.9 1.6-1.42 2.87-1.42.36 0 .68.07.95.2.35.16.48.45.39.81l-.57 2.14c-.08.31-.33.51-.65.51h-.02c-.52 0-.96-.32-1.1-.81-.13-.51-.6-2.07-.6-2.07l-.27-.36z" fill="#FFFFFF"></path>
@@ -69,6 +79,41 @@ const DonationInfo: React.FC<Props> = ({ variant = 'form' }) => {
           </div>
         </div>
       </div>
+      <div className="flex items-center my-6 max-w-md mx-auto">
+        <hr className="flex-grow border-t border-gray-700/50" />
+        <span className="px-3 text-gray-400 text-sm font-semibold">{t('donationOr')}</span>
+        <hr className="flex-grow border-t border-gray-700/50" />
+      </div>
+
+      <div className="max-w-md mx-auto">
+        <a href={`https://social.zalopay.vn/qr/pay?server=zalopay&utm_source=web&receive_id=${SUPPORT_INFO.zaloPhone}`}
+           target="_blank" rel="noopener noreferrer"
+           className="block bg-blue-600/20 border border-blue-500/40 rounded-lg p-3 group hover:bg-blue-600/30 transition-colors">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <ZaloPayIcon />
+                    <div className="text-left">
+                        <p className="font-bold text-white">ZaloPay</p>
+                        <p className="text-xs text-blue-200/80 group-hover:text-white transition-colors">{t('donationZaloPayMessage')}</p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="font-semibold text-white font-mono tracking-wider">{SUPPORT_INFO.zaloPhone}</span>
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            copyToClipboard(SUPPORT_INFO.zaloPhone, 'zalo');
+                        }}
+                        className="text-yellow-300 hover:text-white bg-black/20 px-3 py-1 rounded-md text-xs font-bold shrink-0 w-16 text-center transition-all"
+                    >
+                        {copyStatus['zalo'] || t('copy')}
+                    </button>
+                </div>
+            </div>
+        </a>
+      </div>
+
        <div className="flex items-center my-6 max-w-md mx-auto">
         <hr className="flex-grow border-t border-gray-700/50" />
         <span className="px-3 text-gray-400 text-sm font-semibold">{t('donationOr')}</span>
