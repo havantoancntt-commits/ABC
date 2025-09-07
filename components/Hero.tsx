@@ -9,8 +9,8 @@ interface Props {
 
 const Shop: React.FC<Props> = ({ onBack }) => {
   const { t } = useLocalization();
-  // Switched to a more reliable, high-quality PNG image with a transparent background.
-  const PRODUCT_IMAGE_URL = 'https://i.imgur.com/w4pG0g7.png';
+  // Switched to a more reliable, high-quality PNG image with a transparent background to fix loading issues.
+  const PRODUCT_IMAGE_URL = 'https://i.imgur.com/5a2zJ2j.png';
   const TIKTOK_SHOP_URL = 'https://vt.tiktok.com/ZSHtp8VBv97Sw-X46jh/';
 
   const iconClass = "w-6 h-6 text-amber-300";
