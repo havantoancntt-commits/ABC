@@ -92,6 +92,19 @@ export const translations = {
     palmReadingSection5: 'Lời Khuyên & Định Hướng',
     palmScanInitial: 'Đặt lòng bàn tay của bạn vào trong khung hình.',
 
+    // Tarot Reading
+    tarotReadingTitle: 'Trải Bài Tarot',
+    tarotReadingDesc: 'Rút ba lá bài Tarot cho quá khứ, hiện tại và tương lai để nhận được thông điệp sâu sắc và sự chỉ dẫn cho con đường phía trước của bạn.',
+    tarotReadingButton: 'Trải Bài Tarot',
+    tarotReadingSubtitle: 'Tập trung vào câu hỏi hoặc một lĩnh vực trong cuộc sống của bạn, sau đó rút ba lá bài để khám phá những hiểu biết sâu sắc về hành trình của mình.',
+    tarotDrawButton: 'Rút 3 Lá Bài',
+    tarotDrawAgain: 'Rút Bài Mới',
+    spinnerTarot: 'Đang luận giải thông điệp từ các lá bài... Năng lượng của vũ trụ đang được hé lộ. Xin vui lòng chờ.',
+    tarotPast: 'Quá Khứ',
+    tarotPresent: 'Hiện Tại',
+    tarotFuture: 'Tương Lai',
+    tarotSummary: 'Tổng Kết & Lời Khuyên',
+
     // Birth Info Form
     formTitle: 'Kiến Tạo Bản Đồ Vận Mệnh',
     formSubtitle: 'Tử Vi Đẩu Số là một môn nghệ thuật cổ xưa, giải mã vị trí các vì sao tại thời khắc bạn chào đời để vẽ nên một tấm bản đồ chi tiết về vận mệnh. Hãy nhập thông tin của bạn để khám phá những luận giải sâu sắc, thấu hiểu bản thân và nắm bắt tương lai.',
@@ -326,6 +339,19 @@ export const translations = {
     palmReadingSection4: 'Life Line (Vitality)',
     palmReadingSection5: 'Advice & Guidance',
     palmScanInitial: 'Place your palm within the frame.',
+    
+    // Tarot Reading
+    tarotReadingTitle: 'Tarot Reading',
+    tarotReadingDesc: 'Draw three Tarot cards for your past, present, and future to receive profound messages and guidance for your path ahead.',
+    tarotReadingButton: 'Get a Reading',
+    tarotReadingSubtitle: 'Focus on a question or an area of your life, then draw three cards to uncover deep insights into your journey.',
+    tarotDrawButton: 'Draw 3 Cards',
+    tarotDrawAgain: 'Draw Again',
+    spinnerTarot: 'Interpreting the message from the cards... The universe\'s energy is being revealed. Please wait.',
+    tarotPast: 'The Past',
+    tarotPresent: 'The Present',
+    tarotFuture: 'The Future',
+    tarotSummary: 'Summary & Advice',
 
     // Birth Info Form
     formTitle: 'Create Your Destiny Map',

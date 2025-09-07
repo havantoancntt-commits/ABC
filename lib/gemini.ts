@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -88,5 +88,18 @@ export const analyzePalm = async (base64Image: string, language: string): Promis
             throw error;
         }
         throw new Error("Could not analyze palm due to a connection error or server issue. Please try again.");
+    }
+};
+
+export const getTarotReading = async (cards: TarotCard[], question: string, language: string): Promise<TarotReadingData> => {
+    try {
+        const data = await callProxy('getTarotReading', { cards, question, language });
+        return data as TarotReadingData;
+    } catch (error) {
+        console.error("Error getting Tarot reading:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Could not get Tarot reading due to a connection error or server issue. Please try again.");
     }
 };

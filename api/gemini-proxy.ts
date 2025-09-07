@@ -1,7 +1,7 @@
 // This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
 import { GoogleGenAI, Type, BlockedReason } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
-import type { BirthInfo, CastResult, NumerologyInfo } from '../lib/types';
+import type { BirthInfo, CastResult, NumerologyInfo, TarotCard } from '../lib/types';
 
 // By removing the `export const config = { runtime: 'edge' };`, this function
 // will default to the standard Node.js serverless runtime, which has a longer
@@ -144,6 +144,17 @@ const numerologySchema = {
         summary: { type: Type.STRING, description: "Tổng kết toàn bộ các chỉ số, mối liên kết giữa chúng và đưa ra lời khuyên tổng thể." }
     },
     required: ['lifePathNumber', 'destinyNumber', 'soulUrgeNumber', 'personalityNumber', 'birthdayNumber', 'birthdayChart', 'summary']
+};
+
+const tarotReadingSchema = {
+    type: Type.OBJECT,
+    properties: {
+        past: { type: Type.STRING, description: 'Luận giải lá bài đại diện cho Quá Khứ, những ảnh hưởng nền tảng dẫn đến tình huống hiện tại. (Khoảng 150-200 từ)' },
+        present: { type: Type.STRING, description: 'Luận giải lá bài đại diện cho Hiện Tại, mô tả tình hình, thách thức và cơ hội cốt lõi lúc này. (Khoảng 150-200 từ)' },
+        future: { type: Type.STRING, description: 'Luận giải lá bài đại diện cho Tương Lai, chỉ ra xu hướng, kết quả tiềm năng và lời khuyên để định hướng. (Khoảng 150-200 từ)' },
+        summary: { type: Type.STRING, description: 'Tổng kết toàn bộ 3 lá bài, kết nối chúng thành một câu chuyện mạch lạc và đưa ra lời khuyên chiến lược cuối cùng cho người hỏi. (Khoảng 200-250 từ)' }
+    },
+    required: ['past', 'present', 'future', 'summary']
 };
 
 
@@ -292,6 +303,31 @@ const EN_NUMEROLOGY_SYSTEM_INSTRUCTION = `**Persona:** You are a leading expert 
     *   Interpretations should be concise (150-200 words/number), focusing on potential, challenges, and advice for development.
 4.  **Insightful Summary:** The 'summary' must connect the main numbers, pointing out their interplay (e.g., a Life Path 8 with a Destiny 11) and providing a holistic picture with strategic advice.`;
 
+const VI_TAROT_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một người giải bài Tarot thông thái, sâu sắc và đầy cảm thông. Bạn sử dụng các lá bài như một công cụ để soi chiếu nội tâm, khám phá các mô thức và đưa ra lời khuyên mang tính trao quyền, giúp người hỏi tìm thấy sự rõ ràng và định hướng. Giọng văn của bạn cần ấm áp, gợi mở và tập trung vào tâm lý học hơn là tiên tri.
+
+**Nhiệm vụ:** Luận giải một trải bài Tarot 3 lá (Quá Khứ, Hiện Tại, Tương Lai) và trả về kết quả JSON theo schema.
+
+**Yêu cầu cốt lõi:**
+1.  **Bối cảnh hóa:** Luôn liên kết ý nghĩa của các lá bài với câu hỏi của người hỏi. Nếu không có câu hỏi, hãy giải bài theo bối cảnh chung về "con đường hiện tại".
+2.  **Cấu trúc câu chuyện:**
+    *   'past': Phân tích lá bài này như là nền tảng, những kinh nghiệm hoặc năng lượng trong quá khứ đã định hình nên tình huống hiện tại.
+    *   'present': Đây là trọng tâm. Phân tích lá bài này để làm rõ tình hình hiện tại, những thách thức cốt lõi và bài học quan trọng cần nhận ra.
+    *   'future': Diễn giải lá bài này như một kết quả tiềm năng, một xu hướng hoặc một lời khuyên về hướng đi tiếp theo. Tránh khẳng định đây là "số phận".
+3.  **Tổng kết sâu sắc:** Phần 'summary' phải là sự kết nối tinh tế giữa ba lá bài, tạo thành một câu chuyện có ý nghĩa. Nó phải chỉ ra được dòng chảy năng lượng từ quá khứ đến tương lai và đưa ra một lời khuyên tổng thể, mang tính hành động cao.
+4.  **Ngôn ngữ tâm lý học:** Sử dụng các thuật ngữ như "tiềm thức", "năng lượng", "bài học", "cơ hội để phát triển" thay vì "số phận", "điềm báo".`;
+
+const EN_TAROT_SYSTEM_INSTRUCTION = `**Persona:** You are a wise, insightful, and empathetic Tarot reader. You use the cards as a tool for introspection, uncovering patterns, and offering empowering advice that helps the querent find clarity and direction. Your tone should be warm, evocative, and focused on psychology rather than fortune-telling.
+
+**Task:** Interpret a 3-card Tarot spread (Past, Present, Future) and return the result as a JSON object according to the schema.
+
+**Core Requirements:**
+1.  **Contextualize:** Always relate the meaning of the cards to the querent's question. If no question is provided, interpret the spread in the general context of their "current path."
+2.  **Narrative Structure:**
+    *   'past': Analyze this card as the foundation, the past experiences or energies that have shaped the current situation.
+    *   'present': This is the core focus. Analyze this card to clarify the current situation, its central challenges, and the key lessons to be learned right now.
+    *   'future': Interpret this card as a potential outcome, a trend, or advice on the path forward. Avoid presenting it as a fixed fate.
+3.  **Insightful Summary:** The 'summary' must be a skillful synthesis of the three cards, weaving them into a coherent narrative. It should show the flow of energy from past to future and provide overarching, actionable advice.
+4.  **Psychological Language:** Use terms like "subconscious," "energy," "lessons," "opportunity for growth" instead of "fate," "omen."`;
 
 // --- Main Handler ---
 // Corrected signature for Vercel's Node.js runtime
@@ -418,6 +454,26 @@ export default async function handler(req: any, res: any) {
                 responseMimeType: "application/json",
                 responseSchema: numerologySchema,
                 temperature: 0.7,
+            },
+        });
+    } else if (operation === 'getTarotReading') {
+        const { cards, question, language }: { cards: TarotCard[], question: string, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_TAROT_SYSTEM_INSTRUCTION : VI_TAROT_SYSTEM_INSTRUCTION;
+        
+        const cardNames = cards.map(c => c.name[language]).join(', ');
+
+        const userPrompt = language === 'en'
+            ? `Interpret the following three-card Tarot reading:\n- User's Question: "${question || 'A general question about my current life path.'}"\n- Past: ${cards[0].name.en}\n- Present: ${cards[1].name.en}\n- Future: ${cards[2].name.en}`
+            : `Luận giải trải bài Tarot 3 lá sau:\n- Câu hỏi: "${question || 'Một câu hỏi chung về con đường hiện tại của tôi.'}"\n- Quá Khứ: ${cards[0].name.vi}\n- Hiện Tại: ${cards[1].name.vi}\n- Tương Lai: ${cards[2].name.vi}`;
+
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: tarotReadingSchema,
+                temperature: 0.8,
             },
         });
     } else {

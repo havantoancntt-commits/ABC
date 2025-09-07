@@ -1,6 +1,6 @@
 import React from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'special' | 'iching' | 'shop' | 'numerology' | 'palm';
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'special' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -28,6 +28,7 @@ const Button: React.FC<Props> = ({
     shop: 'bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 hover:brightness-110 focus-visible:ring-yellow-400',
     numerology: 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:brightness-110 focus-visible:ring-cyan-400',
     palm: 'bg-gradient-to-r from-rose-500 to-pink-600 text-white hover:brightness-110 focus-visible:ring-rose-400',
+    tarot: 'bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:brightness-110 focus-visible:ring-purple-400',
   };
 
   const sizeClasses: Record<ButtonSize, string> = {

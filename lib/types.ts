@@ -132,6 +132,22 @@ export interface NumerologyData {
   summary: string;
 }
 
+export interface TarotCard {
+    id: number;
+    name: {
+        vi: string;
+        en: string;
+    };
+}
+
+export interface TarotReadingData {
+    past: string;
+    present: string;
+    future: string;
+    summary: string;
+}
+
+
 export enum AppState {
   HOME,
   SAVED_CHARTS,
@@ -151,4 +167,5 @@ export enum AppState {
   PALM_SCAN_CAPTURE,
   PALM_SCAN_LOADING,
   PALM_SCAN_RESULT,
+  TAROT_READING,
 }

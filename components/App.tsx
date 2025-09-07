@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData } from '../lib/types';
+import React, { useState, useCallback, useEffect } from 'react';
+import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData } from '../lib/types';
 import { AppState } from '../lib/types';
 import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm } from '../lib/gemini';
 import Header from './Header';
@@ -20,6 +20,7 @@ import NumerologyForm from './NumerologyForm';
 import NumerologyChart from './NumerologyChart';
 import PalmScan from './PalmScan';
 import PalmReadingResult from './PalmReadingResult';
+import TarotReading from './TarotReading';
 import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
 import Card from './Card';
@@ -155,6 +156,7 @@ const App: React.FC = () => {
   const [numerologyInfo, setNumerologyInfo] = useState<NumerologyInfo | null>(null);
   const [numerologyData, setNumerologyData] = useState<NumerologyData | null>(null);
   const [palmReadingData, setPalmReadingData] = useState<PalmReadingData | null>(null);
+  const [tarotReadingData, setTarotReadingData] = useState<TarotReadingData | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedPalmImage, setCapturedPalmImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -215,6 +217,7 @@ const App: React.FC = () => {
     setNumerologyData(null);
     setPalmReadingData(null);
     setCapturedPalmImage(null);
+    setTarotReadingData(null);
     setError(null);
   }, []);
 
@@ -370,6 +373,10 @@ const App: React.FC = () => {
       setError(null);
       setAppState(AppState.ICHING_DIVINATION);
   }, []);
+    const handleStartTarot = useCallback(() => {
+      setError(null);
+      setAppState(AppState.TAROT_READING);
+  }, []);
   const handleStartShop = useCallback(() => {
       setError(null);
       setAppState(AppState.SHOP);
@@ -432,13 +439,10 @@ const App: React.FC = () => {
     setPostLoginAction(null);
   }, [postLoginAction]);
 
-  const MemoizedHeader = useMemo(() => <Header onHomeClick={handleResetToHome} />, [handleResetToHome]);
-  const MemoizedZaloContact = useMemo(() => <ZaloContact />, []);
-
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} />;
       case AppState.SAVED_CHARTS:
         return <SavedCharts 
           charts={savedCharts}
@@ -494,6 +498,8 @@ const App: React.FC = () => {
           return <ZodiacHourFinder />;
       case AppState.ICHING_DIVINATION:
           return <IChingDivination onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+       case AppState.TAROT_READING:
+          return <TarotReading onOpenDonationModal={() => setIsDonationModalOpen(true)} onBack={handleResetToHome} />;
       case AppState.SHOP:
           return <Shop onBack={handleResetToHome} />;
       case AppState.NUMEROLOGY_FORM:
@@ -510,7 +516,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen text-gray-200">
       <div className="min-h-screen bg-black bg-opacity-70 backdrop-blur-md flex flex-col">
-        {MemoizedHeader}
+        <Header onHomeClick={handleResetToHome} />
         <main className="container mx-auto px-4 py-8 flex-grow">
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-3 rounded-lg relative mb-6 flex items-start justify-between animate-fade-in" role="alert" aria-live="assertive">
@@ -569,7 +575,7 @@ const App: React.FC = () => {
           </div>
         </footer>
         <DonationModal isOpen={isDonationModalOpen} onClose={() => setIsDonationModalOpen(false)} />
-        {MemoizedZaloContact}
+        <ZaloContact />
         <ConfirmationModal
           isOpen={!!chartToDelete}
           onClose={() => setChartToDelete(null)}

@@ -43,4 +43,4 @@ const Header: React.FC<Props> = ({ onHomeClick }) => {
   );
 };
 
-export default Header;
+export default React.memo(Header);
