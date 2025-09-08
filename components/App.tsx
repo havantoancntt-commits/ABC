@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData } from '../lib/types';
+import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData } from '../lib/types';
 import { AppState } from '../lib/types';
-import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology } from '../lib/gemini';
+import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting } from '../lib/gemini';
 import Header from './Header';
 import BirthInfoForm from './BirthInfoForm';
 import DonationModal from './PaymentModal';
@@ -24,6 +24,8 @@ import TarotReading from './TarotReading';
 import FlowAstrologyForm from './FlowAstrologyForm';
 import FlowAstrologyResult from './FlowAstrologyResult';
 import AuspiciousDayFinder from './AuspiciousDayFinder';
+import HandwritingScan from './HandwritingScan';
+import HandwritingResult from './HandwritingResult';
 import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
 import Card from './Card';
@@ -159,11 +161,13 @@ const App: React.FC = () => {
   const [numerologyInfo, setNumerologyInfo] = useState<NumerologyInfo | null>(null);
   const [numerologyData, setNumerologyData] = useState<NumerologyData | null>(null);
   const [palmReadingData, setPalmReadingData] = useState<PalmReadingData | null>(null);
+  const [handwritingData, setHandwritingData] = useState<HandwritingData | null>(null);
   const [tarotReadingData, setTarotReadingData] = useState<TarotReadingData | null>(null);
   const [flowAstrologyInfo, setFlowAstrologyInfo] = useState<FlowAstrologyInfo | null>(null);
   const [flowAstrologyData, setFlowAstrologyData] = useState<FlowAstrologyData | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedPalmImage, setCapturedPalmImage] = useState<string | null>(null);
+  const [capturedHandwritingImage, setCapturedHandwritingImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedCharts, setSavedCharts] = useState<SavedChart[]>([]);
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
@@ -222,6 +226,8 @@ const App: React.FC = () => {
     setNumerologyData(null);
     setPalmReadingData(null);
     setCapturedPalmImage(null);
+    setHandwritingData(null);
+    setCapturedHandwritingImage(null);
     setTarotReadingData(null);
     setFlowAstrologyInfo(null);
     setFlowAstrologyData(null);
@@ -299,6 +305,29 @@ const App: React.FC = () => {
     }
   }, [capturedPalmImage, language, t]);
 
+  const handleAnalyzeHandwriting = useCallback(async () => {
+    if (!capturedHandwritingImage) return;
+
+    setAppState(AppState.HANDWRITING_ANALYSIS_LOADING);
+    setError(null);
+    const base64Data = capturedHandwritingImage.split(',')[1];
+    if(!base64Data) {
+        setError(t('errorInvalidImageData'));
+        setAppState(AppState.HANDWRITING_ANALYSIS_CAPTURE);
+        return;
+    }
+
+    try {
+      const data = await analyzeHandwriting(base64Data, language);
+      setHandwritingData(data);
+      setAppState(AppState.HANDWRITING_ANALYSIS_RESULT);
+    } catch (err) {
+       console.error(err);
+       setError(err instanceof Error ? err.message : t('errorUnknown'));
+       setAppState(AppState.HANDWRITING_ANALYSIS_CAPTURE);
+    }
+  }, [capturedHandwritingImage, language, t]);
+
   const handleGenerateNumerology = useCallback(async (info: NumerologyInfo) => {
     setNumerologyInfo(info);
     setAppState(AppState.NUMEROLOGY_LOADING);
@@ -346,6 +375,15 @@ const App: React.FC = () => {
     setCapturedPalmImage(null);
     setError(null);
   }, []);
+
+  const handleCaptureHandwritingImage = useCallback((imageDataUrl: string) => {
+    setCapturedHandwritingImage(imageDataUrl);
+  }, []);
+
+  const handleRetakeHandwritingCapture = useCallback(() => {
+    setCapturedHandwritingImage(null);
+    setError(null);
+  }, []);
   
   const handleFormSubmit = useCallback((info: BirthInfo) => {
     const chartId = createChartId(info);
@@ -383,6 +421,7 @@ const App: React.FC = () => {
 
   const handleStartPhysiognomy = useCallback(() => setAppState(AppState.FACE_SCAN_CAPTURE), []);
   const handleStartPalmReading = useCallback(() => setAppState(AppState.PALM_SCAN_CAPTURE), []);
+  const handleStartHandwritingAnalysis = useCallback(() => setAppState(AppState.HANDWRITING_ANALYSIS_CAPTURE), []);
   const handleStartNumerology = useCallback(() => {
       setError(null);
       setAppState(AppState.NUMEROLOGY_FORM);
@@ -459,6 +498,13 @@ const App: React.FC = () => {
       setError(null);
   }, []);
 
+  const handleResetHandwritingScan = useCallback(() => {
+    setAppState(AppState.HANDWRITING_ANALYSIS_CAPTURE);
+    setHandwritingData(null);
+    setCapturedHandwritingImage(null);
+    setError(null);
+}, []);
+
   const handlePasswordSuccess = useCallback(() => {
     sessionStorage.setItem('astrology_unlocked', 'true');
     if (postLoginAction) {
@@ -472,7 +518,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} onStartHandwritingAnalysis={handleStartHandwritingAnalysis} />;
       case AppState.SAVED_CHARTS:
         return <SavedCharts 
           charts={savedCharts}
@@ -521,6 +567,24 @@ const App: React.FC = () => {
               analysisData={palmReadingData} 
               imageData={capturedPalmImage} 
               onReset={handleResetPalmScan} 
+              onBackToHome={handleResetToHome} 
+              onOpenDonationModal={() => setIsDonationModalOpen(true)} 
+          />;
+      case AppState.HANDWRITING_ANALYSIS_CAPTURE:
+        return <HandwritingScan
+            onAnalyze={handleAnalyzeHandwriting} 
+            onBack={handleResetToHome}
+            onCapture={handleCaptureHandwritingImage}
+            onRetake={handleRetakeHandwritingCapture}
+            capturedImage={capturedHandwritingImage}
+        />;
+      case AppState.HANDWRITING_ANALYSIS_LOADING:
+        return <Spinner message={t('spinnerHandwriting')} />;
+      case AppState.HANDWRITING_ANALYSIS_RESULT:
+          return handwritingData && capturedHandwritingImage && <HandwritingResult 
+              analysisData={handwritingData} 
+              imageData={capturedHandwritingImage} 
+              onReset={handleResetHandwritingScan} 
               onBackToHome={handleResetToHome} 
               onOpenDonationModal={() => setIsDonationModalOpen(true)} 
           />;

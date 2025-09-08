@@ -14,6 +14,7 @@ interface Props {
     onStartTarot: () => void;
     onStartFlowAstrology: () => void;
     onStartAuspiciousDayFinder: () => void;
+    onStartHandwritingAnalysis: () => void;
 }
 
 const FeatureCard: React.FC<{
@@ -22,7 +23,7 @@ const FeatureCard: React.FC<{
     buttonText: string;
     icon: React.ReactNode;
     onClick: () => void;
-    buttonVariant: 'primary' | 'special' | 'secondary' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection';
+    buttonVariant: 'primary' | 'special' | 'secondary' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology';
 }> = ({ title, description, buttonText, icon, onClick, buttonVariant }) => (
     <div className="group relative h-full">
         <div className={`absolute -inset-0.5 bg-gradient-to-r ${
@@ -35,6 +36,7 @@ const FeatureCard: React.FC<{
             buttonVariant === 'tarot' ? 'from-purple-600 to-pink-600' :
             buttonVariant === 'flow' ? 'from-sky-500 to-fuchsia-600' :
             buttonVariant === 'dayselection' ? 'from-teal-600 to-cyan-600' :
+            buttonVariant === 'graphology' ? 'from-slate-600 to-indigo-600' :
             'from-cyan-600 to-blue-600'
         } rounded-2xl blur opacity-0 group-hover:opacity-60 transition duration-500`}></div>
         <Card className="relative flex flex-col text-center items-center h-full transition-all duration-300 group-hover:-translate-y-1">
@@ -51,7 +53,7 @@ const FeatureCard: React.FC<{
 );
 
 
-const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZodiacFinder, onStartIChing, onStartShop, onStartNumerology, onStartPalmReading, onStartTarot, onStartFlowAstrology, onStartAuspiciousDayFinder }) => {
+const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZodiacFinder, onStartIChing, onStartShop, onStartNumerology, onStartPalmReading, onStartTarot, onStartFlowAstrology, onStartAuspiciousDayFinder, onStartHandwritingAnalysis }) => {
     const { t } = useLocalization();
     const features = [
         {
@@ -73,6 +75,11 @@ const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZo
             title: t('palmReadingTitle'), description: t('palmReadingDesc'), buttonText: t('palmReadingButton'),
             onClick: onStartPalmReading, buttonVariant: 'palm' as const,
             icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0c-.454-.303-.977-.454-1.5-.454V5.454c.523 0 1.046-.151 1.5-.454a2.704 2.704 0 013 0 2.704 2.704 0 003 0 2.704 2.704 0 013 0 2.704 2.704 0 003 0c.454.303.977.454 1.5.454v10.092zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        },
+        {
+            title: t('handwritingAnalysisTitle'), description: t('handwritingAnalysisDesc'), buttonText: t('handwritingAnalysisButton'),
+            onClick: onStartHandwritingAnalysis, buttonVariant: 'graphology' as const,
+            icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
         },
         {
             title: t('tarotReadingTitle'), description: t('tarotReadingDesc'), buttonText: t('tarotReadingButton'),

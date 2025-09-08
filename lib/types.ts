@@ -56,6 +56,14 @@ export interface PalmReadingData {
     loiKhuyen: string;
 }
 
+export interface HandwritingData {
+    tongQuan: string;
+    khongGian: string;
+    netChu: string;
+    chuKy: string;
+    loiKhuyen: string;
+}
+
 export interface ZodiacHour {
     name: string;
     timeRange: string;
@@ -225,4 +233,7 @@ export enum AppState {
   FLOW_ASTROLOGY_LOADING,
   FLOW_ASTROLOGY_RESULT,
   AUSPICIOUS_DAY_FINDER,
+  HANDWRITING_ANALYSIS_CAPTURE,
+  HANDWRITING_ANALYSIS_LOADING,
+  HANDWRITING_ANALYSIS_RESULT,
 }

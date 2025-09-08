@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -127,5 +127,18 @@ export const getAuspiciousDayAnalysis = async (info: AuspiciousDayInfo, language
             throw error;
         }
         throw new Error("Could not get auspicious day analysis due to a connection error or server issue. Please try again.");
+    }
+};
+
+export const analyzeHandwriting = async (base64Image: string, language: string): Promise<HandwritingData> => {
+    try {
+        const data = await callProxy('analyzeHandwriting', { base64Image, language });
+        return data as HandwritingData;
+    } catch (error) {
+        console.error("Error analyzing handwriting:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Could not analyze handwriting due to a connection error or server issue. Please try again.");
     }
 };

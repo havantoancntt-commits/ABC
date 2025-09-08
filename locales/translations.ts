@@ -49,6 +49,25 @@ export const translations = {
     shopDesc: 'Khám phá các vật phẩm phong thủy và tâm linh được tuyển chọn kỹ lưỡng, mang lại bình an, may mắn và vượng khí cho gia chủ.',
     shopButton: 'Ghé Thăm Cửa Hàng',
 
+    // Handwriting Analysis
+    handwritingAnalysisTitle: 'Bút Tích Học',
+    handwritingAnalysisDesc: 'Phân tích chữ viết tay và chữ ký của bạn để khám phá các khía cạnh ẩn giấu về tính cách, cảm xúc và phong cách tư duy.',
+    handwritingAnalysisButton: 'Phân Tích Chữ Viết',
+    spinnerHandwriting: 'AI đang phân tích từng nét chữ... Những bí mật trong tâm hồn bạn sắp được hé lộ. Vui lòng chờ.',
+    handwritingScanTitle: 'Phân Tích Chữ Viết & Chữ Ký',
+    handwritingScanSubtitle: 'Để có kết quả tốt nhất, hãy viết một vài câu và ký tên trên giấy trắng không có dòng kẻ, sau đó chụp hoặc tải ảnh lên.',
+    handwritingScanAnalyze: 'Luận Giải Bút Tích',
+    handwritingResultTitle: 'Kết Quả Phân Tích Bút Tích',
+    handwritingResultImageTitle: 'Ảnh Chữ Viết',
+    handwritingResultImageAlt: 'Ảnh chữ viết và chữ ký để phân tích',
+    handwritingSection1: 'Tổng Quan & Năng Lượng',
+    handwritingSection2: 'Bố Cục Không Gian',
+    handwritingSection3: 'Đặc Điểm Nét Chữ',
+    handwritingSection4: 'Phân Tích Chữ Ký',
+    handwritingSection5: 'Lời Khuyên & Định Hướng',
+    handwritingScanInitial: 'Chụp hoặc tải lên ảnh chữ viết tay và chữ ký của bạn.',
+
+
     // Auspicious Day
     auspiciousDayTitle: 'Xem Ngày Tốt Xấu',
     auspiciousDayDesc: 'Chọn ngày lành tháng tốt để thực hiện các công việc trọng đại như cưới hỏi, khai trương, xây nhà. Phân tích chi tiết các yếu tố trong ngày.',
@@ -347,6 +366,24 @@ export const translations = {
     shopTitle: 'Mystic Pavilion',
     shopDesc: 'Discover carefully selected feng shui and spiritual items that bring peace, luck, and prosperity to your home.',
     shopButton: 'Visit the Shop',
+
+    // Handwriting Analysis
+    handwritingAnalysisTitle: 'Graphology',
+    handwritingAnalysisDesc: 'Analyze your handwriting and signature to reveal hidden aspects of your personality, emotions, and thinking style.',
+    handwritingAnalysisButton: 'Analyze Handwriting',
+    spinnerHandwriting: 'The AI is analyzing every stroke... Secrets of your psyche are about to be revealed. Please wait.',
+    handwritingScanTitle: 'Handwriting & Signature Analysis',
+    handwritingScanSubtitle: 'For best results, write a few sentences and sign your name on plain, unlined paper, then capture or upload the image.',
+    handwritingScanAnalyze: 'Analyze Handwriting',
+    handwritingResultTitle: 'Graphology Analysis Results',
+    handwritingResultImageTitle: 'Handwriting Sample',
+    handwritingResultImageAlt: 'Image of handwriting and signature for analysis',
+    handwritingSection1: 'Overall & Energy',
+    handwritingSection2: 'Spatial Arrangement',
+    handwritingSection3: 'Stroke Characteristics',
+    handwritingSection4: 'Signature Analysis',
+    handwritingSection5: 'Advice & Guidance',
+    handwritingScanInitial: 'Capture or upload a photo of your handwriting and signature.',
 
     // Auspicious Day
     auspiciousDayTitle: 'Auspicious Day Finder',

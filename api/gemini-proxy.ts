@@ -69,6 +69,18 @@ const palmReadingSchema = {
     required: ['tongQuan', 'duongTamDao', 'duongTriDao', 'duongSinhDao', 'loiKhuyen']
 };
 
+const handwritingSchema = {
+    type: Type.OBJECT,
+    properties: {
+        tongQuan: { type: Type.STRING, description: 'Luận giải tổng quan về năng lượng, nhịp điệu, tốc độ và sự rõ ràng của chữ viết.' },
+        khongGian: { type: Type.STRING, description: 'Phân tích cách sử dụng không gian: lề, khoảng cách giữa các từ, dòng.' },
+        netChu: { type: Type.STRING, description: 'Phân tích các đặc điểm chi tiết: độ nghiêng, kích thước, độ đậm nhạt, các vòng lặp.' },
+        chuKy: { type: Type.STRING, description: 'Phân tích chữ ký, so sánh với chữ viết và ý nghĩa về con người xã hội.' },
+        loiKhuyen: { type: Type.STRING, description: 'Đưa ra lời khuyên hữu ích, mang tính xây dựng dựa trên phân tích.' },
+    },
+    required: ['tongQuan', 'khongGian', 'netChu', 'chuKy', 'loiKhuyen']
+};
+
 const iChingSchema = {
     type: Type.OBJECT,
     properties: {
@@ -302,6 +314,30 @@ const EN_PALM_READING_SYSTEM_INSTRUCTION = `**Persona:** You are a master palm r
     *   'duongTriDao' (Head Line): Analyze the Head Line, highlighting thinking style, analytical abilities, and career aptitude.
     *   'duongSinhDao' (Life Line): Interpret the Life Line in terms of energy levels, vitality, and resilience, **avoiding** predictions of lifespan.
 3.  **Actionable Advice:** The 'loiKhuyen' (Advice) section must synthesize the analysis and provide specific, actionable advice that the user can apply to improve their life.`;
+
+const VI_HANDWRITING_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một chuyên gia Bút Tích Học (Graphology) chuyên nghiệp, với nền tảng tâm lý học sâu sắc. Bạn phân tích chữ viết và chữ ký một cách khách quan, khoa học để khám phá những nét tính cách, trạng thái cảm xúc và tiềm năng của một người, không đưa ra phán xét.
+
+**Nhiệm vụ:** Phân tích hình ảnh chữ viết tay và chữ ký, sau đó trả về kết quả JSON theo schema.
+
+**Yêu cầu cốt lõi:**
+1.  **Phân tích toàn diện (150-200 từ/phần):**
+    *   'tongQuan': Nhận xét về năng lượng tổng thể toát ra từ chữ viết (mạnh mẽ, nhẹ nhàng, gò bó, tự do), nhịp điệu, tốc độ, và sự hài hòa chung.
+    *   'khongGian': Phân tích cách người viết sử dụng không gian trên trang giấy. Lề trái, phải, trên, dưới. Khoảng cách giữa các từ và các dòng nói lên điều gì về tư duy và cách họ tương tác với xã hội.
+    *   'netChu': Đi sâu vào các chi tiết: Độ nghiêng (hướng nội/ngoại), kích thước chữ (cái tôi), áp lực bút (năng lượng), các vòng lặp trên/dưới (trí tưởng tượng/bản năng), và cách nối chữ (logic/trực giác).
+    *   'chuKy': Phân tích chữ ký như là "bộ mặt xã hội". So sánh nó với chữ viết thường để thấy sự khác biệt giữa con người bên trong và cách họ thể hiện ra ngoài. Phân tích độ rõ ràng, kích thước, và các chi tiết đặc biệt (gạch chân, dấu chấm).
+2.  **Lời khuyên xây dựng:** Phần 'loiKhuyen' phải dựa trên những phát hiện, đưa ra những gợi ý để người viết nhận thức rõ hơn về bản thân và phát huy tiềm năng hoặc cân bằng các khía cạnh tính cách.`;
+
+const EN_HANDWRITING_SYSTEM_INSTRUCTION = `**Persona:** You are a professional Graphologist with a deep background in psychology. You analyze handwriting and signatures objectively and scientifically to uncover personality traits, emotional states, and an individual's potential, without passing judgment.
+
+**Task:** Analyze an image of handwriting and a signature, then return the result as a JSON object according to the schema.
+
+**Core Requirements:**
+1.  **Comprehensive Analysis (150-200 words/section):**
+    *   'tongQuan' (Overall): Comment on the overall energy exuded by the script (strong, gentle, constrained, free), its rhythm, speed, and general harmony.
+    *   'khongGian' (Spatial Arrangement): Analyze the writer's use of space on the page. Margins (left, right, top, bottom). Spacing between words and lines, and what this reveals about their thinking and social interaction.
+    *   'netChu' (Stroke Characteristics): Dive into the details: Slant (introversion/extroversion), size (ego), pressure (energy), upper/lower loops (imagination/instincts), and connections (logic/intuition).
+    *   'chuKy' (Signature): Analyze the signature as the "public persona." Compare it to the regular script to find discrepancies between the inner self and the outer presentation. Analyze its legibility, size, and any special features (underscoring, periods).
+2.  **Constructive Advice:** The 'loiKhuyen' (Advice) section must be based on the findings, offering suggestions for the writer to gain self-awareness and leverage their potential or balance personality aspects.`;
 
 // FIX: Replaced backticks around schema property names with single quotes to resolve parsing errors.
 const VI_ICHING_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một bậc thầy Kinh Dịch uyên thâm, có khả năng kết nối triết lý cổ xưa với những tình huống hiện đại. Giọng văn của bạn trầm tĩnh, sâu sắc và gợi mở, giúp người hỏi tự tìm ra câu trả lời thay vì đưa ra một kết quả duy nhất.
@@ -550,6 +586,21 @@ export default async function handler(req: any, res: any) {
                 responseMimeType: "application/json",
                 responseSchema: palmReadingSchema,
                 temperature: 0.6,
+            },
+        });
+    } else if (operation === 'analyzeHandwriting') {
+        const { base64Image, language } = payload;
+        const systemInstruction = language === 'en' ? EN_HANDWRITING_SYSTEM_INSTRUCTION : VI_HANDWRITING_SYSTEM_INSTRUCTION;
+        const promptText = language === 'en' ? "Analyze the handwriting and signature in this image." : "Phân tích chữ viết tay và chữ ký trong ảnh này.";
+        const imagePart = { inlineData: { mimeType: 'image/jpeg', data: base64Image } };
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: { parts: [imagePart, { text: promptText }] },
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: handwritingSchema,
+                temperature: 0.7,
             },
         });
     } else if (operation === 'getIChingInterpretation') {
