@@ -38,9 +38,9 @@ const FeatureCard: React.FC<{
             buttonVariant === 'dayselection' ? 'from-teal-600 to-cyan-600' :
             buttonVariant === 'graphology' ? 'from-slate-600 to-indigo-600' :
             'from-cyan-600 to-blue-600'
-        } rounded-2xl blur opacity-0 group-hover:opacity-60 transition duration-500`}></div>
-        <Card className="relative flex flex-col text-center items-center h-full transition-all duration-300 group-hover:-translate-y-1">
-            <div className="p-4 bg-gray-900/50 rounded-full mb-4 border border-gray-700 transition-transform duration-300 group-hover:scale-110">
+        } rounded-2xl blur opacity-0 group-hover:opacity-75 transition duration-500 group-hover:duration-300`}></div>
+        <Card className="relative flex flex-col text-center items-center h-full transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-black/50">
+            <div className="p-4 bg-gray-900/50 rounded-full mb-4 border border-gray-700 transition-all duration-300 group-hover:scale-110 group-hover:bg-gray-900 group-hover:border-yellow-400/50">
                 {icon}
             </div>
             <h3 className="text-2xl font-bold font-serif text-yellow-300 mb-3">{title}</h3>

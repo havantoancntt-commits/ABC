@@ -1,175 +1,43 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData } from '../lib/types';
 import { AppState } from '../lib/types';
 import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting } from '../lib/gemini';
 import Header from './Header';
-import BirthInfoForm from './BirthInfoForm';
 import DonationModal from './PaymentModal';
-import AstrologyChart from './AstrologyChart';
 import Spinner from './Spinner';
-import SavedCharts from './SavedCharts';
 import ZaloContact from './ZaloContact';
 import ConfirmationModal from './ConfirmationModal';
-import FaceScan from './FaceScan';
-import PhysiognomyResult from './PhysiognomyResult';
-import Home from './Home';
-import ZodiacHourFinder from './ZodiacHourFinder';
-import IChingDivination from './IChingDivination';
-import Shop from './Hero'; // Re-using Hero.tsx for the Shop component
-import NumerologyForm from './NumerologyForm';
-import NumerologyChart from './NumerologyChart';
-import PalmScan from './PalmScan';
-import PalmReadingResult from './PalmReadingResult';
-import TarotReading from './TarotReading';
-import FlowAstrologyForm from './FlowAstrologyForm';
-import FlowAstrologyResult from './FlowAstrologyResult';
-import AuspiciousDayFinder from './AuspiciousDayFinder';
-import HandwritingScan from './HandwritingScan';
-import HandwritingResult from './HandwritingResult';
 import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
 import type { TranslationKey } from '../hooks/useLocalization';
-import Card from './Card';
 import Button from './Button';
+
+// --- Lazy Load Components for Performance ---
+const Home = lazy(() => import('./Home'));
+const SavedCharts = lazy(() => import('./SavedCharts'));
+const PasswordPrompt = lazy(() => import('./PasswordPrompt'));
+const BirthInfoForm = lazy(() => import('./BirthInfoForm'));
+const AstrologyChart = lazy(() => import('./AstrologyChart'));
+const FaceScan = lazy(() => import('./FaceScan'));
+const PhysiognomyResult = lazy(() => import('./PhysiognomyResult'));
+const PalmScan = lazy(() => import('./PalmScan'));
+const PalmReadingResult = lazy(() => import('./PalmReadingResult'));
+const HandwritingScan = lazy(() => import('./HandwritingScan'));
+const HandwritingResult = lazy(() => import('./HandwritingResult'));
+const ZodiacHourFinder = lazy(() => import('./ZodiacHourFinder'));
+const AuspiciousDayFinder = lazy(() => import('./AuspiciousDayFinder'));
+const IChingDivination = lazy(() => import('./IChingDivination'));
+const TarotReading = lazy(() => import('./TarotReading'));
+const Shop = lazy(() => import('./Hero'));
+const NumerologyForm = lazy(() => import('./NumerologyForm'));
+const NumerologyChart = lazy(() => import('./NumerologyChart'));
+const FlowAstrologyForm = lazy(() => import('./FlowAstrologyForm'));
+const FlowAstrologyResult = lazy(() => import('./FlowAstrologyResult'));
+
 
 const createChartId = (info: BirthInfo): string => {
   const hourPart = info.hour === -1 ? 'unknown' : info.hour;
   return `${info.name}-${info.gender}-${info.year}-${info.month}-${info.day}-${hourPart}`.trim().replace(/\s+/g, '_');
-};
-
-// --- Password Prompt Component ---
-interface PasswordPromptProps {
-  onSuccess: () => void;
-  onBack: () => void;
-}
-
-const PasswordPrompt: React.FC<PasswordPromptProps> = ({ onSuccess, onBack }) => {
-  const { t } = useLocalization();
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [copyStatus, setCopyStatus] = useState<Record<string, string>>({});
-  const [transferContent] = useState(`${SUPPORT_INFO.transferContent}_TV`);
-
-  const copyToClipboard = (text: string, field: string) => {
-    if (copyStatus[field]) return;
-    navigator.clipboard.writeText(text).then(() => {
-      setCopyStatus(prev => ({ ...prev, [field]: t('copied') }));
-      setTimeout(() => {
-        setCopyStatus(prev => {
-          const newStatus = { ...prev };
-          delete newStatus[field];
-          return newStatus;
-        });
-      }, 2000);
-    }).catch(err => {
-      console.error('Could not copy text: ', err);
-      setCopyStatus(prev => ({ ...prev, [field]: t('copyError') }));
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === 'tuvi2025') {
-      setError(null);
-      onSuccess();
-    } else {
-      setError(t('passwordIncorrect'));
-    }
-  };
-
-  return (
-    <div className="max-w-4xl mx-auto animate-slide-in-up">
-      <Card className="p-4 sm:p-6 md:p-8">
-        <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold font-serif text-yellow-300 leading-tight">
-              {t('passwordPromptTitle')}
-            </h2>
-            <p className="text-gray-300 mt-3 leading-relaxed max-w-2xl mx-auto">
-              {t('passwordPromptSubtitle')}
-            </p>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          
-          {/* Left Column: Value & Form */}
-          <div className="flex flex-col">
-            <h3 className="font-semibold text-xl text-yellow-300 font-serif mb-4 text-center lg:text-left">
-              {t('passwordPromptValueTitle')}
-            </h3>
-            <p className="text-gray-400 text-sm leading-relaxed mb-6">{t('passwordPromptValueDesc')}</p>
-            <form onSubmit={handleSubmit} className="mt-auto">
-              <label htmlFor="password-input" className="sr-only">
-                {t('passwordLabel')}
-              </label>
-              <input
-                type="password"
-                id="password-input"
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); if (error) setError(null); }}
-                className={`w-full bg-gray-900/50 border rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all ${error ? 'border-red-500' : 'border-gray-600'}`}
-                placeholder={t('passwordPlaceholder')}
-                required
-                aria-invalid={!!error}
-                aria-describedby={error ? "password-error" : undefined}
-              />
-              {error && <p id="password-error" className="text-red-500 text-xs mt-2 text-center">{error}</p>}
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Button onClick={onBack} variant="secondary" type="button">{t('back')}</Button>
-                <Button type="submit" variant="primary">{t('passwordSubmit')}</Button>
-              </div>
-            </form>
-          </div>
-          
-          {/* Right Column: Instructions */}
-          <div className="p-6 bg-gray-950/60 rounded-lg border border-yellow-500/30">
-            <h3 className="font-semibold text-xl text-yellow-300 font-serif mb-4 text-center">
-              {t('passwordPaymentTitle')}
-            </h3>
-            <ol className="space-y-4 text-sm text-gray-300">
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 font-bold text-yellow-400 bg-gray-800 rounded-full h-6 w-6 flex items-center justify-center">1</span>
-                <span>{t('passwordPaymentStep1')}</span>
-              </li>
-               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 font-bold text-yellow-400 bg-gray-800 rounded-full h-6 w-6 flex items-center justify-center">2</span>
-                <span>{t('passwordPaymentStep2')}
-                  <a href={`https://zalo.me/${SUPPORT_INFO.zaloPhone}`} target="_blank" rel="noopener noreferrer" className="font-bold text-white hover:text-yellow-300 transition-colors"> Zalo</a>.
-                </span>
-              </li>
-              <li className="pl-9 space-y-2">
-                <div className="flex items-center justify-between p-2 bg-black/30 rounded-md">
-                  <span className="font-medium text-gray-400 mr-2">{t('zaloNumber')}:</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-white tracking-wider">{SUPPORT_INFO.zaloPhone}</span>
-                    <button type="button" onClick={() => copyToClipboard(SUPPORT_INFO.zaloPhone, 'zaloPhone')} className="text-yellow-400 hover:text-yellow-300 text-xs font-bold uppercase disabled:text-gray-500 transition-colors w-16 text-right" disabled={!!copyStatus['zaloPhone']}>
-                      {copyStatus['zaloPhone'] || t('copy')}
-                    </button>
-                  </div>
-                </div>
-                 <div className="flex items-center justify-between p-2 bg-black/30 rounded-md">
-                  <span className="font-medium text-gray-400 mr-2">{t('passwordTransferContent')}:</span>
-                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-white tracking-wider">{transferContent}</span>
-                    <button type="button" onClick={() => copyToClipboard(transferContent, 'nd')} className="text-yellow-400 hover:text-yellow-300 text-xs font-bold uppercase disabled:text-gray-500 transition-colors w-16 text-right" disabled={!!copyStatus['nd']}>
-                      {copyStatus['nd'] || t('copy')}
-                    </button>
-                  </div>
-                </div>
-              </li>
-               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 font-bold text-yellow-400 bg-gray-800 rounded-full h-6 w-6 flex items-center justify-center">3</span>
-                <span>{t('passwordPaymentStep3')}</span>
-              </li>
-            </ol>
-            <div className="mt-4 text-center">
-                 <a href={`https://zalo.me/${SUPPORT_INFO.zaloPhone}`} target="_blank" rel="noopener noreferrer" className="text-xs text-yellow-400 hover:text-yellow-200">
-                    {t('passwordSupportText')}
-                </a>
-            </div>
-          </div>
-        </div>
-      </Card>
-    </div>
-  );
 };
 
 
@@ -674,9 +542,11 @@ const App: React.FC = () => {
               </button>
             </div>
           )}
-          <div key={appState} className="animate-slide-in-up">
-            {renderContent()}
-          </div>
+          <Suspense fallback={<Spinner message={t('processing')} />}>
+            <div className="animate-slide-in-up">
+              {renderContent()}
+            </div>
+          </Suspense>
         </main>
         <footer className="text-center py-8 text-gray-400 bg-black bg-opacity-50 mt-8 border-t border-gray-700/50">
           <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">

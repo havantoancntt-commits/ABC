@@ -17,7 +17,7 @@ export const translations = {
     view: 'Xem',
     details: 'Chi tiết',
     creating: 'Đang tạo...',
-    saveChartImage: 'Lưu Lá Bùa',
+    saveChartImage: 'Lưu Lá Số',
     errorSaveImage: 'Đã xảy ra lỗi khi lưu ảnh. Vui lòng thử lại.',
     donate: 'Gieo Duyên',
     day: 'Ngày',

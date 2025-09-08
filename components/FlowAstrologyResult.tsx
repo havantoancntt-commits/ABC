@@ -25,6 +25,7 @@ const SymbolIcon: React.FC<{ symbol: string }> = ({ symbol }) => {
 const FlowAstrologyResult: React.FC<Props> = ({ data, info, onReset, onOpenDonationModal }) => {
     const { t } = useLocalization();
     const [selectedPeriod, setSelectedPeriod] = useState<'7days' | '1month' | '6months' | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
     const handleSegmentClick = (period: '7days' | '1month' | '6months') => {
         setSelectedPeriod(period);
@@ -32,17 +33,58 @@ const FlowAstrologyResult: React.FC<Props> = ({ data, info, onReset, onOpenDonat
         element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
 
-    const handleSaveTalisman = () => {
-        const svgBlob = new Blob([data.talisman.svg], { type: 'image/svg+xml' });
-        const svgUrl = URL.createObjectURL(svgBlob);
-        const downloadLink = document.createElement('a');
-        downloadLink.href = svgUrl;
-        downloadLink.download = `Talisman-${info.name.replace(/\s/g, '_')}.svg`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(svgUrl);
+    const handleSaveTalisman = async () => {
+        if (isSaving) return;
+        setIsSaving(true);
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('Could not get canvas context');
+
+            // Use data URI for the image source to handle SVG content directly
+            const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(data.talisman.svg)}`;
+            
+            const img = new Image();
+            
+            img.onload = () => {
+                const desiredSize = 512; // Higher resolution for better quality
+                canvas.width = desiredSize;
+                canvas.height = desiredSize;
+                
+                // Fill background with app's dark color
+                ctx.fillStyle = '#0c0a1a';
+                ctx.fillRect(0, 0, desiredSize, desiredSize);
+                
+                // Draw the SVG image onto the canvas
+                ctx.drawImage(img, 0, 0, desiredSize, desiredSize);
+
+                // Create a PNG and trigger download
+                const pngUrl = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pngUrl;
+                downloadLink.download = `Talisman-${info.name.replace(/\s/g, '_')}.png`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                setIsSaving(false);
+            };
+
+            img.onerror = () => {
+                console.error("Failed to load SVG into image for saving.");
+                alert(t('errorSaveImage'));
+                setIsSaving(false);
+            };
+            
+            img.src = svgDataUrl;
+
+        } catch (error) {
+            console.error("Error saving talisman:", error);
+            alert(t('errorSaveImage'));
+            setIsSaving(false);
+        }
     };
+
 
     const energyStyles: Record<string, { gradient: string; color: string }> = {
         luck: { gradient: 'url(#luckGradient)', color: '#f59e0b' },
@@ -54,6 +96,9 @@ const FlowAstrologyResult: React.FC<Props> = ({ data, info, onReset, onOpenDonat
     const birthDate = new Intl.DateTimeFormat(t('locale'), {
         day: '2-digit', month: '2-digit', year: 'numeric'
     }).format(new Date(info.year, info.month - 1, info.day));
+    
+    // Safer way to display SVG using a data URI in an <img> tag
+    const talismanSvgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(data.talisman.svg)}`;
     
     return (
         <div className="max-w-7xl mx-auto">
@@ -106,7 +151,6 @@ const FlowAstrologyResult: React.FC<Props> = ({ data, info, onReset, onOpenDonat
                                     style={{'--start-offset': `${start}px`, '--end-offset': `${end}px`} as React.CSSProperties}
                                     onClick={() => handleSegmentClick(segment.period)}
                                 >
-                                    {/* FIX: Corrected dynamic key generation and added type assertion for TypeScript. */}
                                     <title>{t(`flowAstrologyPeriod${segment.period}` as TranslationKey)}</title>
                                 </path>
                             );
@@ -140,7 +184,6 @@ const FlowAstrologyResult: React.FC<Props> = ({ data, info, onReset, onOpenDonat
                 {data.flow.map((segment) => (
                     <div id={`prediction-${segment.period}`} key={segment.period} className={`transition-all duration-500 rounded-2xl ${selectedPeriod === segment.period ? 'ring-2 ring-sky-400 shadow-2xl shadow-sky-500/20' : ''}`}>
                          <Card>
-                            {/* FIX: Corrected dynamic key generation and added type assertion for TypeScript. */}
                             <h3 className="text-2xl font-bold font-serif mb-3" style={{color: energyStyles[segment.energyType].color}}>{t(`flowAstrologyPeriod${segment.period}` as TranslationKey)}</h3>
                             <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{segment.interpretation}</p>
                             <p className="mt-4 text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{data.predictions[segment.period]}</p>
@@ -152,9 +195,18 @@ const FlowAstrologyResult: React.FC<Props> = ({ data, info, onReset, onOpenDonat
             <Card className="mt-12 text-center flex flex-col items-center">
                 <h3 className="text-3xl font-bold font-serif text-yellow-300 mb-4">{t('flowAstrologyTalismanTitle')}</h3>
                 <p className="text-gray-400 mb-6 max-w-xl mx-auto">{data.talisman.description}</p>
-                <div className="w-48 h-48 p-4 bg-gray-950 rounded-2xl border border-yellow-500/30 shadow-lg" dangerouslySetInnerHTML={{ __html: data.talisman.svg }} />
-                <Button onClick={handleSaveTalisman} variant="primary" className="mt-8">
-                    {t('flowAstrologySaveTalisman')}
+                <div className="w-48 h-48 p-4 bg-gray-950 rounded-2xl border border-yellow-500/30 shadow-lg">
+                    <img src={talismanSvgDataUrl} alt={data.talisman.name} className="w-full h-full object-contain" />
+                </div>
+                <Button onClick={handleSaveTalisman} disabled={isSaving} variant="primary" className="mt-8">
+                    {isSaving ? (
+                        <>
+                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span>{t('creating')}</span>
+                        </>
+                    ) : (
+                       t('flowAstrologySaveTalisman')
+                    )}
                 </Button>
             </Card>
 
