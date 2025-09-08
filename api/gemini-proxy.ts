@@ -2,7 +2,7 @@
 import { GoogleGenAI, Type, BlockedReason } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
 // FIX: Add CareerInfo to the import list from types.
-import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo } from '../lib/types';
+import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo, TalismanInfo } from '../lib/types';
 
 // By removing the `export const config = { runtime: 'edge' };`, this function
 // will default to the standard Node.js serverless runtime, which has a longer
@@ -263,6 +263,18 @@ const careerAdviceSchema = {
         }
     },
     required: ['overallAnalysis', 'topSuggestions']
+};
+
+const talismanSchema = {
+    type: Type.OBJECT,
+    properties: {
+        name: { type: Type.STRING, description: "Tên của lá bùa, ví dụ: 'Bùa Bình An Hộ Mệnh'." },
+        description: { type: Type.STRING, description: "Mô tả ngắn gọn về lá bùa (khoảng 50-70 từ)." },
+        svg: { type: Type.STRING, description: "Một chuỗi SVG hoàn chỉnh, có thể hiển thị, cho đồ họa lá bùa. SVG phải có viewBox='0 0 200 280' và nền màu tối. Thiết kế phải mang tính biểu tượng, kết hợp các yếu tố tâm linh phương Đông (ngũ hành, bát quái, hoa sen...) một cách trang trọng, tinh tế." },
+        interpretation: { type: Type.STRING, description: "Luận giải chi tiết ý nghĩa của các biểu tượng và năng lượng của lá bùa (khoảng 150-200 từ)." },
+        usage: { type: Type.STRING, description: "Hướng dẫn cách sử dụng lá bùa để phát huy hiệu quả tốt nhất, ví dụ: lưu trong ví, đặt ở bàn làm việc, thiền định cùng lá bùa... (khoảng 100 từ)." }
+    },
+    required: ['name', 'description', 'svg', 'interpretation', 'usage']
 };
 
 
@@ -564,6 +576,41 @@ const EN_CAREER_ADVISOR_SYSTEM_INSTRUCTION = `**Persona:** You are an in-depth c
     *   'suggestedFields': Suggest specific fields or specializations within the industry.
 3.  **Practical and Inspiring:** The suggestions must be real-world professions with potential in the modern world. The tone should be constructive and encouraging.`;
 
+const VI_TALISMAN_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một Pháp sư Huyền học Phương Đông, một người thầy uyên bác có khả năng kết nối năng lượng của trời đất và con người để tạo ra những lá bùa (linh phù) chứa đựng sức mạnh tâm linh. Lời văn của bạn vừa huyền bí, trang trọng, vừa mang lại cảm giác tin tưởng và an yên.
+
+**Nhiệm vụ:** Dựa trên thông tin cá nhân của người dùng, sáng tạo một lá bùa độc nhất và trả về kết quả dưới dạng JSON theo schema đã định.
+
+**Yêu cầu cốt lõi:**
+1.  **Phân tích Năng lượng:** Dựa vào ngũ hành bản mệnh của người dùng (tính từ ngày tháng năm sinh) để lựa chọn màu sắc, hình dạng và biểu tượng chủ đạo cho lá bùa.
+2.  **Thiết kế SVG Sáng tạo:**
+    *   Tạo ra một chuỗi SVG **hoàn chỉnh, hợp lệ và có thể hiển thị được**.
+    *   SVG phải có 'viewBox="0 0 200 280"'.
+    *   Thiết kế phải phức tạp, tinh tế và mang tính biểu tượng cao. Kết hợp các yếu tố như: Bát quái, cổ tự, hoa sen, mây, nước, núi, các biểu tượng ngũ hành...
+    *   Sử dụng màu sắc (vàng, đỏ, trắng, đen, xanh) một cách hài hòa và có ý nghĩa phong thủy. Nền nên là một hình chữ nhật bo góc màu tối, ví dụ 'fill="#1a1a2e"'.
+3.  **Nội dung sâu sắc:**
+    *   'name': Đặt một cái tên ý nghĩa và trang trọng cho lá bùa.
+    *   'description': Mô tả ngắn gọn sức mạnh và công dụng chính.
+    *   'interpretation': Luận giải chi tiết ý nghĩa của các hình ảnh, màu sắc trên lá bùa và cách chúng tương tác với năng lượng của người dùng.
+    *   'usage': Hướng dẫn cụ thể cách "khai quang" và sử dụng lá bùa để đạt hiệu quả tối ưu.`;
+
+const EN_TALISMAN_SYSTEM_INSTRUCTION = `**Persona:** You are an Eastern Esoteric Master, a wise teacher capable of connecting the energies of heaven, earth, and humanity to create powerful spiritual talismans (Fu). Your writing is both mystical and formal, inspiring trust and peace.
+
+**Task:** Based on the user's personal information, create a unique talisman and return the result as a JSON object according to the predefined schema.
+
+**Core Requirements:**
+1.  **Energy Analysis:** Use the user's Bazi/Five Elements (calculated from their date of birth) to select the primary colors, shapes, and symbols for the talisman.
+2.  **Creative SVG Design:**
+    *   Generate a **complete, valid, and renderable** SVG string.
+    *   The SVG must have 'viewBox="0 0 200 280"'.
+    *   The design must be intricate, refined, and highly symbolic. Combine elements such as: Bagua trigrams, ancient script, lotus flowers, clouds, water, mountains, Five Element symbols, etc.
+    *   Use colors (gold, red, white, black, blue) harmoniously and with feng shui meaning. The background should be a dark, rounded rectangle, e.g., 'fill="#1a1a2e"'.
+3.  **Profound Content:**
+    *   'name': Give the talisman a meaningful and dignified name.
+    *   'description': Briefly describe its main power and purpose.
+    *   'interpretation': Provide a detailed explanation of the meaning behind the symbols and colors on the talisman and how they interact with the user's energy.
+    *   'usage': Give specific instructions on how to "activate" and use the talisman for optimal effect.`;
+
+
 // --- Main Handler ---
 // Corrected signature for Vercel's Node.js runtime
 export default async function handler(req: any, res: any) {
@@ -779,6 +826,24 @@ export default async function handler(req: any, res: any) {
                 responseMimeType: "application/json",
                 responseSchema: careerAdviceSchema,
                 temperature: 0.8,
+            },
+        });
+    } else if (operation === 'generateTalisman') {
+        const { info, language }: { info: TalismanInfo, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_TALISMAN_SYSTEM_INSTRUCTION : VI_TALISMAN_SYSTEM_INSTRUCTION;
+    
+        const userPrompt = language === 'en'
+            ? `Generate a personalized talisman for:\n- Name: ${info.name}\n- Date of Birth: ${info.day}/${info.month}/${info.year}`
+            : `Tạo một lá bùa hộ mệnh cá nhân hóa cho:\n- Tên: ${info.name}\n- Ngày sinh: ${info.day}/${info.month}/${info.year}`;
+    
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: talismanSchema,
+                temperature: 1.0, // Higher temperature for more creative SVG designs
             },
         });
     } else {
