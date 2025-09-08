@@ -359,9 +359,18 @@ const App: React.FC = () => {
       setError(null);
       setAppState(AppState.SHOP);
   }, []);
+
   const handleStartCareerAdvisor = useCallback(() => {
-    setError(null);
-    setAppState(AppState.CAREER_ADVISOR_FORM);
+    const action = () => {
+        setError(null);
+        setAppState(AppState.CAREER_ADVISOR_FORM);
+    };
+    if (sessionStorage.getItem('career_unlocked') === 'true') {
+        action();
+    } else {
+        setPostLoginAction(() => action);
+        setAppState(AppState.CAREER_ADVISOR_PASSWORD);
+    }
   }, []);
 
   const handleViewChart = useCallback((chart: SavedChart) => {
@@ -418,7 +427,7 @@ const App: React.FC = () => {
     setError(null);
 }, []);
 
-  const handlePasswordSuccess = useCallback(() => {
+  const handleAstrologyPasswordSuccess = useCallback(() => {
     sessionStorage.setItem('astrology_unlocked', 'true');
     if (postLoginAction) {
       postLoginAction();
@@ -427,6 +436,17 @@ const App: React.FC = () => {
     }
     setPostLoginAction(null);
   }, [postLoginAction]);
+  
+  const handleCareerPasswordSuccess = useCallback(() => {
+    sessionStorage.setItem('career_unlocked', 'true');
+    if (postLoginAction) {
+        postLoginAction();
+    } else {
+        setAppState(AppState.CAREER_ADVISOR_FORM);
+    }
+    setPostLoginAction(null);
+  }, [postLoginAction]);
+
 
   const getTranslatedError = (errorKey: string | null): string => {
     if (!errorKey) return '';
@@ -460,7 +480,7 @@ const App: React.FC = () => {
           onCreateNew={handleStartAstrology}
         />;
       case AppState.ASTROLOGY_PASSWORD:
-        return <PasswordPrompt onSuccess={handlePasswordSuccess} onBack={handleResetToHome} />;
+        return <PasswordPrompt onSuccess={handleAstrologyPasswordSuccess} onBack={handleResetToHome} feature="astrology"/>;
       case AppState.ASTROLOGY_FORM:
         return <BirthInfoForm onSubmit={handleFormSubmit} />;
       case AppState.LOADING:
@@ -543,6 +563,8 @@ const App: React.FC = () => {
           return <Spinner message={t('spinnerFlowAstrology')} />;
       case AppState.FLOW_ASTROLOGY_RESULT:
           return flowAstrologyData && <FlowAstrologyResult data={flowAstrologyData} info={flowAstrologyInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.CAREER_ADVISOR_PASSWORD:
+          return <PasswordPrompt onSuccess={handleCareerPasswordSuccess} onBack={handleResetToHome} feature="career" />;
       case AppState.CAREER_ADVISOR_FORM:
           return <CareerAdvisorForm onSubmit={handleGenerateCareerAdvice} />;
       case AppState.CAREER_ADVISOR_LOADING:

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocalization } from '../hooks/useLocalization';
+import type { TranslationKey } from '../hooks/useLocalization';
 import { SUPPORT_INFO } from '../lib/constants';
 import Card from './Card';
 import Button from './Button';
@@ -7,14 +8,38 @@ import Button from './Button';
 interface PasswordPromptProps {
   onSuccess: () => void;
   onBack: () => void;
+  feature: 'astrology' | 'career';
 }
 
-const PasswordPrompt: React.FC<PasswordPromptProps> = ({ onSuccess, onBack }) => {
+const PasswordPrompt: React.FC<PasswordPromptProps> = ({ onSuccess, onBack, feature }) => {
   const { t } = useLocalization();
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<Record<string, string>>({});
-  const [transferContent] = useState(`${SUPPORT_INFO.transferContent}_TV`);
+
+  const featureConfig = {
+    astrology: {
+      password: 'tuvi2025',
+      titleKey: 'passwordPromptTitle' as const,
+      subtitleKey: 'passwordPromptSubtitle' as const,
+      valueTitleKey: 'passwordPromptValueTitle' as const,
+      valueDescKey: 'passwordPromptValueDesc' as const,
+      paymentStep1Key: 'passwordPaymentStep1' as const,
+      transferContentSuffix: 'TV',
+    },
+    career: {
+      password: 'nghenghiep2025',
+      titleKey: 'passwordPromptTitle' as const,
+      subtitleKey: 'careerPasswordPromptSubtitle' as const,
+      valueTitleKey: 'careerPasswordPromptValueTitle' as const,
+      valueDescKey: 'careerPasswordPromptValueDesc' as const,
+      paymentStep1Key: 'careerPasswordPaymentStep1' as const,
+      transferContentSuffix: 'NN',
+    }
+  };
+
+  const config = featureConfig[feature];
+  const [transferContent] = useState(`${SUPPORT_INFO.transferContent}_${config.transferContentSuffix}`);
 
   const copyToClipboard = (text: string, field: string) => {
     if (copyStatus[field]) return;
@@ -35,7 +60,7 @@ const PasswordPrompt: React.FC<PasswordPromptProps> = ({ onSuccess, onBack }) =>
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'tuvi2025') {
+    if (password === config.password) {
       setError(null);
       onSuccess();
     } else {
@@ -48,10 +73,10 @@ const PasswordPrompt: React.FC<PasswordPromptProps> = ({ onSuccess, onBack }) =>
       <Card className="p-4 sm:p-6 md:p-8">
         <div className="text-center mb-8">
             <h2 className="text-3xl sm:text-4xl font-bold font-serif text-yellow-300 leading-tight">
-              {t('passwordPromptTitle')}
+              {t(config.titleKey)}
             </h2>
             <p className="text-gray-300 mt-3 leading-relaxed max-w-2xl mx-auto">
-              {t('passwordPromptSubtitle')}
+              {t(config.subtitleKey)}
             </p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -59,9 +84,9 @@ const PasswordPrompt: React.FC<PasswordPromptProps> = ({ onSuccess, onBack }) =>
           {/* Left Column: Value & Form */}
           <div className="flex flex-col">
             <h3 className="font-semibold text-xl text-yellow-300 font-serif mb-4 text-center lg:text-left">
-              {t('passwordPromptValueTitle')}
+              {t(config.valueTitleKey)}
             </h3>
-            <p className="text-gray-400 text-sm leading-relaxed mb-6">{t('passwordPromptValueDesc')}</p>
+            <p className="text-gray-400 text-sm leading-relaxed mb-6">{t(config.valueDescKey)}</p>
             <form onSubmit={handleSubmit} className="mt-auto">
               <label htmlFor="password-input" className="sr-only">
                 {t('passwordLabel')}
@@ -93,7 +118,7 @@ const PasswordPrompt: React.FC<PasswordPromptProps> = ({ onSuccess, onBack }) =>
             <ol className="space-y-4 text-sm text-gray-300">
               <li className="flex items-start gap-3">
                 <span className="flex-shrink-0 font-bold text-yellow-400 bg-gray-800 rounded-full h-6 w-6 flex items-center justify-center">1</span>
-                <span>{t('passwordPaymentStep1')}</span>
+                <span>{t(config.paymentStep1Key)}</span>
               </li>
                <li className="flex items-start gap-3">
                 <span className="flex-shrink-0 font-bold text-yellow-400 bg-gray-800 rounded-full h-6 w-6 flex items-center justify-center">2</span>

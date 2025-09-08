@@ -376,6 +376,10 @@ export const translations = {
     careerResultWhy: 'Tại sao lại phù hợp?',
     careerResultPath: 'Lộ trình sự nghiệp',
     careerResultFields: 'Lĩnh vực đề xuất',
+    careerPasswordPromptSubtitle: 'Tính năng này cần gieo duyên để mở khóa các gợi ý nghề nghiệp chuyên sâu, kết hợp giữa Tử Vi và phân tích hiện đại.',
+    careerPasswordPromptValueTitle: 'Giá Trị Của Gói Tư Vấn Hướng Nghiệp',
+    careerPasswordPromptValueDesc: 'Mở khóa 3 gợi ý nghề nghiệp được cá nhân hóa sâu sắc, phân tích chi tiết về sự phù hợp, lộ trình phát triển và các lĩnh vực tiềm năng. Các gợi ý này được xây dựng dựa trên sự kết hợp phức tạp giữa bản đồ sao, sở thích và kỹ năng của bạn.',
+    careerPasswordPaymentStep1: 'Gieo duyên tùy tâm (Gợi ý: 100.000đ) qua một trong các hình thức bên dưới.',
 
     // FIX: Add missing translation key for PDF error
     errorPdf: 'Đã xảy ra lỗi khi tạo file PDF. Vui lòng thử lại.',
@@ -757,6 +761,10 @@ export const translations = {
     careerResultWhy: 'Why is it a good fit?',
     careerResultPath: 'Career Path',
     careerResultFields: 'Suggested Fields',
+    careerPasswordPromptSubtitle: 'This feature requires a contribution to unlock in-depth career suggestions that combine astrology with modern analysis.',
+    careerPasswordPromptValueTitle: 'The Value of the Career Advisor Package',
+    careerPasswordPromptValueDesc: 'Unlock 3 deeply personalized career suggestions, with detailed analysis of suitability, development paths, and potential fields. These suggestions are built upon a complex synthesis of your star chart, interests, and skills.',
+    careerPasswordPaymentStep1: 'Make a discretionary contribution (Suggested: $4.00) via one of the methods below.',
 
     // FIX: Add missing translation key for PDF error
     errorPdf: 'An error occurred while creating the PDF file. Please try again.',
