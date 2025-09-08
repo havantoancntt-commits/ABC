@@ -33,7 +33,7 @@ const DonationModal: React.FC<Props> = ({ isOpen, onClose }) => {
         role="dialog"
     >
         <div 
-            className="max-w-md w-full p-8 rounded-xl bg-gray-900/70 backdrop-blur-lg border border-yellow-400/30 shadow-2xl shadow-black/50"
+            className="max-w-md w-full p-6 sm:p-8 rounded-xl bg-gray-950/80 backdrop-blur-lg border border-yellow-400/30 shadow-2xl shadow-black/50"
             onClick={e => e.stopPropagation()}
         >
             <h2 className="text-3xl font-bold text-center mb-3 text-yellow-300 font-serif">{t('donationTitle')}</h2>
@@ -41,7 +41,7 @@ const DonationModal: React.FC<Props> = ({ isOpen, onClose }) => {
             {t('donationSubtitle')}
             </p>
 
-            <DonationInfo variant="modal" />
+            <DonationInfo />
 
             <div className="mt-8">
             <button 

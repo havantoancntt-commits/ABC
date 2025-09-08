@@ -28,7 +28,7 @@ export const translations = {
     summary: 'Tổng Kết Luận Giải',
     errorPdf: 'Đã xảy ra lỗi khi tạo file PDF. Vui lòng thử lại.',
     locale: 'vi-VN',
-    resultSupportMessage: 'Hy vọng bản luận giải này mang lại cho bạn những góc nhìn giá trị. Sự ủng hộ của bạn là động lực để chúng tôi tiếp tục phát triển và duy trì ứng dụng miễn phí.',
+    resultSupportMessage: 'Mỗi luận giải là một sản phẩm trí tuệ đòi hỏi chi phí vận hành và phát triển. Nếu bạn thấy giá trị, xin hãy gieo một duyên lành để nền tảng này có thể tiếp tục lan tỏa tri thức đến cộng đồng.',
 
     // Home
     homeTitle: 'Khám Phá Huyền Học Cổ Đại',
@@ -236,8 +236,8 @@ export const translations = {
     confirmDeleteMessage: 'Bạn có chắc chắn muốn xóa lá số của {{name}}? Hành động này không thể hoàn tác.',
     
     // Donation
-    donationTitle: 'Gieo Duyên Lành',
-    donationSubtitle: 'Sự ủng hộ của bạn là nguồn năng lượng quý giá để chúng tôi duy trì và phát triển ứng dụng.',
+    donationTitle: 'Gieo Duyên Lành & Ủng Hộ',
+    donationSubtitle: 'Sự đóng góp của bạn là động lực vô giá để chúng tôi duy trì và nâng cấp nền tảng huyền học này.',
     donationMessage: 'Mỗi luận giải bạn nhận được là kết quả của quá trình nghiên cứu và ứng dụng AI phức tạp. Sự ủng hộ tùy tâm của bạn là nguồn năng lượng trực tiếp giúp chúng tôi duy trì máy chủ, nâng cấp thuật toán và tiếp tục sứ mệnh lan tỏa tri thức huyền học đến cộng đồng. Xin trân trọng từng duyên lành!',
     donationBank: 'Ngân hàng',
     donationAccountNo: 'Số TK',
@@ -249,6 +249,11 @@ export const translations = {
     copy: 'CHÉP',
     copied: 'Đã chép!',
     copyError: 'Lỗi!',
+    donationViaBank: 'Ngân Hàng (QR)',
+    donationViaZaloPay: 'ZaloPay',
+    donationViaPayPal: 'PayPal',
+    donationScanQR: 'Quét mã QR để chuyển khoản nhanh',
+    donationOrManual: 'Hoặc chuyển khoản thủ công:',
 
     // Footer
     footerVisits: 'Lượt truy cập',
@@ -306,15 +311,21 @@ export const translations = {
     shopViewOnTiktok: 'Vào TikTok Shop',
 
     // Password Prompt
-    passwordPromptTitle: 'Truy Cập Chuyên Sâu',
-    passwordPromptSubtitle: 'Để mở khóa toàn bộ luận giải chi tiết của Tử Vi Đẩu Số, một trong những công cụ mạnh mẽ nhất, xin quý vị gieo duyên để nhận mã truy cập.',
+    passwordPromptTitle: 'Yêu Cầu Mã Truy Cập',
+    passwordPromptSubtitle: 'Tính năng này cần gieo duyên để mở khóa toàn bộ các luận giải chi tiết.',
     passwordLabel: 'Mã truy cập',
     passwordPlaceholder: 'Nhập mã truy cập...',
     passwordSubmit: 'Mở Khóa',
     passwordIncorrect: 'Mã truy cập không chính xác. Vui lòng thử lại.',
-    passwordPaymentTitle: 'Nhận Mã Truy Cập',
-    passwordPaymentStep1: '1. Gieo duyên tùy tâm (Gợi ý: 50,000 VNĐ) qua ZaloPay đến SĐT:',
-    passwordPaymentStep2: '2. Gửi ảnh chụp giao dịch qua Zalo để nhận mã truy cập ngay lập tức.',
+    passwordPaymentTitle: 'Để Nhận Mã Truy Cập',
+    passwordPaymentStep1: 'Gieo duyên tùy tâm (Gợi ý: 50.000đ) qua một trong các hình thức bên dưới.',
+    passwordPaymentStep2: 'Chụp ảnh màn hình giao dịch thành công và gửi qua Zalo số:',
+    passwordPaymentStep3: 'Bạn sẽ nhận được Mã Truy Cập ngay sau khi xác nhận.',
+    passwordSupportText: 'Cần hỗ trợ?',
+    zaloNumber: 'Số Zalo',
+    passwordPromptValueTitle: 'Giá Trị Của Luận Giải Chuyên Sâu',
+    passwordPromptValueDesc: 'Mở khóa toàn bộ 12 cung sao, các luận giải chi tiết về Chính Tinh, Phụ Tinh và một bản tổng kết định hướng toàn diện. Đây là những kiến thức chuyên sâu đòi hỏi sự phân tích phức tạp từ AI, khác biệt hoàn toàn với các luận giải thông thường.',
+    passwordTransferContent: 'Nội dung chuyển khoản:',
 
   },
   en: {
@@ -346,7 +357,7 @@ export const translations = {
     summary: 'Summary & Analysis',
     errorPdf: 'Failed to create PDF file. Please try again.',
     locale: 'en-US',
-    resultSupportMessage: 'We hope this analysis provides you with valuable insights. Your support is the motivation that allows us to continue developing and maintaining this application for free.',
+    resultSupportMessage: 'Each analysis is an intellectual product that requires operational and development costs. If you find it valuable, please contribute so this platform can continue to spread knowledge to the community.',
 
     // Home
     homeTitle: 'Explore Ancient Mysticism',
@@ -554,20 +565,25 @@ export const translations = {
     confirmDeleteMessage: 'Are you sure you want to delete the horoscope for {{name}}? This action cannot be undone.',
     
     // Donation
-    donationTitle: 'Support the Mission',
-    donationSubtitle: 'Your support is the energy that allows us to maintain and grow this application.',
-    donationMessage: 'Each analysis you receive is the result of deep research and complex AI computation. Your discretionary support directly helps us maintain our servers, upgrade our algorithms, and continue our mission of sharing esoteric knowledge with the community. We are grateful for every contribution!',
+    donationTitle: 'Contribute & Support',
+    donationSubtitle: 'Your contribution is invaluable in helping us maintain and upgrade this spiritual platform.',
+    donationMessage: 'Each analysis you receive is the result of complex research and AI application. Your discretionary support is the direct energy that helps us maintain servers, upgrade algorithms, and continue our mission of spreading esoteric knowledge to the community. We are grateful for every contribution!',
     donationBank: 'Bank',
     donationAccountNo: 'Account No.',
     donationAccountName: 'Account Name',
     donationContent: 'Content',
     donationOr: 'Or',
-    donationPayPal: 'Support with PayPal',
-    donationZaloPayMessage: 'Transfer via Phone',
+    donationPayPal: 'Contribute with PayPal',
+    donationZaloPayMessage: 'Transfer via Phone No.',
     copy: 'COPY',
     copied: 'Copied!',
     copyError: 'Error!',
-    
+    donationViaBank: 'Bank (QR)',
+    donationViaZaloPay: 'ZaloPay',
+    donationViaPayPal: 'PayPal',
+    donationScanQR: 'Scan QR for quick transfer',
+    donationOrManual: 'Or transfer manually:',
+
     // Footer
     footerVisits: 'Visits',
     footerDisclaimer: 'All information in this application is for reference and contemplation purposes only. Your destiny is in your hands.',
@@ -624,15 +640,21 @@ export const translations = {
     shopViewOnTiktok: 'Visit TikTok Shop',
 
     // Password Prompt
-    passwordPromptTitle: 'In-Depth Access',
-    passwordPromptSubtitle: 'To unlock the full, detailed analysis of Tử Vi Đẩu Số, one of the most powerful tools, please support the project to receive your access code.',
+    passwordPromptTitle: 'Access Code Required',
+    passwordPromptSubtitle: 'This feature requires a contribution to unlock all detailed analyses.',
     passwordLabel: 'Access Code',
     passwordPlaceholder: 'Enter access code...',
     passwordSubmit: 'Unlock',
     passwordIncorrect: 'Incorrect access code. Please try again.',
-    passwordPaymentTitle: 'Receive Access Code',
-    passwordPaymentStep1: '1. Make a discretionary contribution (Suggested: 50,000 VND) via ZaloPay to the phone number:',
-    passwordPaymentStep2: '2. Send a transaction screenshot via Zalo to receive the access code immediately.',
+    passwordPaymentTitle: 'To Receive Your Access Code',
+    passwordPaymentStep1: 'Make a discretionary contribution (Suggested: $2.00) via one of the methods below.',
+    passwordPaymentStep2: 'Send a screenshot of the successful transaction via Zalo to:',
+    passwordPaymentStep3: 'You will receive the Access Code immediately after confirmation.',
+    passwordSupportText: 'Need help?',
+    zaloNumber: 'Zalo Number',
+    passwordPromptValueTitle: 'The Value of In-Depth Analysis',
+    passwordPromptValueDesc: 'Unlock all 12 palaces, detailed interpretations of Major and Minor Stars, and a comprehensive life-guiding summary. This is in-depth knowledge requiring complex AI analysis, completely different from standard interpretations.',
+    passwordTransferContent: 'Transfer Content:',
   }
 };
 
