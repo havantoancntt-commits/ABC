@@ -508,25 +508,24 @@ export default async function handler(req: any, res: any) {
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ error: 'error_invalid_method' });
   }
 
   try {
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
       console.error("API_KEY environment variable not set on Vercel.");
-      const errorMessage = 'API Key is not configured on the server. The administrator needs to check the `API_KEY` environment variable in the project settings and redeploy.';
-      return res.status(500).json({ error: errorMessage });
+      return res.status(500).json({ error: 'error_api_key_missing' });
     }
 
     if (!req.body) {
-      return res.status(400).json({ error: 'Request body is missing.' });
+      return res.status(400).json({ error: 'error_bad_request' });
     }
 
     const { operation, payload } = req.body;
     
     if(!operation || !payload) {
-      return res.status(400).json({ error: 'Request is missing "operation" or "payload".' });
+      return res.status(400).json({ error: 'error_bad_request' });
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -700,7 +699,7 @@ export default async function handler(req: any, res: any) {
             },
         });
     } else {
-      return res.status(400).json({ error: 'Invalid operation specified' });
+      return res.status(400).json({ error: 'error_invalid_operation' });
     }
 
     const responseText = response.text;
@@ -708,12 +707,10 @@ export default async function handler(req: any, res: any) {
     if (!responseText) {
       const feedback = response.promptFeedback;
       console.error('Gemini response was blocked or empty. Feedback:', JSON.stringify(feedback, null, 2));
-      let userMessage = 'Could not generate content. The response from the AI was empty or blocked by safety filters.';
       if (feedback?.blockReason) {
-        const reason = feedback.blockReason === BlockedReason.SAFETY ? 'safety' : `other (${feedback.blockReason})`;
-        userMessage = `Your request was blocked for ${reason} reasons. Please try again with different information.`;
+        return res.status(400).json({ error: 'error_ai_blocked_safety' });
       }
-      return res.status(400).json({ error: userMessage });
+      return res.status(400).json({ error: 'error_ai_blocked_unknown' });
     }
 
     let parsedJson;
@@ -721,32 +718,29 @@ export default async function handler(req: any, res: any) {
       parsedJson = JSON.parse(responseText);
     } catch (e) {
       console.error('Gemini response is not valid JSON:', responseText);
-      const userMessage = 'The AI system returned an invalid data format. This may be a temporary issue, please try again.';
-      return res.status(500).json({ error: userMessage });
+      return res.status(500).json({ error: 'error_ai_invalid_json' });
     }
 
     return res.status(200).json(parsedJson);
 
   } catch (error: unknown) {
     console.error('Critical error in Gemini proxy function:', error);
-    let userMessage = 'An unexpected error occurred while processing your request.';
+    let errorKey = 'error_server_generic';
     let statusCode = 500;
 
     if (error instanceof Error) {
       const errorString = error.toString().toLowerCase();
       if (errorString.includes('api key not valid')) {
-        userMessage = 'API Key validation failed. Please check the server-side API Key.';
+        errorKey = 'error_api_key_invalid';
         statusCode = 401;
       } else if (errorString.includes('503') || errorString.includes('unavailable') || errorString.includes('resource has been exhausted')) {
-        userMessage = 'The AI system is currently overloaded or has exhausted its resources. Please try again in a few moments.';
+        errorKey = 'error_ai_overloaded';
         statusCode = 503;
-      } else {
-        userMessage = `A server-side error occurred. Please try again later.`;
       }
     }
     
     if (!res.headersSent) {
-      return res.status(statusCode).json({ error: userMessage });
+      return res.status(statusCode).json({ error: errorKey });
     }
   }
 }

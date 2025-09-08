@@ -30,6 +30,18 @@ export const translations = {
     locale: 'vi-VN',
     resultSupportMessage: 'Mỗi luận giải là một sản phẩm trí tuệ đòi hỏi chi phí vận hành và phát triển. Nếu bạn thấy giá trị, xin hãy gieo một duyên lành để nền tảng này có thể tiếp tục lan tỏa tri thức đến cộng đồng.',
 
+    // Backend Errors
+    errorAiOverloaded: 'Hệ thống AI hiện đang quá tải hoặc đã hết tài nguyên. Vui lòng thử lại sau ít phút.',
+    errorApiKeyMissing: 'Khóa API chưa được cấu hình trên máy chủ. Vui lòng liên hệ quản trị viên.',
+    errorBadRequest: 'Yêu cầu không hợp lệ. Vui lòng thử lại.',
+    errorInvalidMethod: 'Phương thức yêu cầu không hợp lệ.',
+    errorInvalidOperation: 'Thao tác không hợp lệ được chỉ định.',
+    errorAiBlockedSafety: 'Yêu cầu của bạn đã bị chặn vì lý do an toàn. Vui lòng thử lại với thông tin khác.',
+    errorAiBlockedUnknown: 'Không thể tạo nội dung. Phản hồi từ AI trống hoặc đã bị chặn.',
+    errorAiInvalidJson: 'Hệ thống AI đã trả về một định dạng dữ liệu không hợp lệ. Đây có thể là sự cố tạm thời, vui lòng thử lại.',
+    errorApiKeyInvalid: 'Xác thực Khóa API không thành công. Vui lòng liên hệ quản trị viên.',
+    errorServerGeneric: 'Đã xảy ra lỗi phía máy chủ. Vui lòng thử lại sau.',
+
     // Home
     homeTitle: 'Khám Phá Huyền Học Cổ Đại',
     homeSubtitle: 'Ứng dụng Trí Tuệ Nhân Tạo để luận giải các bộ môn kinh điển của văn hóa phương Đông, mang đến một góc nhìn sâu sắc để thấu hiểu bản thân và định hướng tương lai.',
@@ -359,6 +371,18 @@ export const translations = {
     summary: 'Summary & Analysis',
     locale: 'en-US',
     resultSupportMessage: 'Each analysis is an intellectual product that requires operational and development costs. If you find it valuable, please contribute so this platform can continue to spread knowledge to the community.',
+
+    // Backend Errors
+    errorAiOverloaded: 'The AI system is currently overloaded or has exhausted its resources. Please try again in a few moments.',
+    errorApiKeyMissing: 'API Key is not configured on the server. Please contact the administrator.',
+    errorBadRequest: 'Invalid request. Please try again.',
+    errorInvalidMethod: 'Invalid request method.',
+    errorInvalidOperation: 'Invalid operation specified.',
+    errorAiBlockedSafety: 'Your request was blocked for safety reasons. Please try again with different information.',
+    errorAiBlockedUnknown: 'Could not generate content. The response from the AI was empty or blocked.',
+    errorAiInvalidJson: 'The AI system returned an invalid data format. This may be a temporary issue, please try again.',
+    errorApiKeyInvalid: 'API Key validation failed. Please contact the administrator.',
+    errorServerGeneric: 'A server-side error occurred. Please try again later.',
 
     // Home
     homeTitle: 'Explore Ancient Mysticism',

@@ -28,6 +28,7 @@ import HandwritingScan from './HandwritingScan';
 import HandwritingResult from './HandwritingResult';
 import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
+import type { TranslationKey } from '../hooks/useLocalization';
 import Card from './Card';
 import Button from './Button';
 
@@ -534,6 +535,26 @@ const App: React.FC = () => {
     setPostLoginAction(null);
   }, [postLoginAction]);
 
+  const getTranslatedError = (errorKey: string | null): string => {
+    if (!errorKey) return '';
+    // Check if the errorKey looks like one of our backend keys (e.g., "error_something_...")
+    const isBackendKey = /^[a-z]+(_[a-z]+)*$/.test(errorKey);
+    if (isBackendKey) {
+        // Convert snake_case_key to camelCaseKey for t() function
+        const translationKey = errorKey.replace(/_([a-z])/g, (g) => g[1].toUpperCase()) as TranslationKey;
+        const translated = t(translationKey);
+        
+        // If t() returns the key itself, it means translation was not found.
+        // In that case, we show a generic error message.
+        if (translated === translationKey) {
+            return t('errorUnknown');
+        }
+        return translated;
+    }
+    // If it's not a key (e.g., a generic message from a library), display it as is.
+    return errorKey;
+  };
+
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
@@ -645,7 +666,7 @@ const App: React.FC = () => {
                 <svg className="w-6 h-6 mr-3 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 <div>
                   <strong className="font-bold text-red-300">{t('errorTitle')}</strong>
-                  <span className="block mt-1">{error}</span>
+                  <span className="block mt-1">{getTranslatedError(error)}</span>
                 </div>
               </div>
               <button onClick={() => setError(null)} className="p-1 rounded-full hover:bg-red-500/20 transition-colors ml-4" aria-label={t('errorCloseAriaLabel')}>
