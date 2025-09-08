@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData } from '../lib/types';
+import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData } from '../lib/types';
 import { AppState } from '../lib/types';
-import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting } from '../lib/gemini';
+import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice } from '../lib/gemini';
 import Header from './Header';
 import DonationModal from './PaymentModal';
 import Spinner from './Spinner';
@@ -33,6 +33,8 @@ const NumerologyForm = lazy(() => import('./NumerologyForm'));
 const NumerologyChart = lazy(() => import('./NumerologyChart'));
 const FlowAstrologyForm = lazy(() => import('./FlowAstrologyForm'));
 const FlowAstrologyResult = lazy(() => import('./FlowAstrologyResult'));
+const CareerAdvisorForm = lazy(() => import('./CareerAdvisorForm'));
+const CareerAdvisorResult = lazy(() => import('./CareerAdvisorResult'));
 
 
 const createChartId = (info: BirthInfo): string => {
@@ -53,6 +55,8 @@ const App: React.FC = () => {
   const [tarotReadingData, setTarotReadingData] = useState<TarotReadingData | null>(null);
   const [flowAstrologyInfo, setFlowAstrologyInfo] = useState<FlowAstrologyInfo | null>(null);
   const [flowAstrologyData, setFlowAstrologyData] = useState<FlowAstrologyData | null>(null);
+  const [careerInfo, setCareerInfo] = useState<CareerInfo | null>(null);
+  const [careerAdviceData, setCareerAdviceData] = useState<CareerAdviceData | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedPalmImage, setCapturedPalmImage] = useState<string | null>(null);
   const [capturedHandwritingImage, setCapturedHandwritingImage] = useState<string | null>(null);
@@ -119,6 +123,8 @@ const App: React.FC = () => {
     setTarotReadingData(null);
     setFlowAstrologyInfo(null);
     setFlowAstrologyData(null);
+    setCareerInfo(null);
+    setCareerAdviceData(null);
     setError(null);
   }, []);
 
@@ -246,6 +252,21 @@ const App: React.FC = () => {
     }
   }, [language, t]);
 
+    const handleGenerateCareerAdvice = useCallback(async (info: CareerInfo) => {
+    setCareerInfo(info);
+    setAppState(AppState.CAREER_ADVISOR_LOADING);
+    setError(null);
+    try {
+        const data = await getCareerAdvice(info, language);
+        setCareerAdviceData(data);
+        setAppState(AppState.CAREER_ADVISOR_RESULT);
+    } catch (err) {
+        console.error(err);
+        setError(err instanceof Error ? err.message : t('errorUnknown'));
+        setAppState(AppState.CAREER_ADVISOR_FORM);
+    }
+  }, [language, t]);
+
   const handleCaptureImage = useCallback((imageDataUrl: string) => {
     setCapturedImage(imageDataUrl);
   }, []);
@@ -338,6 +359,10 @@ const App: React.FC = () => {
       setError(null);
       setAppState(AppState.SHOP);
   }, []);
+  const handleStartCareerAdvisor = useCallback(() => {
+    setError(null);
+    setAppState(AppState.CAREER_ADVISOR_FORM);
+  }, []);
 
   const handleViewChart = useCallback((chart: SavedChart) => {
     const action = () => {
@@ -426,7 +451,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} onStartHandwritingAnalysis={handleStartHandwritingAnalysis} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} onStartHandwritingAnalysis={handleStartHandwritingAnalysis} onStartCareerAdvisor={handleStartCareerAdvisor} />;
       case AppState.SAVED_CHARTS:
         return <SavedCharts 
           charts={savedCharts}
@@ -518,6 +543,12 @@ const App: React.FC = () => {
           return <Spinner message={t('spinnerFlowAstrology')} />;
       case AppState.FLOW_ASTROLOGY_RESULT:
           return flowAstrologyData && <FlowAstrologyResult data={flowAstrologyData} info={flowAstrologyInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.CAREER_ADVISOR_FORM:
+          return <CareerAdvisorForm onSubmit={handleGenerateCareerAdvice} />;
+      case AppState.CAREER_ADVISOR_LOADING:
+          return <Spinner message={t('spinnerCareerAdvisor')} />;
+      case AppState.CAREER_ADVISOR_RESULT:
+          return careerAdviceData && <CareerAdvisorResult data={careerAdviceData} info={careerInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       default:
         return null;
     }

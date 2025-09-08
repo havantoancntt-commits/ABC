@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData, CareerInfo, CareerAdviceData } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -140,5 +140,18 @@ export const analyzeHandwriting = async (base64Image: string, language: string):
             throw error;
         }
         throw new Error("Could not analyze handwriting due to a connection error or server issue. Please try again.");
+    }
+};
+
+export const getCareerAdvice = async (info: CareerInfo, language: string): Promise<CareerAdviceData> => {
+    try {
+        const data = await callProxy('getCareerAdvice', { info, language });
+        return data as CareerAdviceData;
+    } catch (error) {
+        console.error("Error getting career advice:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Could not get career advice due to a connection error or server issue. Please try again.");
     }
 };

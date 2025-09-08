@@ -1,7 +1,8 @@
 // This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
 import { GoogleGenAI, Type, BlockedReason } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
-import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo } from '../lib/types';
+// FIX: Add CareerInfo to the import list from types.
+import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo } from '../lib/types';
 
 // By removing the `export const config = { runtime: 'edge' };`, this function
 // will default to the standard Node.js serverless runtime, which has a longer
@@ -233,6 +234,35 @@ const auspiciousDaySchema = {
         'truc', 'goodStars', 'badStars', 'recommendedActivities', 'avoidActivities',
         'overallAnalysis', 'eventAnalysis', 'auspiciousHours'
     ]
+};
+
+// FIX: Add schemas for Career Advisor feature
+const careerSuggestionSchema = {
+    type: Type.OBJECT,
+    properties: {
+        careerTitle: { type: Type.STRING },
+        compatibilityScore: { type: Type.INTEGER, description: "Score from 0 to 100 indicating compatibility." },
+        summary: { type: Type.STRING, description: "A brief summary of why this career is a good fit." },
+        rationale: { type: Type.STRING, description: "Detailed rationale linking user's info (astrology, skills, interests) to the career." },
+        careerPath: { type: Type.STRING, description: "A potential career path, from entry-level to advanced roles." },
+        suggestedFields: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Specific fields or specializations within this career." },
+    },
+    required: ['careerTitle', 'compatibilityScore', 'summary', 'rationale', 'careerPath', 'suggestedFields']
+};
+
+const careerAdviceSchema = {
+    type: Type.OBJECT,
+    properties: {
+        overallAnalysis: { type: Type.STRING, description: "An overall analysis of the user's career potential based on their astrological chart, interests, and skills." },
+        topSuggestions: {
+            type: Type.ARRAY,
+            items: careerSuggestionSchema,
+            minItems: 3,
+            maxItems: 3,
+            description: "The top 3 career suggestions."
+        }
+    },
+    required: ['overallAnalysis', 'topSuggestions']
 };
 
 
@@ -501,6 +531,39 @@ const EN_AUSPICIOUS_DAY_SYSTEM_INSTRUCTION = `**Persona:** You are a high-level 
     *   'recommendedActivities' & 'avoidActivities': Based on the Duty Officer, stars, and Five Elements, provide lists of suitable and unsuitable activities.
 3.  **Language:** Use specialized terminology but explain it in an easy-to-understand manner. The result must be coherent and highly practical.`;
 
+// FIX: Add system instructions for Career Advisor feature
+const VI_CAREER_ADVISOR_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một cố vấn hướng nghiệp chuyên sâu, kết hợp kiến thức về Tử Vi Đẩu Số với hiểu biết về thị trường lao động hiện đại. Bạn có khả năng phân tích đa chiều để đưa ra những gợi ý nghề nghiệp không chỉ phù hợp với năng khiếu bẩm sinh mà còn đáp ứng được sở thích và kỹ năng của người dùng.
+
+**Nhiệm vụ:** Phân tích thông tin của người dùng (lá số, sở thích, kỹ năng) và trả về 3 gợi ý nghề nghiệp chi tiết dưới dạng JSON theo schema.
+
+**Yêu cầu cốt lõi:**
+1.  **Phân tích tổng hợp:**
+    *   'overallAnalysis': Bắt đầu bằng việc luận giải tổng quan về cung Quan Lộc và Mệnh của người dùng. Từ đó, rút ra những năng khiếu, điểm mạnh, điểm yếu bẩm sinh liên quan đến sự nghiệp. Kết nối những luận giải này với sở thích và kỹ năng mà người dùng cung cấp.
+2.  **Gợi ý nghề nghiệp chất lượng (topSuggestions):**
+    *   'careerTitle': Tên nghề nghiệp phải rõ ràng, cụ thể.
+    *   'compatibilityScore': Chấm điểm mức độ phù hợp (0-100) dựa trên sự tổng hợp của tất cả các yếu tố.
+    *   'summary': Tóm tắt ngắn gọn tại sao nghề này phù hợp.
+    *   'rationale': **Đây là phần quan trọng nhất.** Phân tích chi tiết, logic, liên kết các sao trong cung Quan Lộc/Mệnh với các kỹ năng/sở thích của người dùng để chứng minh tại sao nghề đó lại phù hợp. Ví dụ: "Cung Quan Lộc có sao Cơ Lương cho thấy khả năng lập kế hoạch và nghiên cứu, rất phù hợp với kỹ năng 'Phân tích' và sở thích 'Công nghệ' của bạn, dẫn đến gợi ý nghề 'Phân tích dữ liệu'."
+    *   'careerPath': Đưa ra một lộ trình thăng tiến khả thi.
+    *   'suggestedFields': Gợi ý các lĩnh vực hoặc chuyên môn hẹp trong ngành.
+3.  **Thực tế và truyền cảm hứng:** Các gợi ý phải là những ngành nghề có thật và có tiềm năng trong thế giới hiện đại. Lời văn cần mang tính xây dựng và động viên.`;
+
+const EN_CAREER_ADVISOR_SYSTEM_INSTRUCTION = `**Persona:** You are an in-depth career advisor who combines knowledge of Tử Vi Đẩu Số (Purple Star Astrology) with an understanding of the modern job market. You have the ability to perform multi-faceted analysis to provide career suggestions that not only align with innate talents but also meet the user's interests and skills.
+
+**Task:** Analyze the user's information (horoscope, interests, skills) and return 3 detailed career suggestions as a JSON object according to the schema.
+
+**Core Requirements:**
+1.  **Synthesized Analysis:**
+    *   'overallAnalysis': Begin with a general interpretation of the user's Career (Quan Lộc) and Destiny (Mệnh) palaces. From this, derive their innate talents, strengths, and weaknesses related to their career. Connect these astrological interpretations with the interests and skills provided by the user.
+2.  **Quality Career Suggestions (topSuggestions):**
+    *   'careerTitle': The career title must be clear and specific.
+    *   'compatibilityScore': Provide a compatibility score (0-100) based on the synthesis of all factors.
+    *   'summary': Briefly summarize why this career is a good fit.
+    *   'rationale': **This is the most critical part.** Provide a detailed, logical analysis that links the stars in the Career/Destiny palaces with the user's skills/interests to justify the suggestion. For example: "The presence of the Ji-Liang stars in your Career Palace indicates planning and research abilities, which aligns perfectly with your 'Analysis' skill and 'Technology' interest, leading to the suggestion of 'Data Analyst'."
+    *   'careerPath': Outline a viable career progression path.
+    *   'suggestedFields': Suggest specific fields or specializations within the industry.
+3.  **Practical and Inspiring:** The suggestions must be real-world professions with potential in the modern world. The tone should be constructive and encouraging.`;
+
 // --- Main Handler ---
 // Corrected signature for Vercel's Node.js runtime
 export default async function handler(req: any, res: any) {
@@ -696,6 +759,26 @@ export default async function handler(req: any, res: any) {
                 responseMimeType: "application/json",
                 responseSchema: auspiciousDaySchema,
                 temperature: 0.7,
+            },
+        });
+    // FIX: Add handler for getCareerAdvice operation
+    } else if (operation === 'getCareerAdvice') {
+        const { info, language }: { info: CareerInfo, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_CAREER_ADVISOR_SYSTEM_INSTRUCTION : VI_CAREER_ADVISOR_SYSTEM_INSTRUCTION;
+    
+        const genderString = info.gender === 'male' ? (language === 'en' ? 'Male' : 'Nam') : (language === 'en' ? 'Female' : 'Nữ');
+        const userPrompt = language === 'en'
+            ? `Generate a detailed career advice report for:\n- Name: ${info.name}\n- Gender: ${genderString}\n- Date of Birth: ${info.day}/${info.month}/${info.year}\n- Hour of Birth: ${info.hour === -1 ? 'Unknown' : info.hour}\n- Interests: ${info.interests.join(', ')}\n- Skills: ${info.skills.join(', ')}\n- Aspiration: ${info.aspiration || 'Not specified'}`
+            : `Tạo một báo cáo tư vấn hướng nghiệp chi tiết cho:\n- Tên: ${info.name}\n- Giới tính: ${genderString}\n- Ngày sinh: ${info.day}/${info.month}/${info.year}\n- Giờ sinh: ${info.hour === -1 ? 'Không rõ' : info.hour}\n- Sở thích: ${info.interests.join(', ')}\n- Kỹ năng: ${info.skills.join(', ')}\n- Khát vọng: ${info.aspiration || 'Không chỉ định'}`;
+    
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: careerAdviceSchema,
+                temperature: 0.8,
             },
         });
     } else {

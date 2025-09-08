@@ -8,7 +8,7 @@ export interface BirthInfo {
 }
 
 export interface Palace {
-  name: string;
+  name:string;
   stars: string[];
   interpretation: string;
 }
@@ -191,7 +191,6 @@ export interface AuspiciousDayInfo {
 }
 
 export interface AuspiciousDayData {
-    // FIX: Added missing 'gregorianDate' property to align with API response schema.
     gregorianDate: string;
     lunarDate: string;
     dayCanChi: string;
@@ -206,6 +205,26 @@ export interface AuspiciousDayData {
     overallAnalysis: string;
     eventAnalysis: string;
     auspiciousHours: string[];
+}
+
+export interface CareerInfo extends BirthInfo {
+  interests: string[];
+  skills: string[];
+  aspiration?: string;
+}
+
+export interface CareerSuggestion {
+  careerTitle: string;
+  compatibilityScore: number;
+  summary: string;
+  rationale: string;
+  careerPath: string;
+  suggestedFields: string[];
+}
+
+export interface CareerAdviceData {
+  overallAnalysis: string;
+  topSuggestions: CareerSuggestion[];
 }
 
 
@@ -236,4 +255,7 @@ export enum AppState {
   HANDWRITING_ANALYSIS_CAPTURE,
   HANDWRITING_ANALYSIS_LOADING,
   HANDWRITING_ANALYSIS_RESULT,
+  CAREER_ADVISOR_FORM,
+  CAREER_ADVISOR_LOADING,
+  CAREER_ADVISOR_RESULT,
 }
