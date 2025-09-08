@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData } from '../lib/types';
+import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData } from '../lib/types';
 import { AppState } from '../lib/types';
-import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice } from '../lib/gemini';
+import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman } from '../lib/gemini';
 import Header from './Header';
 import DonationModal from './PaymentModal';
 import Spinner from './Spinner';
@@ -35,6 +35,8 @@ const FlowAstrologyForm = lazy(() => import('./FlowAstrologyForm'));
 const FlowAstrologyResult = lazy(() => import('./FlowAstrologyResult'));
 const CareerAdvisorForm = lazy(() => import('./CareerAdvisorForm'));
 const CareerAdvisorResult = lazy(() => import('./CareerAdvisorResult'));
+const TalismanGeneratorForm = lazy(() => import('./TalismanGeneratorForm'));
+const TalismanResult = lazy(() => import('./TalismanResult'));
 
 
 const createChartId = (info: BirthInfo): string => {
@@ -57,6 +59,8 @@ const App: React.FC = () => {
   const [flowAstrologyData, setFlowAstrologyData] = useState<FlowAstrologyData | null>(null);
   const [careerInfo, setCareerInfo] = useState<CareerInfo | null>(null);
   const [careerAdviceData, setCareerAdviceData] = useState<CareerAdviceData | null>(null);
+  const [talismanInfo, setTalismanInfo] = useState<TalismanInfo | null>(null);
+  const [talismanData, setTalismanData] = useState<TalismanData | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedPalmImage, setCapturedPalmImage] = useState<string | null>(null);
   const [capturedHandwritingImage, setCapturedHandwritingImage] = useState<string | null>(null);
@@ -125,6 +129,8 @@ const App: React.FC = () => {
     setFlowAstrologyData(null);
     setCareerInfo(null);
     setCareerAdviceData(null);
+    setTalismanInfo(null);
+    setTalismanData(null);
     setError(null);
   }, []);
 
@@ -267,6 +273,21 @@ const App: React.FC = () => {
     }
   }, [language, t]);
 
+  const handleGenerateTalisman = useCallback(async (info: TalismanInfo) => {
+    setTalismanInfo(info);
+    setAppState(AppState.TALISMAN_LOADING);
+    setError(null);
+    try {
+        const data = await generateTalisman(info, language);
+        setTalismanData(data);
+        setAppState(AppState.TALISMAN_RESULT);
+    } catch (err) {
+        console.error(err);
+        setError(err instanceof Error ? err.message : t('errorUnknown'));
+        setAppState(AppState.TALISMAN_GENERATOR);
+    }
+  }, [language, t]);
+
   const handleCaptureImage = useCallback((imageDataUrl: string) => {
     setCapturedImage(imageDataUrl);
   }, []);
@@ -358,6 +379,10 @@ const App: React.FC = () => {
   const handleStartShop = useCallback(() => {
       setError(null);
       setAppState(AppState.SHOP);
+  }, []);
+  const handleStartTalismanGenerator = useCallback(() => {
+    setError(null);
+    setAppState(AppState.TALISMAN_GENERATOR);
   }, []);
 
   const handleStartCareerAdvisor = useCallback(() => {
@@ -471,7 +496,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} onStartHandwritingAnalysis={handleStartHandwritingAnalysis} onStartCareerAdvisor={handleStartCareerAdvisor} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} onStartHandwritingAnalysis={handleStartHandwritingAnalysis} onStartCareerAdvisor={handleStartCareerAdvisor} onStartTalismanGenerator={handleStartTalismanGenerator} />;
       case AppState.SAVED_CHARTS:
         return <SavedCharts 
           charts={savedCharts}
@@ -571,6 +596,12 @@ const App: React.FC = () => {
           return <Spinner message={t('spinnerCareerAdvisor')} />;
       case AppState.CAREER_ADVISOR_RESULT:
           return careerAdviceData && <CareerAdvisorResult data={careerAdviceData} info={careerInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.TALISMAN_GENERATOR:
+          return <TalismanGeneratorForm onSubmit={handleGenerateTalisman} />;
+      case AppState.TALISMAN_LOADING:
+          return <Spinner message={t('spinnerTalisman')} />;
+      case AppState.TALISMAN_RESULT:
+          return talismanData && <TalismanResult data={talismanData} info={talismanInfo!} onReset={() => setAppState(AppState.TALISMAN_GENERATOR)} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       default:
         return null;
     }

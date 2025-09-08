@@ -167,11 +167,21 @@ export interface FlowSegment {
     interpretation: string;
 }
 
+export interface TalismanInfo {
+  name: string;
+  year: number;
+  month: number;
+  day: number;
+}
+
 export interface TalismanData {
     name: string;
     description: string;
     svg: string;
+    interpretation: string;
+    usage: string;
 }
+
 
 export interface FlowAstrologyData {
     flow: FlowSegment[];
@@ -259,4 +269,7 @@ export enum AppState {
   CAREER_ADVISOR_LOADING,
   CAREER_ADVISOR_RESULT,
   CAREER_ADVISOR_PASSWORD,
+  TALISMAN_GENERATOR,
+  TALISMAN_LOADING,
+  TALISMAN_RESULT,
 }

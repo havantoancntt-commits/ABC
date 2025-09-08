@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData, CareerInfo, CareerAdviceData } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -153,5 +153,18 @@ export const getCareerAdvice = async (info: CareerInfo, language: string): Promi
             throw error;
         }
         throw new Error("Could not get career advice due to a connection error or server issue. Please try again.");
+    }
+};
+
+export const generateTalisman = async (info: TalismanInfo, language: string): Promise<TalismanData> => {
+    try {
+        const data = await callProxy('generateTalisman', { info, language });
+        return data as TalismanData;
+    } catch (error) {
+        console.error("Error generating talisman:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Could not generate talisman due to a connection error or server issue. Please try again.");
     }
 };
