@@ -17,7 +17,8 @@ export const translations = {
     view: 'Xem',
     details: 'Chi tiết',
     creating: 'Đang tạo...',
-    downloadPdf: 'Tải PDF',
+    saveChartImage: 'Lưu Lá Bùa',
+    errorSaveImage: 'Đã xảy ra lỗi khi lưu ảnh. Vui lòng thử lại.',
     donate: 'Gieo Duyên',
     day: 'Ngày',
     month: 'Tháng',
@@ -26,7 +27,6 @@ export const translations = {
     than: 'THÂN',
     starChart: 'Bảng An Sao',
     summary: 'Tổng Kết Luận Giải',
-    errorPdf: 'Đã xảy ra lỗi khi tạo file PDF. Vui lòng thử lại.',
     locale: 'vi-VN',
     resultSupportMessage: 'Mỗi luận giải là một sản phẩm trí tuệ đòi hỏi chi phí vận hành và phát triển. Nếu bạn thấy giá trị, xin hãy gieo một duyên lành để nền tảng này có thể tiếp tục lan tỏa tri thức đến cộng đồng.',
 
@@ -326,7 +326,8 @@ export const translations = {
     passwordPromptValueTitle: 'Giá Trị Của Luận Giải Chuyên Sâu',
     passwordPromptValueDesc: 'Mở khóa toàn bộ 12 cung sao, các luận giải chi tiết về Chính Tinh, Phụ Tinh và một bản tổng kết định hướng toàn diện. Đây là những kiến thức chuyên sâu đòi hỏi sự phân tích phức tạp từ AI, khác biệt hoàn toàn với các luận giải thông thường.',
     passwordTransferContent: 'Nội dung chuyển khoản:',
-
+    // FIX: Add missing translation key for PDF error
+    errorPdf: 'Đã xảy ra lỗi khi tạo file PDF. Vui lòng thử lại.',
   },
   en: {
     // Common
@@ -346,7 +347,8 @@ export const translations = {
     view: 'View',
     details: 'Details',
     creating: 'Creating...',
-    downloadPdf: 'Download PDF',
+    saveChartImage: 'Save Chart Image',
+    errorSaveImage: 'Failed to save image. Please try again.',
     donate: 'Contribute',
     day: 'Day',
     month: 'Month',
@@ -355,7 +357,6 @@ export const translations = {
     than: 'BODY',
     starChart: 'Star Placement Chart',
     summary: 'Summary & Analysis',
-    errorPdf: 'Failed to create PDF file. Please try again.',
     locale: 'en-US',
     resultSupportMessage: 'Each analysis is an intellectual product that requires operational and development costs. If you find it valuable, please contribute so this platform can continue to spread knowledge to the community.',
 
@@ -655,6 +656,8 @@ export const translations = {
     passwordPromptValueTitle: 'The Value of In-Depth Analysis',
     passwordPromptValueDesc: 'Unlock all 12 palaces, detailed interpretations of Major and Minor Stars, and a comprehensive life-guiding summary. This is in-depth knowledge requiring complex AI analysis, completely different from standard interpretations.',
     passwordTransferContent: 'Transfer Content:',
+    // FIX: Add missing translation key for PDF error
+    errorPdf: 'An error occurred while creating the PDF file. Please try again.',
   }
 };
 

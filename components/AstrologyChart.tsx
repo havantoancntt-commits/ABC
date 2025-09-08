@@ -114,7 +114,7 @@ const palaceToGridArea: Record<string, string> = {
 
 const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonationModal }) => {
     const { t } = useLocalization();
-    const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
     const [viewingPalace, setViewingPalace] = useState<Palace | null>(null);
 
     const allPalaces = useMemo(() => [
@@ -123,33 +123,29 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
         data.cungTaiBach, data.cungTuTuc, data.cungPhuThe, data.cungHuynhDe
     ], [data]);
 
-    const handleDownloadPdf = async () => {
-        setIsDownloadingPdf(true);
+    const handleDownloadImage = async () => {
+        setIsDownloading(true);
         try {
-            const [{ jsPDF }, { default: html2canvas }] = await Promise.all([
-                import('jspdf'),
-                import('html2canvas')
-            ]);
+            const { default: html2canvas } = await import('html2canvas');
             
             const chartElement = document.getElementById('laso-print-area');
             if (!chartElement) throw new Error("Chart element not found");
 
-            const canvas = await html2canvas(chartElement, { scale: 2, useCORS: true, backgroundColor: '#0c0a1a' });
+            const canvas = await html2canvas(chartElement, { scale: 3, useCORS: true, backgroundColor: '#0c0a1a' });
             const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({
-                orientation: 'p',
-                unit: 'px',
-                format: [canvas.width, canvas.height]
-            });
-
-            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-            pdf.save(`Horoscope-${birthInfo.name.replace(/\s/g, '_')}.pdf`);
+            
+            const link = document.createElement('a');
+            link.href = imgData;
+            link.download = `LaSo-${birthInfo.name.replace(/\s/g, '_')}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
         } catch (error) {
-            console.error("Failed to download PDF:", error);
-            alert(t('errorPdf'));
+            console.error("Failed to download image:", error);
+            alert(t('errorSaveImage'));
         } finally {
-            setIsDownloadingPdf(false);
+            setIsDownloading(false);
         }
     };
 
@@ -207,15 +203,15 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onReset, onOpenDonat
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
                     {t('home')}
                 </Button>
-                <Button onClick={handleDownloadPdf} disabled={isDownloadingPdf} variant="secondary" className="bg-blue-600 hover:bg-blue-700 text-white">
-                     {isDownloadingPdf ? (
+                <Button onClick={handleDownloadImage} disabled={isDownloading} variant="primary">
+                     {isDownloading ? (
                         <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                      ) : (
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                      )}
-                    {isDownloadingPdf ? t('creating') : t('downloadPdf')}
+                    {isDownloading ? t('creating') : t('saveChartImage')}
                 </Button>
-                <Button onClick={onOpenDonationModal} variant="primary">
+                <Button onClick={onOpenDonationModal} variant="secondary">
                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                     {t('donate')}
                 </Button>
