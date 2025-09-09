@@ -13,7 +13,6 @@ const ENERGY_COLORS = ['Red', 'Green', 'Blue', 'Purple', 'Yellow', 'White', 'Bla
 const BioEnergyCapture: React.FC<Props> = ({ onCapture, onBack }) => {
     const { t } = useLocalization();
     const [status, setStatus] = useState<'idle' | 'holding' | 'captured'>('idle');
-    // FIX: Changed NodeJS.Timeout to number for browser compatibility.
     const holdTimeout = useRef<number | null>(null);
 
     const handleInteractionStart = () => {

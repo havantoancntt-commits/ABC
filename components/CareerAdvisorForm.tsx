@@ -7,7 +7,6 @@ import type { TranslationKey } from '../hooks/useLocalization';
 
 interface Props {
   onSubmit: (data: CareerInfo) => void;
-  // FIX: Add initialName prop to pre-fill the form.
   initialName?: string;
 }
 
@@ -26,7 +25,6 @@ const CareerAdvisorForm: React.FC<Props> = ({ onSubmit, initialName }) => {
     const [step, setStep] = useState(1);
 
     // Form data states
-    // FIX: Use initialName to set the initial state for the name.
     const [name, setName] = useState(initialName || '');
     const [gender, setGender] = useState<'male' | 'female'>('male');
     const [day, setDay] = useState(1);
@@ -165,7 +163,7 @@ const CareerAdvisorForm: React.FC<Props> = ({ onSubmit, initialName }) => {
             <p className="text-center text-gray-400 mb-6">{t('careerFormStep4Subtitle')}</p>
              <textarea value={aspiration} onChange={(e) => setAspiration(e.target.value)}
                 placeholder={t('careerFormAspirationPlaceholder')}
-                className="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all h-40" />
+                className="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 h-40" />
         </>
     );
 

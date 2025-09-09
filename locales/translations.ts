@@ -7,7 +7,6 @@ export const translations = {
     errorUnknown: 'Đã xảy ra lỗi không xác định. Vui lòng thử lại.',
     errorInvalidImageData: 'Dữ liệu ảnh không hợp lệ.',
     errorCloseAriaLabel: 'Đóng thông báo lỗi',
-    // FIX: Add missing translation keys for Error Boundary
     errorBoundaryTitle: 'Ôi, có lỗi xảy ra!',
     errorBoundaryMessage: 'Ứng dụng đã gặp phải một lỗi không mong muốn. Vui lòng tải lại trang để tiếp tục.',
     errorBoundaryButton: 'Tải Lại Trang',
