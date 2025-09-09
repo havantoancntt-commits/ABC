@@ -76,7 +76,8 @@ const TalismanResult: React.FC<Props> = ({ data, info, onReset, onOpenDonationMo
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                 <div className="flex flex-col items-center text-center">
                     <Card className="p-4 bg-gray-950/50 border-amber-500/30">
-                        <h3 className="text-2xl font-serif font-bold text-amber-300 mb-4">{data.name}</h3>
+                        <h3 className="text-2xl font-serif font-bold text-amber-300 mb-2">{data.name}</h3>
+                        <p className="font-serif text-xl text-yellow-200/90 tracking-widest mb-4 drop-shadow-[0_1px_2px_rgba(250,204,21,0.5)]">"{data.cauChu}"</p>
                         <div className="w-full max-w-xs mx-auto aspect-[200/280] p-2 bg-black/30 rounded-lg shadow-inner">
                             <img src={talismanSvgDataUrl} alt={data.name} className="w-full h-full object-contain" />
                         </div>

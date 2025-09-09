@@ -178,6 +178,7 @@ export interface TalismanData {
     name: string;
     description: string;
     svg: string;
+    cauChu: string;
     interpretation: string;
     usage: string;
 }
