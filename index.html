@@ -138,6 +138,52 @@
         grid-column: span 2;
         grid-row: span 2;
       }
+
+      /* --- Background Themes --- */
+      .background-container::before {
+        content: '';
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -2; /* Behind content and blur overlay */
+        background-size: cover;
+        background-position: center center;
+        opacity: 0;
+        transition: opacity 1.5s ease-in-out;
+      }
+
+      @keyframes slow-pan {
+        from { transform: scale(1.05) translateX(0); }
+        to { transform: scale(1.15) translateX(-5%); }
+      }
+      @keyframes slow-pan-vertical {
+        from { background-position: 50% 0%; transform: scale(1.1); }
+        to { background-position: 50% 100%; transform: scale(1.1); }
+      }
+
+      .bg-theme-home::before {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'%3e%3cdefs%3e%3cradialGradient id='g_home' cx='50%25' cy='50%25' r='50%25'%3e%3cstop offset='0%25' stop-color='%232a2a4a' /%3e%3cstop offset='100%25' stop-color='%230c0a1a' /%3e%3c/radialGradient%3e%3cfilter id='f_home_blur'%3e%3cfeGaussianBlur stdDeviation='3' /%3e%3c/filter%3e%3cg id='star'%3e%3ccircle r='1.5' fill='%23fff' opacity='0.8' filter='url(%23f_home_blur)'/%3e%3c/g%3e%3cstyle%3e@keyframes shoot { 0%25 { transform: translateX(0) translateY(0); opacity: 1; } 100%25 { transform: translateX(300px) translateY(150px); opacity: 0; } } .shooting-star { animation: shoot 3s linear infinite; }%3c/style%3e%3c/defs%3e%3crect width='1600' height='900' fill='url(%23g_home)' /%3e%3cg id='stars'%3e%3cuse href='%23star' x='200' y='100' /%3e%3cuse href='%23star' x='500' y='250' /%3e%3cuse href='%23star' x='900' y='150' /%3e%3cuse href='%23star' x='1200' y='300' /%3e%3cuse href='%23star' x='1500' y='100' /%3e%3cuse href='%23star' x='800' y='450' /%3e%3cuse href='%23star' x='100' y='500' /%3e%3cuse href='%23star' x='1400' y='550' /%3e%3cuse href='%23star' x='600' y='700' /%3e%3cuse href='%23star' x='1100' y='800' /%3e%3c/g%3e%3cuse href='%23star' x='100' y='200' class='shooting-star' style='animation-delay: 0s;'/%3e%3cuse href='%23star' x='800' y='100' class='shooting-star' style='animation-delay: 1.2s;'/%3e%3cuse href='%23star' x='1300' y='400' class='shooting-star' style='animation-delay: 2.5s;'/%3e%3c/svg%3e");
+          opacity: 0.4;
+          animation: slow-pan 180s linear infinite alternate;
+      }
+      .bg-theme-astrology::before {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3e%3cdefs%3e%3cradialGradient id='g_astro' cx='50%25' cy='50%25' r='50%25'%3e%3cstop offset='0%25' stop-color='%231e1a33' /%3e%3cstop offset='100%25' stop-color='%230c0a1a' /%3e%3c/radialGradient%3e%3cfilter id='glow_astro'%3e%3cfeGaussianBlur stdDeviation='3' /%3e%3c/filter%3e%3cstyle%3e.ring { animation: rotate 120s linear infinite; transform-origin: center; } .ring2 { animation-duration: 180s; } .ring3 { animation-duration: 240s; animation-direction: reverse; } .zodiac-sign { opacity: 0.5; } @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes pulse_subtle { 0%25, 100%25 { opacity: 0.5; } 50%25 { opacity: 0.8; } } .planet { animation: pulse_subtle 5s ease-in-out infinite; }%3c/style%3e%3c/defs%3e%3crect width='800' height='800' fill='url(%23g_astro)' /%3e%3cg id='orrery' transform='translate(400, 400)'%3e%3ccircle cx='0' cy='0' r='380' fill='none' stroke='%23f0e68c' stroke-width='0.5' opacity='0.2' /%3e%3cg class='ring ring3'%3e%3ccircle cx='0' cy='0' r='350' fill='none' stroke='%23f0e68c' stroke-width='1' opacity='0.4' stroke-dasharray='5 15'/%3e%3cg fill='%23f0e68c' font-size='24' font-family='serif'%3e%3ctext x='0' y='-340' text-anchor='middle' class='zodiac-sign'%3e♈%3c/text%3e%3ctext x='175' y='-294' text-anchor='middle' class='zodiac-sign'%3e♉%3c/text%3e%3ctext x='294' y='-175' text-anchor='middle' class='zodiac-sign'%3e♊%3c/text%3e%3ctext x='350' y='0' text-anchor='middle' class='zodiac-sign'%3e♋%3c/text%3e%3ctext x='294' y='175' text-anchor='middle' class='zodiac-sign'%3e♌%3c/text%3e%3ctext x='175' y='294' text-anchor='middle' class='zodiac-sign'%3e♍%3c/text%3e%3ctext x='0' y='360' text-anchor='middle' class='zodiac-sign'%3e♎%3c/text%3e%3ctext x='-175' y='294' text-anchor='middle' class='zodiac-sign'%3e♏%3c/text%3e%3ctext x='-294' y='175' text-anchor='middle' class='zodiac-sign'%3e♐%3c/text%3e%3ctext x='-350' y='0' text-anchor='middle' class='zodiac-sign'%3e♑%3c/text%3e%3ctext x='-294' y='-175' text-anchor='middle' class='zodiac-sign'%3e♒%3c/text%3e%3ctext x='-175' y='-294' text-anchor='middle' class='zodiac-sign'%3e♓%3c/text%3e%3c/g%3e%3c/g%3e%3cg class='ring ring2'%3e%3ccircle cx='0' cy='0' r='250' fill='none' stroke='%23c7d2fe' stroke-width='0.5' opacity='0.5' /%3e%3ccircle cx='-216' cy='-125' r='8' fill='%23facc15' class='planet' filter='url(%23glow_astro)' /%3e%3c/g%3e%3cg class='ring'%3e%3ccircle cx='0' cy='0' r='150' fill='none' stroke='%23c7d2fe' stroke-width='0.5' opacity='0.3' stroke-dasharray='2 8' /%3e%3ccircle cx='0' cy='150' r='5' fill='%23818cf8' class='planet' style='animation-delay: 2s;' /%3e%3c/g%3e%3ccircle cx='0' cy='0' r='40' fill='%23fde68a' opacity='0.1' filter='url(%23glow_astro)' /%3e%3ccircle cx='0' cy='0' r='30' fill='%23fde68a' opacity='0.2' /%3e%3c/g%3e%3c/svg%3e");
+          opacity: 0.5;
+          transform: scale(1.1);
+      }
+      .bg-theme-personal::before {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3e%3cdefs%3e%3cfilter id='f_water' x='-20%25' y='-20%25' width='140%25' height='140%25'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.01 0.03' numOctaves='3' seed='2' result='noise'/%3e%3cfeDisplacementMap in='SourceGraphic' in2='noise' scale='20' /%3e%3cfeGaussianBlur stdDeviation='2' /%3e%3canimate attributeName='baseFrequency' from='0.01 0.03' to='0.015 0.035' dur='8s' repeatCount='indefinite' /%3e%3c/filter%3e%3cradialGradient id='g_moonlight'%3e%3cstop offset='0%25' stop-color='%23606882' /%3e%3cstop offset='100%25' stop-color='%231a2a45' /%3e%3c/radialGradient%3e%3c/defs%3e%3crect width='800' height='800' fill='url(%23g_moonlight)' filter='url(%23f_water)'/%3e%3c/svg%3e");
+          opacity: 0.4;
+          animation: slow-pan-vertical 120s linear infinite alternate;
+      }
+      .bg-theme-divination::before {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3e%3cdefs%3e%3cfilter id='f_smoke' x='-50%25' y='-50%25' width='200%25' height='200%25'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.015' numOctaves='4' seed='10' result='noise'%3e%3canimate attributeName='seed' from='10' to='50' dur='20s' repeatCount='indefinite' /%3e%3c/feTurbulence%3e%3cfeColorMatrix type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -1' /%3e%3cfeGaussianBlur stdDeviation='5' /%3e%3c/filter%3e%3clinearGradient id='g_divine' x1='0' y1='0' x2='1' y2='1'%3e%3cstop offset='0%25' stop-color='%231a1a2e' /%3e%3cstop offset='100%25' stop-color='%232a1a3e' /%3e%3c/linearGradient%3e%3c/defs%3e%3crect width='800' height='800' fill='url(%23g_divine)' /%3e%3crect width='800' height='800' fill='%23f0e68c' opacity='0.05' filter='url(%23f_smoke)' /%3e%3c/svg%3e");
+          opacity: 0.8;
+      }
+      .bg-theme-shop::before {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3e%3cdefs%3e%3clinearGradient id='g_shop' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3e%3cstop offset='0%25' stop-color='%234c1d22'/%3e%3cstop offset='100%25' stop-color='%232c0d12'/%3e%3c/linearGradient%3e%3cpattern id='p_shop' width='50' height='50' patternUnits='userSpaceOnUse'%3e%3cpath d='M 25 0 L 50 25 L 25 50 L 0 25 Z' fill='none' stroke='%23fde68a' stroke-width='0.5' opacity='0.2'%3e%3canimate attributeName='opacity' values='0.2;0.5;0.2' dur='7s' repeatCount='indefinite' /%3e%3c/path%3e%3cpath d='M 0 0 L 50 50 M 50 0 L 0 50' fill='none' stroke='%23fde68a' stroke-width='0.25' opacity='0.1'/%3e%3c/pattern%3e%3c/defs%3e%3crect width='200' height='200' fill='url(%23g_shop)'/%3e%3crect width='200' height='200' fill='url(%23p_shop)'/%3e%3c/svg%3e");
+          opacity: 0.6;
+          animation: slow-pan 200s linear infinite alternate;
+      }
     </style>
   <script type="importmap">
 {

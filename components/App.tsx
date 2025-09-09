@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useEffect, lazy, Suspense, useMemo } from 'react';
 import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, GoogleUser } from '../lib/types';
 import { AppState } from '../lib/types';
 import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName } from '../lib/gemini';
@@ -50,6 +50,63 @@ const createChartId = (info: BirthInfo): string => {
   return `${info.name}-${info.gender}-${info.year}-${info.month}-${info.day}-${hourPart}`.trim().replace(/\s+/g, '_');
 };
 
+const getBackgroundClassForState = (state: AppState): string => {
+    switch (state) {
+        case AppState.HOME:
+        case AppState.SAVED_CHARTS:
+        case AppState.ZODIAC_HOUR_FINDER:
+            return 'bg-theme-home';
+        
+        case AppState.ASTROLOGY_FORM:
+        case AppState.ASTROLOGY_PASSWORD:
+        case AppState.LOADING:
+        case AppState.RESULT:
+        case AppState.NUMEROLOGY_FORM:
+        case AppState.NUMEROLOGY_LOADING:
+        case AppState.NUMEROLOGY_RESULT:
+        case AppState.FLOW_ASTROLOGY_FORM:
+        case AppState.FLOW_ASTROLOGY_LOADING:
+        case AppState.FLOW_ASTROLOGY_RESULT:
+        case AppState.CAREER_ADVISOR_FORM:
+        case AppState.CAREER_ADVISOR_PASSWORD:
+        case AppState.CAREER_ADVISOR_LOADING:
+        case AppState.CAREER_ADVISOR_RESULT:
+        case AppState.AUSPICIOUS_NAMING_FORM:
+        case AppState.AUSPICIOUS_NAMING_LOADING:
+        case AppState.AUSPICIOUS_NAMING_RESULT:
+        case AppState.AUSPICIOUS_DAY_FINDER:
+            return 'bg-theme-astrology';
+
+        case AppState.FACE_SCAN_CAPTURE:
+        case AppState.FACE_SCAN_LOADING:
+        case AppState.FACE_SCAN_RESULT:
+        case AppState.PALM_SCAN_CAPTURE:
+        case AppState.PALM_SCAN_LOADING:
+        case AppState.PALM_SCAN_RESULT:
+        case AppState.HANDWRITING_ANALYSIS_CAPTURE:
+        case AppState.HANDWRITING_ANALYSIS_LOADING:
+        case AppState.HANDWRITING_ANALYSIS_RESULT:
+            return 'bg-theme-personal';
+
+        case AppState.ICHING_DIVINATION:
+        case AppState.TAROT_READING:
+            return 'bg-theme-divination';
+
+        case AppState.SHOP:
+        case AppState.TALISMAN_GENERATOR:
+        case AppState.TALISMAN_LOADING:
+        case AppState.TALISMAN_RESULT:
+            return 'bg-theme-shop';
+        
+        case AppState.ADMIN_LOGIN:
+        case AppState.ADMIN_DASHBOARD:
+            return 'bg-theme-home';
+
+        default:
+            return 'bg-theme-home';
+    }
+};
+
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.HOME);
@@ -81,6 +138,8 @@ const App: React.FC = () => {
   const [adminActionToConfirm, setAdminActionToConfirm] = useState<{ action: string; title: string; message: string; } | null>(null);
   const { language, t } = useLocalization();
   const { user, authError } = useGoogleAuth();
+
+  const backgroundClass = useMemo(() => getBackgroundClassForState(appState), [appState]);
 
   const getChartStorageKey = useCallback((userId?: string) => {
     const id = userId || user?.sub;
@@ -707,7 +766,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen text-gray-200">
+    <div className={`min-h-screen text-gray-200 background-container ${backgroundClass}`}>
       <div className="min-h-screen bg-black bg-opacity-70 backdrop-blur-md flex flex-col">
         <Header onHomeClick={handleResetToHome} />
         <main className="container mx-auto px-4 py-8 flex-grow">
