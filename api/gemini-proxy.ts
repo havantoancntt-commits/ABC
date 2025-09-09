@@ -698,6 +698,7 @@ export default async function handler(req: any, res: any) {
         : `Lập lá số tử vi chi tiết cho người có thông tin sau:\n- Tên: ${info.name}\n- Giới tính: ${genderString}\n- Ngày sinh (Dương Lịch): ${info.day}/${info.month}/${info.year}\n- Giờ sinh: ${hourString}`;
       
       response = await ai.models.generateContent({
+        // FIX: Update deprecated model to 'gemini-2.5-flash'
         model: "gemini-2.5-flash",
         contents: userPrompt,
         config: {
@@ -713,6 +714,7 @@ export default async function handler(req: any, res: any) {
       const promptText = language === 'en' ? "Analyze the physiognomy of the face in this image." : "Phân tích nhân tướng học cho khuôn mặt trong ảnh này.";
       const imagePart = { inlineData: { mimeType: 'image/jpeg', data: base64Image } };
       response = await ai.models.generateContent({
+        // FIX: Update deprecated model to 'gemini-2.5-flash'
         model: "gemini-2.5-flash",
         contents: { parts: [imagePart, { text: promptText }] },
         config: {
@@ -728,6 +730,7 @@ export default async function handler(req: any, res: any) {
         const promptText = language === 'en' ? "Analyze the palm in this image." : "Phân tích chỉ tay trong ảnh này.";
         const imagePart = { inlineData: { mimeType: 'image/jpeg', data: base64Image } };
         response = await ai.models.generateContent({
+            // FIX: Update deprecated model to 'gemini-2.5-flash'
             model: "gemini-2.5-flash",
             contents: { parts: [imagePart, { text: promptText }] },
             config: {
@@ -743,6 +746,7 @@ export default async function handler(req: any, res: any) {
         const promptText = language === 'en' ? "Analyze the handwriting and signature in this image." : "Phân tích chữ viết tay và chữ ký trong ảnh này.";
         const imagePart = { inlineData: { mimeType: 'image/jpeg', data: base64Image } };
         response = await ai.models.generateContent({
+            // FIX: Update deprecated model to 'gemini-2.5-flash'
             model: "gemini-2.5-flash",
             contents: { parts: [imagePart, { text: promptText }] },
             config: {
@@ -765,6 +769,7 @@ export default async function handler(req: any, res: any) {
         : `Luận giải quẻ Kinh Dịch sau:\n- Câu hỏi: "${question || 'Một câu hỏi chung về tình hình hiện tại.'}"\n- Quẻ Chính: ${castResult.primaryHexagram.number}. ${primaryName}\n- Hào Động: ${changingLines}\n- Quẻ Biến: ${secondaryName}`;
 
         response = await ai.models.generateContent({
+            // FIX: Update deprecated model to 'gemini-2.5-flash'
             model: "gemini-2.5-flash",
             contents: userPrompt,
             config: {
@@ -775,3 +780,154 @@ export default async function handler(req: any, res: any) {
             },
         });
     } else if (operation === 'generateNumerologyChart') {
+        const { info, language }: { info: NumerologyInfo, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_NUMEROLOGY_SYSTEM_INSTRUCTION : VI_NUMEROLOGY_SYSTEM_INSTRUCTION;
+        const userPrompt = language === 'en'
+            ? `Generate a detailed numerology chart for:\n- Full Name: ${info.fullName}\n- Date of Birth: ${info.day}/${info.month}/${info.year}`
+            : `Lập biểu đồ thần số học chi tiết cho:\n- Họ và tên: ${info.fullName}\n- Ngày sinh: ${info.day}/${info.month}/${info.year}`;
+        
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: numerologySchema,
+                temperature: 0.7,
+            },
+        });
+    } else if (operation === 'getTarotReading') {
+        const { cards, question, language }: { cards: TarotCard[], question: string, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_TAROT_SYSTEM_INSTRUCTION : VI_TAROT_SYSTEM_INSTRUCTION;
+        const cardNames = cards.map(c => c.name[language]).join(', ');
+
+        const userPrompt = language === 'en'
+            ? `Interpret the following 3-card Tarot reading (Past, Present, Future):\n- Cards: ${cardNames}\n- Question: "${question || 'A general question about my current path.'}"`
+            : `Luận giải trải bài Tarot 3 lá (Quá khứ, Hiện tại, Tương lai):\n- Các lá bài: ${cardNames}\n- Câu hỏi: "${question || 'Một câu hỏi chung về con đường hiện tại.'}"`;
+
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: tarotReadingSchema,
+                temperature: 0.8,
+            },
+        });
+    } else if (operation === 'generateFlowAstrology') {
+        const { info, language }: { info: FlowAstrologyInfo, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION : VI_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION;
+        const userPrompt = language === 'en'
+            ? `Generate an Energy Flow Astrology chart for a person with birth date ${info.day}/${info.month}/${info.year}. Their intuitive number is ${info.intuitiveNumber}.`
+            : `Tạo biểu đồ Tử Vi Dòng Chảy Năng Lượng cho người có ngày sinh ${info.day}/${info.month}/${info.year}. Con số trực giác của họ là ${info.intuitiveNumber}.`;
+
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: flowAstrologySchema,
+                temperature: 0.9,
+            },
+        });
+    } else if (operation === 'getAuspiciousDayAnalysis') {
+        const { info, language }: { info: AuspiciousDayInfo, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_AUSPICIOUS_DAY_SYSTEM_INSTRUCTION : VI_AUSPICIOUS_DAY_SYSTEM_INSTRUCTION;
+        const userPrompt = language === 'en'
+            ? `Analyze the auspiciousness of the date ${info.day}/${info.month}/${info.year} for the event: "${info.event}".`
+            : `Phân tích ngày tốt xấu cho ngày ${info.day}/${info.month}/${info.year} đối với sự việc: "${info.event}".`;
+
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: auspiciousDaySchema,
+                temperature: 0.5,
+            },
+        });
+    } else if (operation === 'getCareerAdvice') {
+        const { info, language }: { info: CareerInfo, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_CAREER_ADVISOR_SYSTEM_INSTRUCTION : VI_CAREER_ADVISOR_SYSTEM_INSTRUCTION;
+        const userPrompt = language === 'en'
+            ? `Provide career advice for a person with the following details:\n- Birth Info: ${info.day}/${info.month}/${info.year}, ${info.gender}\n- Interests: ${info.interests.join(', ')}\n- Skills: ${info.skills.join(', ')}\n- Aspiration: ${info.aspiration || 'Not provided'}`
+            : `Tư vấn hướng nghiệp cho người có thông tin sau:\n- Ngày sinh: ${info.day}/${info.month}/${info.year}, ${info.gender}\n- Sở thích: ${info.interests.join(', ')}\n- Kỹ năng: ${info.skills.join(', ')}\n- Khát vọng: ${info.aspiration || 'Không cung cấp'}`;
+        
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: careerAdviceSchema,
+                temperature: 0.8,
+            },
+        });
+    } else if (operation === 'generateTalisman') {
+        const { info, language }: { info: TalismanInfo, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_TALISMAN_SYSTEM_INSTRUCTION : VI_TALISMAN_SYSTEM_INSTRUCTION;
+        const userPrompt = language === 'en'
+            ? `Create a unique, personalized talisman for a person named ${info.name}, born on ${info.day}/${info.month}/${info.year}.`
+            : `Tạo một lá bùa hộ mệnh độc nhất, được cá nhân hóa cho người tên ${info.name}, sinh ngày ${info.day}/${info.month}/${info.year}.`;
+        
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: talismanSchema,
+                temperature: 1.0,
+            },
+        });
+    } else if (operation === 'generateAuspiciousName') {
+        const { info, language }: { info: AuspiciousNamingInfo, language: 'vi' | 'en' } = payload;
+        const systemInstruction = language === 'en' ? EN_AUSPICIOUS_NAMING_SYSTEM_INSTRUCTION : VI_AUSPICIOUS_NAMING_SYSTEM_INSTRUCTION;
+        const userPrompt = language === 'en'
+            ? `Suggest auspicious names based on the following information:\n- Last Name: ${info.childLastName}\n- Gender: ${info.childGender}\n- DOB: ${info.childDay}/${info.childMonth}/${info.childYear}\n- Qualities: ${info.desiredQualities.join(', ')}\n- Constraints: ${info.otherConstraints || 'None'}`
+            : `Gợi ý tên hợp mệnh dựa trên thông tin sau:\n- Họ: ${info.childLastName}\n- Giới tính: ${info.childGender === 'male' ? 'Nam' : 'Nữ'}\n- Ngày sinh: ${info.childDay}/${info.childMonth}/${info.childYear}\n- Mong muốn: ${info.desiredQualities.join(', ')}\n- Yêu cầu khác: ${info.otherConstraints || 'Không có'}`;
+        
+        response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+                systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: auspiciousNamingSchema,
+                temperature: 0.9,
+            },
+        });
+    } else {
+        return res.status(400).json({ error: 'error_invalid_operation' });
+    }
+
+    if (!response.text) {
+        const blockReason = response.candidates?.[0]?.finishReason;
+        if (blockReason === BlockedReason.SAFETY) {
+            return res.status(400).json({ error: 'error_ai_blocked_safety' });
+        }
+        console.error("AI response was empty or blocked. Reason:", blockReason, "Response:", JSON.stringify(response, null, 2));
+        return res.status(500).json({ error: 'error_ai_blocked_unknown' });
+    }
+
+    try {
+        const jsonResponse = JSON.parse(response.text);
+        return res.status(200).json(jsonResponse);
+    } catch (e) {
+        console.error("Failed to parse JSON from Gemini:", e);
+        console.error("Raw Gemini response:", response.text);
+        return res.status(500).json({ error: 'error_ai_invalid_json' });
+    }
+
+  } catch (error) {
+    console.error("An error occurred in the Gemini proxy:", error);
+    // Check for specific API key related errors from Google's library if possible
+    if (error instanceof Error && error.message.includes('API key not valid')) {
+        return res.status(401).json({ error: 'error_api_key_invalid' });
+    }
+    return res.status(500).json({ error: 'error_server_generic' });
+  }
+}

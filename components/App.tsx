@@ -80,15 +80,18 @@ const App: React.FC = () => {
   const [postLoginAction, setPostLoginAction] = useState<(() => void) | null>(null);
   const [adminActionToConfirm, setAdminActionToConfirm] = useState<{ action: string; title: string; message: string; } | null>(null);
   const { language, t } = useLocalization();
-  const { user, handleSignIn, handleSignOut, authError } = useGoogleAuth({
-    onSuccess: (gUser) => logAdminEvent('User Signed In', gUser.email, `Name: ${gUser.name}`),
-    onError: () => setError(t('googleSignInError')),
-  });
+  const { user, authError } = useGoogleAuth();
 
   const getChartStorageKey = useCallback((userId?: string) => {
     const id = userId || user?.sub;
     return id ? `astrologyCharts_${id}` : 'astrologyCharts_guest';
   }, [user]);
+
+  useEffect(() => {
+    if (authError) {
+      setError(t('googleSignInError'));
+    }
+  }, [authError, t]);
 
   useEffect(() => {
     const currentChartStorageKey = getChartStorageKey();
@@ -126,10 +129,7 @@ const App: React.FC = () => {
     } else {
         setVisitCount(parseInt(localStorage.getItem('visitCount') || '0', 10));
     }
-    
-    // Set auth error if it exists
-    if(authError) setError(authError);
-  }, [authError]);
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);

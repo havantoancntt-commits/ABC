@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Card from './Card';
 import Button from './Button';
 import { useLocalization } from '../hooks/useLocalization';
@@ -62,7 +62,22 @@ const FeatureCard: React.FC<{
 
 const Home: React.FC<Props> = (props) => {
     const { t } = useLocalization();
-    const { user, isConfigured } = useGoogleAuth({});
+    const { user, isConfigured, isInitialized } = useGoogleAuth();
+
+    useEffect(() => {
+        if (isInitialized && !user) {
+            const signInButtonContainer = document.getElementById('google-signin-button');
+            if (signInButtonContainer) {
+                // Ensure we don't render the button multiple times on re-renders
+                if (signInButtonContainer.childElementCount === 0) {
+                    window.google.accounts.id.renderButton(
+                        signInButtonContainer,
+                        { theme: "outline", size: "large", type: "standard", shape: "pill" }
+                    );
+                }
+            }
+        }
+    }, [isInitialized, user]);
 
     const features = [
         { title: t('astrologyTitle'), description: t('astrologyDesc'), buttonText: t('astrologyButton'), onClick: props.onStartAstrology, buttonVariant: 'primary' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-12v4m-2-2h4m5 4v4m-2-2h4M5 11h14M5 11a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 01-2 2M5 11v2a2 2 0 002 2h10a2 2 0 002-2v-2" /></svg> },
@@ -94,7 +109,7 @@ const Home: React.FC<Props> = (props) => {
                     <div className="mt-8 animate-fade-in" style={{ animationDelay: '0.6s' }}>
                         <p className="text-amber-200/80 mb-4">{t('homeAuthPrompt')}</p>
                         {isConfigured ? (
-                           <div id="google-signin-button"></div>
+                           <div id="google-signin-button" className="flex justify-center"></div>
                         ) : (
                            <p className="text-sm text-gray-500 italic">{t('homeAuthUnavailable')}</p>
                         )}

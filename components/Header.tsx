@@ -28,7 +28,7 @@ const LanguageSwitcher: React.FC = () => {
 };
 
 const UserProfile: React.FC = () => {
-    const { user, handleSignOut } = useGoogleAuth({});
+    const { user, handleSignOut } = useGoogleAuth();
     const { t } = useLocalization();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);

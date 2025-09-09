@@ -1,86 +1,71 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { getGoogleClientId } from '../lib/constants';
 import type { GoogleUser } from '../lib/types';
 import { logAdminEvent } from '../lib/logger';
 
-// FIX: Declare the global `google` object provided by the Google Identity Services script
-// to resolve TypeScript errors about it not being defined on `window` or globally.
 declare global {
-  interface Window {
-    google: any;
-  }
+  interface Window { google: any; }
 }
 
-interface UseGoogleAuthProps {
-  onSuccess?: (user: GoogleUser) => void;
-  onError?: () => void;
+interface GoogleAuthContextType {
+  user: GoogleUser | null;
+  handleSignOut: () => void;
+  isConfigured: boolean;
+  isInitialized: boolean;
+  authError: string | null;
 }
 
-export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
+const GoogleAuthContext = createContext<GoogleAuthContextType | undefined>(undefined);
+
+export const GoogleAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<GoogleUser | null>(null);
     const [authError, setAuthError] = useState<string | null>(null);
     const [isConfigured, setIsConfigured] = useState(false);
-
-    const handleSignOut = useCallback(() => {
-        logAdminEvent('User Signed Out', user?.email || 'Unknown');
-        if (window.google?.accounts?.id) {
-          window.google.accounts.id.disableAutoSelect();
-        }
-        setUser(null);
-        sessionStorage.removeItem('google_user');
-    }, [user]);
+    const [isInitialized, setIsInitialized] = useState(false);
 
     const handleCredentialResponse = useCallback((response: any) => {
         try {
             const userObject = jwtDecode<GoogleUser>(response.credential);
             setUser(userObject);
             sessionStorage.setItem('google_user', JSON.stringify(userObject));
-            if (onSuccess) {
-                onSuccess(userObject);
-            }
+            logAdminEvent('User Signed In', userObject.email, `Name: ${userObject.name}`);
         } catch (error) {
             console.error("Error decoding JWT:", error);
-            if (onError) {
-                onError();
-            }
+            setAuthError('Error decoding user information.');
         }
-    }, [onSuccess, onError]);
-    
+    }, []);
+
+    const handleSignOut = useCallback(() => {
+        logAdminEvent('User Signed Out', user?.email || 'Unknown');
+        if (window.google?.accounts?.id) {
+            window.google.accounts.id.disableAutoSelect();
+        }
+        setUser(null);
+        sessionStorage.removeItem('google_user');
+    }, [user]);
+
     useEffect(() => {
-        // Step 1: Check for persisted user session
         const storedUser = sessionStorage.getItem('google_user');
         if (storedUser) {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch {
-                sessionStorage.removeItem('google_user');
-            }
+            try { setUser(JSON.parse(storedUser)); } 
+            catch { sessionStorage.removeItem('google_user'); }
         }
 
-        // Step 2: Determine if Google Sign-In is configured.
-        // This runs once and triggers a re-render if `isConfigured` changes.
         const GOOGLE_CLIENT_ID = getGoogleClientId();
         const isSignInConfigured = !!(GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE_CLIENT_ID'));
         setIsConfigured(isSignInConfigured);
-    }, []); 
-    
-    useEffect(() => {
-        // Step 3: This effect runs after `isConfigured` is set to true.
-        // By this point, the component using the hook should have rendered the button container.
-        if (!isConfigured) {
-            if (getGoogleClientId()?.includes('YOUR_GOOGLE_CLIENT_ID')) {
-              console.warn("Google Sign-In is not configured with a valid Client ID. Login functionality will be disabled.");
-            }
-            return;
-        }
+    }, []);
 
+    useEffect(() => {
+        if (!isConfigured || isInitialized) return;
+        
         const GOOGLE_CLIENT_ID = getGoogleClientId()!;
 
-        const initializeGoogleSignIn = () => {
-            if (!window.google?.accounts?.id) {
+        const initialize = () => {
+             if (!window.google?.accounts?.id) {
                 console.error("Google Identity Services library not loaded.");
-                setAuthError("Google Sign-In script not loaded. Please check your connection.");
+                setAuthError("Google Sign-In script not loaded.");
                 return;
             }
             try {
@@ -88,58 +73,37 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
                     client_id: GOOGLE_CLIENT_ID,
                     callback: handleCredentialResponse,
                 });
-
-                const signInButton = document.getElementById('google-signin-button');
-                if (signInButton) {
-                    // Clear the container in case it was rendered before (e.g., on hot-reload)
-                    signInButton.innerHTML = '';
-                    window.google.accounts.id.renderButton(
-                        signInButton,
-                        { theme: "outline", size: "large", type: "standard", shape: "pill" }
-                    );
-                }
-
-                // Prompt for sign-in only if the user isn't already logged in from the session.
+                setIsInitialized(true);
                 if (!sessionStorage.getItem('google_user')) {
-                     window.google.accounts.id.prompt();
+                    window.google.accounts.id.prompt();
                 }
             } catch (e) {
-                 console.error("Google Sign-In initialization error:", e);
-                 setAuthError(e instanceof Error ? e.message : "An unknown error occurred during Google Sign-In setup.");
+                console.error("Google Sign-In initialization error:", e);
+                setAuthError(e instanceof Error ? e.message : "An unknown error occurred during Google Sign-In setup.");
             }
         };
-        
-        // The GSI script is loaded with `async defer`, so we need to check if `window.google` is ready.
-        // If not, we wait for the script to load.
+
         if (window.google) {
-            initializeGoogleSignIn();
+            initialize();
         } else {
             const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
             if (script) {
-                const handleScriptLoad = () => initializeGoogleSignIn();
-                const handleScriptError = () => {
-                    console.error("Failed to load Google Identity Services script.");
-                    setAuthError("Could not load Google Sign-In script. Please check your internet connection and try again.");
-                    setIsConfigured(false);
-                };
-                script.addEventListener('load', handleScriptLoad);
-                script.addEventListener('error', handleScriptError);
-                return () => {
-                    script.removeEventListener('load', handleScriptLoad);
-                    script.removeEventListener('error', handleScriptError);
-                };
-            } else {
-                 console.error("Google Identity Services script tag not found in HTML.");
-                 setAuthError("Google Sign-In script not found.");
+                script.addEventListener('load', initialize);
+                return () => script.removeEventListener('load', initialize);
             }
         }
-    }, [isConfigured, handleCredentialResponse]);
+    }, [isConfigured, isInitialized, handleCredentialResponse]);
 
-    const handleSignIn = () => {
-        if (isConfigured && window.google?.accounts?.id) {
-            window.google.accounts.id.prompt();
-        }
-    };
-    
-    return { user, handleSignIn, handleSignOut, authError, isConfigured };
+    const value = { user, handleSignOut, isConfigured, isInitialized, authError };
+
+    // FIX: Replace JSX with React.createElement to avoid parsing errors in a .ts file.
+    return React.createElement(GoogleAuthContext.Provider, { value: value }, children);
+};
+
+export const useGoogleAuth = (): GoogleAuthContextType => {
+    const context = useContext(GoogleAuthContext);
+    if (context === undefined) {
+        throw new Error('useGoogleAuth must be used within a GoogleAuthProvider');
+    }
+    return context;
 };
