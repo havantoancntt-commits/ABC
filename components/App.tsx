@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense, useMemo } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, GoogleUser } from '../lib/types';
+import type { BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload } from '../lib/types';
 import { AppState } from '../lib/types';
 import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName } from '../lib/gemini';
 import Header from './Header';
@@ -12,11 +12,10 @@ import { useLocalization } from '../hooks/useLocalization';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
 import { logAdminEvent } from '../lib/logger';
 import type { TranslationKey } from '../hooks/useLocalization';
-import Button from './Button';
 
 // --- Lazy Load Components for Performance ---
 const Home = lazy(() => import('./Home'));
-const SavedCharts = lazy(() => import('./SavedCharts'));
+const SavedItems = lazy(() => import('./SavedItems'));
 const PasswordPrompt = lazy(() => import('./PasswordPrompt'));
 const BirthInfoForm = lazy(() => import('./BirthInfoForm'));
 const AstrologyChart = lazy(() => import('./AstrologyChart'));
@@ -45,15 +44,10 @@ const AdminLogin = lazy(() => import('./AdminLogin'));
 const AdminDashboard = lazy(() => import('./AdminDashboard'));
 
 
-const createChartId = (info: BirthInfo): string => {
-  const hourPart = info.hour === -1 ? 'unknown' : info.hour;
-  return `${info.name}-${info.gender}-${info.year}-${info.month}-${info.day}-${hourPart}`.trim().replace(/\s+/g, '_');
-};
-
 const getBackgroundClassForState = (state: AppState): string => {
     switch (state) {
         case AppState.HOME:
-        case AppState.SAVED_CHARTS:
+        case AppState.SAVED_ITEMS:
         case AppState.ZODIAC_HOUR_FINDER:
             return 'bg-theme-home';
         
@@ -130,9 +124,9 @@ const App: React.FC = () => {
   const [capturedPalmImage, setCapturedPalmImage] = useState<string | null>(null);
   const [capturedHandwritingImage, setCapturedHandwritingImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [savedCharts, setSavedCharts] = useState<SavedChart[]>([]);
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
-  const [chartToDelete, setChartToDelete] = useState<SavedChart | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<SavedItem | null>(null);
   const [visitCount, setVisitCount] = useState<number>(0);
   const [postLoginAction, setPostLoginAction] = useState<(() => void) | null>(null);
   const [adminActionToConfirm, setAdminActionToConfirm] = useState<{ action: string; title: string; message: string; } | null>(null);
@@ -141,9 +135,9 @@ const App: React.FC = () => {
 
   const backgroundClass = useMemo(() => getBackgroundClassForState(appState), [appState]);
 
-  const getChartStorageKey = useCallback((userId?: string) => {
+  const getStorageKey = useCallback((userId?: string) => {
     const id = userId || user?.sub;
-    return id ? `astrologyCharts_${id}` : 'astrologyCharts_guest';
+    return id ? `savedItems_${id}` : 'savedItems_guest';
   }, [user]);
 
   useEffect(() => {
@@ -153,31 +147,53 @@ const App: React.FC = () => {
   }, [authError, t]);
 
   useEffect(() => {
-    const currentChartStorageKey = getChartStorageKey();
+    const currentStorageKey = getStorageKey();
+    const oldStorageKey = user ? `astrologyCharts_${user.sub}` : 'astrologyCharts_guest';
+    
     try {
-      const storedCharts = localStorage.getItem(currentChartStorageKey);
-      if (storedCharts) {
-        const parsedCharts = JSON.parse(storedCharts);
-        if (Array.isArray(parsedCharts) && parsedCharts.every(c => c.id && c.birthInfo && c.chartData)) {
-            setSavedCharts(parsedCharts);
-            // If logged in and has charts, go to saved charts screen.
-            if (user && parsedCharts.length > 0 && sessionStorage.getItem('admin_auth') !== 'true') {
-               setAppState(AppState.SAVED_CHARTS);
+      const storedItems = localStorage.getItem(currentStorageKey);
+      const oldStoredCharts = localStorage.getItem(oldStorageKey);
+
+      if (storedItems) {
+        const parsedItems = JSON.parse(storedItems);
+        if (Array.isArray(parsedItems)) { // Basic validation
+            setSavedItems(parsedItems);
+             if (user && parsedItems.length > 0 && sessionStorage.getItem('admin_auth') !== 'true') {
+               setAppState(AppState.SAVED_ITEMS);
             }
-        } else {
-            localStorage.removeItem(currentChartStorageKey);
+        }
+      } else if (oldStoredCharts) {
+        // Migrate old data
+        const parsedCharts = JSON.parse(oldStoredCharts);
+        if (Array.isArray(parsedCharts) && parsedCharts.every(c => c.id && c.birthInfo && c.chartData)) {
+            const migratedItems: SavedItem[] = parsedCharts.map((chart: any) => ({
+                id: chart.id,
+                timestamp: new Date().toISOString(), // Old data has no timestamp, so use current
+                payload: {
+                    type: 'astrology',
+                    birthInfo: chart.birthInfo,
+                    chartData: chart.chartData,
+                }
+            }));
+            migratedItems.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+            setSavedItems(migratedItems);
+            localStorage.setItem(currentStorageKey, JSON.stringify(migratedItems));
+            localStorage.removeItem(oldStorageKey);
+            if (user && migratedItems.length > 0 && sessionStorage.getItem('admin_auth') !== 'true') {
+               setAppState(AppState.SAVED_ITEMS);
+            }
         }
       } else {
-        setSavedCharts([]); // Clear charts if nothing is in storage for the user
+        setSavedItems([]); // Clear items if nothing is in storage for the user
       }
     } catch (e) {
-      console.error("Could not load charts from localStorage", e);
-      localStorage.removeItem(currentChartStorageKey);
+      console.error("Could not load items from localStorage", e);
+      localStorage.removeItem(currentStorageKey);
+      localStorage.removeItem(oldStorageKey);
     }
-  }, [user, getChartStorageKey]);
+  }, [user, getStorageKey]);
 
   useEffect(() => {
-    // Log initial visit
     if (sessionStorage.getItem('visit_logged') !== 'true') {
         let currentCount = parseInt(localStorage.getItem('visitCount') || '0', 10);
         currentCount++;
@@ -190,15 +206,13 @@ const App: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [appState]);
+  useEffect(() => { window.scrollTo(0, 0); }, [appState]);
 
   useEffect(() => {
-    if (appState === AppState.SAVED_CHARTS && savedCharts.length === 0) {
+    if (appState === AppState.SAVED_ITEMS && savedItems.length === 0) {
       setAppState(AppState.HOME);
     }
-  }, [savedCharts, appState]);
+  }, [savedItems, appState]);
   
   const resetAllDynamicData = useCallback(() => {
     setBirthInfo(null);
@@ -234,6 +248,48 @@ const App: React.FC = () => {
     }
   };
 
+  const saveItem = useCallback((payload: SavedItemPayload) => {
+    let id: string;
+    let isUpdate = false;
+    
+    const createDeterministicId = (...args: (string | number)[]) => args.join('-').trim().replace(/\s+/g, '_');
+
+    switch (payload.type) {
+        case 'astrology':
+            id = `astrology-${createDeterministicId(payload.birthInfo.name, payload.birthInfo.gender, payload.birthInfo.year, payload.birthInfo.month, payload.birthInfo.day, payload.birthInfo.hour)}`;
+            isUpdate = true;
+            break;
+        case 'numerology':
+            id = `numerology-${createDeterministicId(payload.info.fullName, payload.info.year, payload.info.month, payload.info.day)}`;
+            isUpdate = true;
+            break;
+        case 'flowAstrology':
+            id = `flow-${createDeterministicId(payload.info.name, payload.info.year, payload.info.month, payload.info.day)}`;
+            isUpdate = true;
+            break;
+        case 'auspiciousNaming':
+             id = `naming-${createDeterministicId(payload.info.childLastName, payload.info.childYear, payload.info.childMonth, payload.info.childDay)}`;
+             isUpdate = true;
+             break;
+        default:
+            id = `${payload.type}-${crypto.randomUUID()}`;
+            break;
+    }
+
+    const newItem: SavedItem = { id, timestamp: new Date().toISOString(), payload };
+    
+    setSavedItems(currentItems => {
+      const updatedItems = isUpdate
+        ? [...currentItems.filter(item => item.id !== id), newItem]
+        : [...currentItems, newItem];
+        
+      updatedItems.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      localStorage.setItem(getStorageKey(), JSON.stringify(updatedItems));
+      return updatedItems;
+    });
+  }, [getStorageKey]);
+
+
   const handleGenerateChart = useCallback(async (info: BirthInfo) => {
     trackFeatureUsage('astrologyChart');
     logAdminEvent('Generate Astrology Chart', user?.email || 'Guest', `For: ${info.name}`);
@@ -243,24 +299,14 @@ const App: React.FC = () => {
     try {
       const data = await generateAstrologyChart(info, language);
       setChartData(data);
-      
-      const newChart: SavedChart = {
-          id: createChartId(info),
-          birthInfo: info,
-          chartData: data
-      };
-      
-      const updatedCharts = [...savedCharts.filter(c => c.id !== newChart.id), newChart];
-      setSavedCharts(updatedCharts);
-      localStorage.setItem(getChartStorageKey(), JSON.stringify(updatedCharts));
-
+      saveItem({ type: 'astrology', birthInfo: info, chartData: data });
       setAppState(AppState.RESULT);
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : t('errorUnknown'));
       setAppState(AppState.ASTROLOGY_FORM);
     }
-  }, [savedCharts, language, t, user, getChartStorageKey]);
+  }, [language, t, user, saveItem]);
   
   const handleAnalyzeFace = useCallback(async () => {
     if (!capturedImage) return;
@@ -278,13 +324,14 @@ const App: React.FC = () => {
     try {
       const data = await analyzePhysiognomy(base64Data, language);
       setPhysiognomyData(data);
+      saveItem({ type: 'physiognomy', name: t('itemTypePhysiognomy'), imageData: capturedImage, analysisData: data });
       setAppState(AppState.FACE_SCAN_RESULT);
     } catch (err) {
        console.error(err);
        setError(err instanceof Error ? err.message : t('errorUnknown'));
        setAppState(AppState.FACE_SCAN_CAPTURE);
     }
-  }, [capturedImage, language, t, user]);
+  }, [capturedImage, language, t, user, saveItem]);
 
   const handleAnalyzePalm = useCallback(async () => {
     if (!capturedPalmImage) return;
@@ -302,13 +349,14 @@ const App: React.FC = () => {
     try {
       const data = await analyzePalm(base64Data, language);
       setPalmReadingData(data);
+      saveItem({ type: 'palmReading', name: t('itemTypePalmReading'), imageData: capturedPalmImage, analysisData: data });
       setAppState(AppState.PALM_SCAN_RESULT);
     } catch (err) {
        console.error(err);
        setError(err instanceof Error ? err.message : t('errorUnknown'));
        setAppState(AppState.PALM_SCAN_CAPTURE);
     }
-  }, [capturedPalmImage, language, t, user]);
+  }, [capturedPalmImage, language, t, user, saveItem]);
 
   const handleAnalyzeHandwriting = useCallback(async () => {
     if (!capturedHandwritingImage) return;
@@ -326,13 +374,14 @@ const App: React.FC = () => {
     try {
       const data = await analyzeHandwriting(base64Data, language);
       setHandwritingData(data);
+      saveItem({ type: 'handwriting', name: t('itemTypeHandwriting'), imageData: capturedHandwritingImage, analysisData: data });
       setAppState(AppState.HANDWRITING_ANALYSIS_RESULT);
     } catch (err) {
        console.error(err);
        setError(err instanceof Error ? err.message : t('errorUnknown'));
        setAppState(AppState.HANDWRITING_ANALYSIS_CAPTURE);
     }
-  }, [capturedHandwritingImage, language, t, user]);
+  }, [capturedHandwritingImage, language, t, user, saveItem]);
 
   const handleGenerateNumerology = useCallback(async (info: NumerologyInfo) => {
     trackFeatureUsage('numerology');
@@ -343,13 +392,14 @@ const App: React.FC = () => {
     try {
         const data = await generateNumerologyChart(info, language);
         setNumerologyData(data);
+        saveItem({ type: 'numerology', info, data });
         setAppState(AppState.NUMEROLOGY_RESULT);
     } catch (err) {
         console.error(err);
         setError(err instanceof Error ? err.message : t('errorUnknown'));
         setAppState(AppState.NUMEROLOGY_FORM);
     }
-  }, [language, t, user]);
+  }, [language, t, user, saveItem]);
 
   const handleGenerateFlowAstrology = useCallback(async (info: FlowAstrologyInfo) => {
     trackFeatureUsage('flowAstrology');
@@ -360,13 +410,14 @@ const App: React.FC = () => {
     try {
         const data = await generateFlowAstrology(info, language);
         setFlowAstrologyData(data);
+        saveItem({ type: 'flowAstrology', info, data });
         setAppState(AppState.FLOW_ASTROLOGY_RESULT);
     } catch (err) {
         console.error(err);
         setError(err instanceof Error ? err.message : t('errorUnknown'));
         setAppState(AppState.FLOW_ASTROLOGY_FORM);
     }
-  }, [language, t, user]);
+  }, [language, t, user, saveItem]);
 
     const handleGenerateCareerAdvice = useCallback(async (info: CareerInfo) => {
     trackFeatureUsage('careerAdvisor');
@@ -411,71 +462,50 @@ const App: React.FC = () => {
     try {
         const data = await generateAuspiciousName(info, language);
         setAuspiciousNamingData(data);
+        saveItem({ type: 'auspiciousNaming', info, data });
         setAppState(AppState.AUSPICIOUS_NAMING_RESULT);
     } catch (err) {
         console.error(err);
         setError(err instanceof Error ? err.message : t('errorUnknown'));
         setAppState(AppState.AUSPICIOUS_NAMING_FORM);
     }
-  }, [language, t, user]);
+  }, [language, t, user, saveItem]);
 
-  const handleCaptureImage = useCallback((imageDataUrl: string) => {
-    setCapturedImage(imageDataUrl);
-  }, []);
-
-  const handleRetakeCapture = useCallback(() => {
-    setCapturedImage(null);
-    setError(null);
-  }, []);
-
-  const handleCapturePalmImage = useCallback((imageDataUrl: string) => {
-    setCapturedPalmImage(imageDataUrl);
-  }, []);
-
-  const handleRetakePalmCapture = useCallback(() => {
-    setCapturedPalmImage(null);
-    setError(null);
-  }, []);
-
-  const handleCaptureHandwritingImage = useCallback((imageDataUrl: string) => {
-    setCapturedHandwritingImage(imageDataUrl);
-  }, []);
-
-  const handleRetakeHandwritingCapture = useCallback(() => {
-    setCapturedHandwritingImage(null);
-    setError(null);
-  }, []);
+  const handleCaptureImage = useCallback((imageDataUrl: string) => { setCapturedImage(imageDataUrl); }, []);
+  const handleRetakeCapture = useCallback(() => { setCapturedImage(null); setError(null); }, []);
+  const handleCapturePalmImage = useCallback((imageDataUrl: string) => { setCapturedPalmImage(imageDataUrl); }, []);
+  const handleRetakePalmCapture = useCallback(() => { setCapturedPalmImage(null); setError(null); }, []);
+  const handleCaptureHandwritingImage = useCallback((imageDataUrl: string) => { setCapturedHandwritingImage(imageDataUrl); }, []);
+  const handleRetakeHandwritingCapture = useCallback(() => { setCapturedHandwritingImage(null); setError(null); }, []);
   
   const handleFormSubmit = useCallback((info: BirthInfo) => {
-    const chartId = createChartId(info);
-    const existingChart = savedCharts.find(chart => chart.id === chartId);
+    const chartId = `astrology-${info.name.replace(/\s/g, '_')}-${info.gender}-${info.year}-${info.month}-${info.day}-${info.hour}`;
+    const existingItem = savedItems.find(item => item.id === chartId);
 
-    if (existingChart) {
-      setBirthInfo(existingChart.birthInfo);
-      setChartData(existingChart.chartData);
+    if (existingItem && existingItem.payload.type === 'astrology') {
+      setBirthInfo(existingItem.payload.birthInfo);
+      setChartData(existingItem.payload.chartData);
       setAppState(AppState.RESULT);
     } else {
       handleGenerateChart(info);
     }
-  }, [savedCharts, handleGenerateChart]);
+  }, [savedItems, handleGenerateChart]);
 
   const handleResetToHome = useCallback(() => {
     if (sessionStorage.getItem('admin_auth') === 'true') {
         setAppState(AppState.ADMIN_DASHBOARD);
         return;
     }
-    if (user && savedCharts.length > 0) {
-        setAppState(AppState.SAVED_CHARTS);
+    if (user && savedItems.length > 0) {
+        setAppState(AppState.SAVED_ITEMS);
     } else {
         setAppState(AppState.HOME);
     }
     resetAllDynamicData();
-  }, [user, savedCharts, resetAllDynamicData]);
+  }, [user, savedItems, resetAllDynamicData]);
   
   const handleStartAstrology = useCallback(() => {
-    const action = () => {
-        setAppState(AppState.ASTROLOGY_FORM);
-    };
+    const action = () => { setAppState(AppState.ASTROLOGY_FORM); };
     if (sessionStorage.getItem('astrology_unlocked') === 'true' || !user) {
         action();
     } else {
@@ -492,16 +522,13 @@ const App: React.FC = () => {
   const handleStartZodiacFinder = useCallback(() => { trackFeatureUsage('zodiacHourFinder'); setError(null); setAppState(AppState.ZODIAC_HOUR_FINDER); }, []);
   const handleStartAuspiciousDayFinder = useCallback(() => { trackFeatureUsage('auspiciousDayFinder'); setError(null); setAppState(AppState.AUSPICIOUS_DAY_FINDER); }, []);
   const handleStartIChing = useCallback(() => { trackFeatureUsage('iChing'); setError(null); setAppState(AppState.ICHING_DIVINATION); }, []);
-    const handleStartTarot = useCallback(() => { trackFeatureUsage('tarotReading'); setError(null); setAppState(AppState.TAROT_READING); }, []);
+  const handleStartTarot = useCallback(() => { trackFeatureUsage('tarotReading'); setError(null); setAppState(AppState.TAROT_READING); }, []);
   const handleStartShop = useCallback(() => { trackFeatureUsage('shop'); setError(null); setAppState(AppState.SHOP); }, []);
   const handleStartTalismanGenerator = useCallback(() => { trackFeatureUsage('talismanForm'); setError(null); setAppState(AppState.TALISMAN_GENERATOR); }, []);
   const handleStartAuspiciousNaming = useCallback(() => { trackFeatureUsage('auspiciousNamingForm'); setError(null); setAppState(AppState.AUSPICIOUS_NAMING_FORM); }, []);
 
   const handleStartCareerAdvisor = useCallback(() => {
-    const action = () => {
-        setError(null);
-        setAppState(AppState.CAREER_ADVISOR_FORM);
-    };
+    const action = () => { setError(null); setAppState(AppState.CAREER_ADVISOR_FORM); };
     if (sessionStorage.getItem('career_unlocked') === 'true' || !user) {
         action();
     } else {
@@ -510,39 +537,73 @@ const App: React.FC = () => {
     }
   }, [user]);
 
-  const handleViewChart = useCallback((chart: SavedChart) => {
-    const action = () => {
-      setBirthInfo(chart.birthInfo);
-      setChartData(chart.chartData);
-      setAppState(AppState.RESULT);
-    };
-    if (sessionStorage.getItem('astrology_unlocked') === 'true' || !user) {
-        action();
-    } else {
-        setPostLoginAction(() => action);
-        setAppState(AppState.ASTROLOGY_PASSWORD);
+  const handleViewItem = useCallback((item: SavedItem) => {
+    resetAllDynamicData();
+    const { payload } = item;
+    switch(payload.type) {
+        case 'astrology':
+             const viewAction = () => {
+                setBirthInfo(payload.birthInfo);
+                setChartData(payload.chartData);
+                setAppState(AppState.RESULT);
+            };
+            if (sessionStorage.getItem('astrology_unlocked') === 'true' || !user) {
+                viewAction();
+            } else {
+                setPostLoginAction(() => viewAction);
+                setAppState(AppState.ASTROLOGY_PASSWORD);
+            }
+            break;
+        case 'physiognomy':
+            setPhysiognomyData(payload.analysisData);
+            setCapturedImage(payload.imageData);
+            setAppState(AppState.FACE_SCAN_RESULT);
+            break;
+        case 'palmReading':
+            setPalmReadingData(payload.analysisData);
+            setCapturedPalmImage(payload.imageData);
+            setAppState(AppState.PALM_SCAN_RESULT);
+            break;
+        case 'handwriting':
+            setHandwritingData(payload.analysisData);
+            setCapturedHandwritingImage(payload.imageData);
+            setAppState(AppState.HANDWRITING_ANALYSIS_RESULT);
+            break;
+        case 'numerology':
+            setNumerologyInfo(payload.info);
+            setNumerologyData(payload.data);
+            setAppState(AppState.NUMEROLOGY_RESULT);
+            break;
+        case 'flowAstrology':
+            setFlowAstrologyInfo(payload.info);
+            setFlowAstrologyData(payload.data);
+            setAppState(AppState.FLOW_ASTROLOGY_RESULT);
+            break;
+        case 'auspiciousNaming':
+            setAuspiciousNamingInfo(payload.info);
+            setAuspiciousNamingData(payload.data);
+            setAppState(AppState.AUSPICIOUS_NAMING_RESULT);
+            break;
     }
-  }, [user]);
+  }, [user, resetAllDynamicData]);
 
-  const handleDeleteChart = useCallback((chart: SavedChart) => {
-    setChartToDelete(chart);
+  const handleDeleteItem = useCallback((item: SavedItem) => {
+    setItemToDelete(item);
   }, []);
 
-  const confirmDeleteChart = useCallback(() => {
-    if (!chartToDelete) return;
-    const updatedCharts = savedCharts.filter(chart => chart.id !== chartToDelete.id);
-    setSavedCharts(updatedCharts);
-    localStorage.setItem(getChartStorageKey(), JSON.stringify(updatedCharts));
-    logAdminEvent('Deleted Chart', user?.email || 'Guest', `For: ${chartToDelete.birthInfo.name}`);
-    setChartToDelete(null);
-  }, [chartToDelete, savedCharts, user, getChartStorageKey]);
+  const confirmDeleteItem = useCallback(() => {
+    if (!itemToDelete) return;
+    const updatedItems = savedItems.filter(item => item.id !== itemToDelete.id);
+    setSavedItems(updatedItems);
+    localStorage.setItem(getStorageKey(), JSON.stringify(updatedItems));
+    logAdminEvent('Deleted Saved Item', user?.email || 'Guest', `ID: ${itemToDelete.id}`);
+    setItemToDelete(null);
+  }, [itemToDelete, savedItems, user, getStorageKey]);
   
   const handleCreateNew = useCallback(() => {
       setAppState(AppState.ASTROLOGY_FORM);
-      setBirthInfo(null);
-      setChartData(null);
-      setError(null);
-  }, []);
+      resetAllDynamicData();
+  }, [resetAllDynamicData]);
 
   const handleResetFaceScan = useCallback(() => {
       setAppState(AppState.FACE_SCAN_CAPTURE);
@@ -587,14 +648,8 @@ const App: React.FC = () => {
     setPostLoginAction(null);
   }, [postLoginAction, user]);
 
-  const handleStartAdminLogin = useCallback(() => {
-    setAppState(AppState.ADMIN_LOGIN);
-  }, []);
-
-  const handleAdminLoginSuccess = useCallback(() => {
-      logAdminEvent('Admin Signed In', 'Admin');
-      setAppState(AppState.ADMIN_DASHBOARD);
-  }, []);
+  const handleStartAdminLogin = useCallback(() => { setAppState(AppState.ADMIN_LOGIN); }, []);
+  const handleAdminLoginSuccess = useCallback(() => { logAdminEvent('Admin Signed In', 'Admin'); setAppState(AppState.ADMIN_DASHBOARD); }, []);
 
   const handleAdminAction = useCallback((action: string) => {
       const confirmConfig = {
@@ -615,17 +670,31 @@ const App: React.FC = () => {
 
       if (action === 'clear_charts') {
           Object.keys(localStorage).forEach(key => {
-              if (key.startsWith('astrologyCharts_')) {
+              if (key.startsWith('savedItems_') || key.startsWith('astrologyCharts_')) {
                   localStorage.removeItem(key);
               }
           });
-          setSavedCharts([]); // Clear current user's view
+          setSavedItems([]);
       } else if (action === 'clear_history') {
           localStorage.removeItem('adminHistoryLog');
       }
       setAdminActionToConfirm(null);
   }, [adminActionToConfirm]);
 
+  // FIX: Correctly handle different name properties for saved item types.
+  const getDeleteItemMessage = (item: SavedItem): string => {
+      const { payload } = item;
+      switch (payload.type) {
+        case 'astrology':
+          return t('confirmDeleteMessageWithName', { name: payload.birthInfo.name });
+        case 'numerology':
+          return t('confirmDeleteMessageWithName', { name: payload.info.fullName });
+        case 'flowAstrology':
+          return t('confirmDeleteMessageWithName', { name: payload.info.name });
+        default:
+          return t('confirmDeleteMessage');
+      }
+  };
 
   const getTranslatedError = (errorKey: string | null): string => {
     if (!errorKey) return '';
@@ -633,9 +702,7 @@ const App: React.FC = () => {
     if (isBackendKey) {
         const translationKey = errorKey.replace(/_([a-z])/g, (g) => g[1].toUpperCase()) as TranslationKey;
         const translated = t(translationKey);
-        if (translated === translationKey) {
-            return t('errorUnknown');
-        }
+        if (translated === translationKey) { return t('errorUnknown'); }
         return translated;
     }
     return errorKey;
@@ -645,11 +712,11 @@ const App: React.FC = () => {
     switch (appState) {
       case AppState.HOME:
         return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} onStartHandwritingAnalysis={handleStartHandwritingAnalysis} onStartCareerAdvisor={handleStartCareerAdvisor} onStartTalismanGenerator={handleStartTalismanGenerator} onStartAuspiciousNaming={handleStartAuspiciousNaming} />;
-      case AppState.SAVED_CHARTS:
-        return <SavedCharts 
-          charts={savedCharts}
-          onView={handleViewChart}
-          onDelete={handleDeleteChart}
+      case AppState.SAVED_ITEMS:
+        return <SavedItems 
+          items={savedItems}
+          onView={handleViewItem}
+          onDelete={handleDeleteItem}
           onCreateNew={handleStartAstrology}
         />;
       case AppState.ASTROLOGY_PASSWORD:
@@ -661,59 +728,23 @@ const App: React.FC = () => {
       case AppState.RESULT:
         return chartData && <AstrologyChart data={chartData} birthInfo={birthInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.FACE_SCAN_CAPTURE:
-        return <FaceScan 
-            onAnalyze={handleAnalyzeFace} 
-            onBack={handleResetToHome}
-            onCapture={handleCaptureImage}
-            onRetake={handleRetakeCapture}
-            capturedImage={capturedImage}
-        />;
+        return <FaceScan onAnalyze={handleAnalyzeFace} onBack={handleResetToHome} onCapture={handleCaptureImage} onRetake={handleRetakeCapture} capturedImage={capturedImage} />;
       case AppState.FACE_SCAN_LOADING:
         return <Spinner message={t('spinnerPhysiognomy')} />;
       case AppState.FACE_SCAN_RESULT:
-          return physiognomyData && capturedImage && <PhysiognomyResult 
-              analysisData={physiognomyData} 
-              imageData={capturedImage} 
-              onReset={handleResetFaceScan} 
-              onBackToHome={handleResetToHome} 
-              onOpenDonationModal={() => setIsDonationModalOpen(true)} 
-          />;
+          return physiognomyData && capturedImage && <PhysiognomyResult analysisData={physiognomyData} imageData={capturedImage} onReset={handleResetFaceScan} onBackToHome={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.PALM_SCAN_CAPTURE:
-        return <PalmScan 
-            onAnalyze={handleAnalyzePalm} 
-            onBack={handleResetToHome}
-            onCapture={handleCapturePalmImage}
-            onRetake={handleRetakePalmCapture}
-            capturedImage={capturedPalmImage}
-        />;
+        return <PalmScan onAnalyze={handleAnalyzePalm} onBack={handleResetToHome} onCapture={handleCapturePalmImage} onRetake={handleRetakePalmCapture} capturedImage={capturedPalmImage} />;
       case AppState.PALM_SCAN_LOADING:
         return <Spinner message={t('spinnerPalmReading')} />;
       case AppState.PALM_SCAN_RESULT:
-          return palmReadingData && capturedPalmImage && <PalmReadingResult 
-              analysisData={palmReadingData} 
-              imageData={capturedPalmImage} 
-              onReset={handleResetPalmScan} 
-              onBackToHome={handleResetToHome} 
-              onOpenDonationModal={() => setIsDonationModalOpen(true)} 
-          />;
+          return palmReadingData && capturedPalmImage && <PalmReadingResult analysisData={palmReadingData} imageData={capturedPalmImage} onReset={handleResetPalmScan} onBackToHome={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.HANDWRITING_ANALYSIS_CAPTURE:
-        return <HandwritingScan
-            onAnalyze={handleAnalyzeHandwriting} 
-            onBack={handleResetToHome}
-            onCapture={handleCaptureHandwritingImage}
-            onRetake={handleRetakeHandwritingCapture}
-            capturedImage={capturedHandwritingImage}
-        />;
+        return <HandwritingScan onAnalyze={handleAnalyzeHandwriting} onBack={handleResetToHome} onCapture={handleCaptureHandwritingImage} onRetake={handleRetakeHandwritingCapture} capturedImage={capturedHandwritingImage} />;
       case AppState.HANDWRITING_ANALYSIS_LOADING:
         return <Spinner message={t('spinnerHandwriting')} />;
       case AppState.HANDWRITING_ANALYSIS_RESULT:
-          return handwritingData && capturedHandwritingImage && <HandwritingResult 
-              analysisData={handwritingData} 
-              imageData={capturedHandwritingImage} 
-              onReset={handleResetHandwritingScan} 
-              onBackToHome={handleResetToHome} 
-              onOpenDonationModal={() => setIsDonationModalOpen(true)} 
-          />;
+          return handwritingData && capturedHandwritingImage && <HandwritingResult analysisData={handwritingData} imageData={capturedHandwritingImage} onReset={handleResetHandwritingScan} onBackToHome={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.ZODIAC_HOUR_FINDER:
           return <ZodiacHourFinder />;
       case AppState.AUSPICIOUS_DAY_FINDER:
@@ -836,14 +867,14 @@ const App: React.FC = () => {
         <DonationModal isOpen={isDonationModalOpen} onClose={() => setIsDonationModalOpen(false)} />
         <ZaloContact />
         <ConfirmationModal
-          isOpen={!!chartToDelete || !!adminActionToConfirm}
+          isOpen={!!itemToDelete || !!adminActionToConfirm}
           onClose={() => {
-              setChartToDelete(null);
+              setItemToDelete(null);
               setAdminActionToConfirm(null);
           }}
-          onConfirm={chartToDelete ? confirmDeleteChart : confirmAdminAction}
-          title={chartToDelete ? t('confirmDeleteTitle') : adminActionToConfirm?.title || ''}
-          message={chartToDelete ? t('confirmDeleteMessage', { name: chartToDelete?.birthInfo.name || '' }) : adminActionToConfirm?.message || ''}
+          onConfirm={itemToDelete ? confirmDeleteItem : confirmAdminAction}
+          title={itemToDelete ? t('confirmDeleteTitle') : adminActionToConfirm?.title || ''}
+          message={itemToDelete ? getDeleteItemMessage(itemToDelete) : adminActionToConfirm?.message || ''}
         />
       </div>
     </div>

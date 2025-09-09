@@ -35,12 +35,6 @@ export interface AstrologyChartData {
   tongKet: string;
 }
 
-export interface SavedChart {
-  id: string;
-  birthInfo: BirthInfo;
-  chartData: AstrologyChartData;
-}
-
 export interface PhysiognomyData {
     tongQuan: string;
     tamDinh: string;
@@ -278,9 +272,72 @@ export interface AdminLogEntry {
     details: string;
 }
 
+// --- Saved Item Data Structures ---
+
+export interface SavedAstrologyPayload {
+    type: 'astrology';
+    birthInfo: BirthInfo;
+    chartData: AstrologyChartData;
+}
+
+export interface SavedPhysiognomyPayload {
+    type: 'physiognomy';
+    name: string; // e.g., "Physiognomy Analysis - 2024-07-29"
+    imageData: string;
+    analysisData: PhysiognomyData;
+}
+
+export interface SavedPalmReadingPayload {
+    type: 'palmReading';
+    name: string;
+    imageData: string;
+    analysisData: PalmReadingData;
+}
+
+export interface SavedHandwritingPayload {
+    type: 'handwriting';
+    name: string;
+    imageData: string;
+    analysisData: HandwritingData;
+}
+
+export interface SavedNumerologyPayload {
+    type: 'numerology';
+    info: NumerologyInfo;
+    data: NumerologyData;
+}
+
+export interface SavedFlowAstrologyPayload {
+    type: 'flowAstrology';
+    info: FlowAstrologyInfo;
+    data: FlowAstrologyData;
+}
+
+export interface SavedAuspiciousNamingPayload {
+    type: 'auspiciousNaming';
+    info: AuspiciousNamingInfo;
+    data: AuspiciousNamingData;
+}
+
+export type SavedItemPayload = 
+    | SavedAstrologyPayload 
+    | SavedPhysiognomyPayload 
+    | SavedNumerologyPayload 
+    | SavedPalmReadingPayload 
+    | SavedHandwritingPayload 
+    | SavedFlowAstrologyPayload 
+    | SavedAuspiciousNamingPayload;
+
+export interface SavedItem {
+    id: string;
+    timestamp: string; // ISO string for sorting
+    payload: SavedItemPayload;
+}
+
+
 export enum AppState {
   HOME,
-  SAVED_CHARTS,
+  SAVED_ITEMS,
   ASTROLOGY_PASSWORD,
   ASTROLOGY_FORM,
   LOADING,
