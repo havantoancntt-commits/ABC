@@ -166,6 +166,7 @@ export const translations = {
     numerologyBirthdayChartTitle: 'Biểu Đồ Ngày Sinh',
     numerologyStrengthArrows: 'Mũi Tên Sức Mạnh',
     numerologyWeaknessArrows: 'Mũi Tên Trống (Cơ Hội)',
+    errorPdf: 'Đã xảy ra lỗi khi tạo file PDF. Vui lòng thử lại.',
 
     // Palm Reading
     palmReadingTitle: 'Xem Chỉ Tay',
@@ -395,9 +396,6 @@ export const translations = {
     careerPasswordPromptValueTitle: 'Giá Trị Của Gói Tư Vấn Hướng Nghiệp',
     careerPasswordPromptValueDesc: 'Mở khóa 3 gợi ý nghề nghiệp được cá nhân hóa sâu sắc, phân tích chi tiết về sự phù hợp, lộ trình phát triển và các lĩnh vực tiềm năng. Các gợi ý này được xây dựng dựa trên sự kết hợp phức tạp giữa bản đồ sao, sở thích và kỹ năng của bạn.',
     careerPasswordPaymentStep1: 'Gieo duyên tùy tâm (Gợi ý: 100.000đ) qua một trong các hình thức bên dưới.',
-
-    // FIX: Add missing translation key for PDF error
-    errorPdf: 'Đã xảy ra lỗi khi tạo file PDF. Vui lòng thử lại.',
   },
   en: {
     // Common
@@ -565,6 +563,7 @@ export const translations = {
     numerologyBirthdayChartTitle: 'Birthday Chart',
     numerologyStrengthArrows: 'Arrows of Strength',
     numerologyWeaknessArrows: 'Empty Arrows (Opportunities)',
+    errorPdf: 'An error occurred while creating the PDF file. Please try again.',
 
     // Palm Reading
     palmReadingTitle: 'Palm Reading',
@@ -794,7 +793,5 @@ export const translations = {
     careerPasswordPromptValueTitle: 'Value of the Career Guidance Package',
     careerPasswordPromptValueDesc: 'Unlock 3 deeply personalized career suggestions with detailed analysis on suitability, growth paths, and potential fields. These suggestions are built on a complex combination of your star chart, interests, and skills.',
     careerPasswordPaymentStep1: 'Make a voluntary contribution (Suggestion: $5.00) via one of the methods below.',
-
-    errorPdf: 'An error occurred while creating the PDF file. Please try again.',
   }
 };

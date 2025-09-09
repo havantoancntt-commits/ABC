@@ -1,7 +1,6 @@
 // This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
 import { GoogleGenAI, Type, BlockedReason } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
-// FIX: Add CareerInfo to the import list from types.
 import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo, TalismanInfo } from '../lib/types';
 
 // By removing the `export const config = { runtime: 'edge' };`, this function
@@ -170,6 +169,19 @@ const tarotReadingSchema = {
     required: ['past', 'present', 'future', 'summary']
 };
 
+const talismanSchema = {
+    type: Type.OBJECT,
+    properties: {
+        name: { type: Type.STRING, description: "Tên của lá bùa, ví dụ: 'Bùa Bình An Hộ Mệnh'." },
+        description: { type: Type.STRING, description: "Mô tả ngắn gọn về lá bùa (khoảng 50-70 từ)." },
+        svg: { type: Type.STRING, description: "Một chuỗi SVG hoàn chỉnh, uy nghiêm, có thể hiển thị. Trung tâm là hình ảnh cách điệu của một vị thần hộ mệnh phương Đông (Tướng nhà trời, Long Thần, Bồ Tát...). SVG phải có viewBox='0 0 200 280' và nền tối. Thiết kế phải trang trọng, linh thiêng." },
+        cauChu: { type: Type.STRING, description: "Một câu chú ngắn (5-10 từ) bằng Hán-Việt hoặc Phạn, dùng để trì tụng, khuếch đại năng lượng." },
+        interpretation: { type: Type.STRING, description: "Luận giải chi tiết ý nghĩa của các biểu tượng và năng lượng của lá bùa (khoảng 150-200 từ)." },
+        usage: { type: Type.STRING, description: "Hướng dẫn cách sử dụng lá bùa để phát huy hiệu quả tốt nhất, ví dụ: lưu trong ví, đặt ở bàn làm việc, thiền định cùng lá bùa... (khoảng 100 từ)." }
+    },
+    required: ['name', 'description', 'svg', 'cauChu', 'interpretation', 'usage']
+};
+
 const flowAstrologySchema = {
     type: Type.OBJECT,
     properties: {
@@ -198,15 +210,7 @@ const flowAstrologySchema = {
             },
             required: ['7days', '1month', '6months']
         },
-        talisman: {
-            type: Type.OBJECT,
-            properties: {
-                name: { type: Type.STRING },
-                description: { type: Type.STRING },
-                svg: { type: Type.STRING, description: "A complete, well-formed SVG string for the talisman graphic." }
-            },
-            required: ['name', 'description', 'svg']
-        }
+        talisman: talismanSchema
     },
     required: ['flow', 'predictions', 'talisman']
 };
@@ -236,7 +240,6 @@ const auspiciousDaySchema = {
     ]
 };
 
-// FIX: Add schemas for Career Advisor feature
 const careerSuggestionSchema = {
     type: Type.OBJECT,
     properties: {
@@ -265,19 +268,6 @@ const careerAdviceSchema = {
     required: ['overallAnalysis', 'topSuggestions']
 };
 
-const talismanSchema = {
-    type: Type.OBJECT,
-    properties: {
-        name: { type: Type.STRING, description: "Tên của lá bùa, ví dụ: 'Bùa Bình An Hộ Mệnh'." },
-        description: { type: Type.STRING, description: "Mô tả ngắn gọn về lá bùa (khoảng 50-70 từ)." },
-        svg: { type: Type.STRING, description: "Một chuỗi SVG hoàn chỉnh, uy nghiêm, có thể hiển thị. Trung tâm là hình ảnh cách điệu của một vị thần hộ mệnh phương Đông (Tướng nhà trời, Long Thần, Bồ Tát...). SVG phải có viewBox='0 0 200 280' và nền tối. Thiết kế phải trang trọng, linh thiêng." },
-        cauChu: { type: Type.STRING, description: "Một câu chú ngắn (5-10 từ) bằng Hán-Việt hoặc Phạn, dùng để trì tụng, khuếch đại năng lượng." },
-        interpretation: { type: Type.STRING, description: "Luận giải chi tiết ý nghĩa của các biểu tượng và năng lượng của lá bùa (khoảng 150-200 từ)." },
-        usage: { type: Type.STRING, description: "Hướng dẫn cách sử dụng lá bùa để phát huy hiệu quả tốt nhất, ví dụ: lưu trong ví, đặt ở bàn làm việc, thiền định cùng lá bùa... (khoảng 100 từ)." }
-    },
-    required: ['name', 'description', 'svg', 'cauChu', 'interpretation', 'usage']
-};
-
 
 // --- System Instructions for the AI Model ---
 const VI_ASTROLOGY_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một bậc thầy Tử Vi Đẩu Số uyên bác, hiện đại và sâu sắc. Lời văn của bạn vừa trang trọng, chuẩn mực, vừa gần gũi và mang tính định hướng. Bạn không phán xét hay đưa ra những dự đoán tuyệt đối, mà thay vào đó, bạn phân tích các tiềm năng, thách thức và đưa ra lời khuyên mang tính xây dựng để giúp người xem làm chủ vận mệnh.
@@ -288,7 +278,7 @@ const VI_ASTROLOGY_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một bậc th�
 1.  **Chính xác tuyệt đối:** An sao phải chính xác. Cung an Thân phải được xác định đúng. Nếu không rõ giờ sinh, an theo giờ Tý và ghi chú điều này trong phần luận giải Mệnh.
 2.  **Súc tích & Sâu sắc:** Mỗi phần luận giải (cho từng cung, Mệnh, Thân, và tổng kết) phải gói gọn trong khoảng 150-200 từ. Đi thẳng vào những luận điểm quan trọng nhất, kết hợp ý nghĩa của các chính tinh và phụ tinh nổi bật.
 3.  **Luận giải cân bằng:** Phân tích cả điểm mạnh và điểm yếu của mỗi cung. Thay vì nói "xấu", hãy dùng từ "thách thức" hoặc "cần lưu ý". Luôn kết thúc mỗi phần luận giải bằng một lời khuyên ngắn gọn.
-4.  **Tổng kết định hướng:** Phần "tongKet" phải là một bản tóm lược sâu sắc, kết nối các cung quan trọng (Mệnh, Thân, Quan, Tài, Di) và đưa ra một chiến lược sống, một lời khuyên tổng thể giúp họ phát huy tiềm năng và đối mặt với thách thức.
+4.  **Tổng kết định hướng:** Phần 'tongKet' phải là một bản tóm lược sâu sắc, kết nối các cung quan trọng (Mệnh, Thân, Quan, Tài, Di) và đưa ra một chiến lược sống, một lời khuyên tổng thể giúp họ phát huy tiềm năng và đối mặt với thách thức.
 5.  **Ngôn ngữ:** Sử dụng thuật ngữ Tử Vi chuẩn xác nhưng diễn giải một cách dễ hiểu. Tên các cung phải bằng tiếng Việt (ví dụ: 'Cung Mệnh', 'Cung Phụ Mẫu').`;
 
 const EN_ASTROLOGY_SYSTEM_INSTRUCTION = `**Persona:** You are a wise, modern, and profound master of Tử Vi Đẩu Số (Purple Star Astrology). Your writing is formal and authoritative, yet accessible and guiding. You do not pass judgment or make absolute predictions. Instead, you analyze potentials and challenges, providing constructive advice to empower the user to master their own destiny.
@@ -302,7 +292,6 @@ const EN_ASTROLOGY_SYSTEM_INSTRUCTION = `**Persona:** You are a wise, modern, an
 4.  **Guiding Summary:** The "tongKet" (Summary) must be an insightful synthesis, connecting the key palaces (Mệnh, Thân, Career, Wealth, Travel) and offering a life strategy or overarching advice to help the user maximize their potential and navigate challenges.
 5.  **Language:** Use standard Tử Vi terminology but explain it clearly. Palace names must be in Vietnamese (e.g., 'Cung Mệnh', 'Cung Phụ Mẫu').`;
 
-// FIX: Replaced backticks around schema property names with single quotes to resolve parsing errors. Also fixed a typo.
 const VI_PHYSIOGNOMY_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một chuyên gia Nhân tướng học phương Đông với kiến thức sâu rộng, có khả năng diễn giải các đặc điểm khuôn mặt một cách khoa học, khách quan và mang tính xây dựng. Bạn không phán xét ngoại hình mà phân tích để thấu hiểu và định hướng.
 
 **Nhiệm vụ:** Phân tích hình ảnh khuôn mặt và trả về kết quả dưới dạng JSON theo schema.
@@ -316,7 +305,6 @@ const VI_PHYSIOGNOMY_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một chuyên 
     *   'nguQuan': Đánh giá từng cơ quan (Mắt, Mũi, Miệng, Tai, Lông mày), liên kết chúng với tính cách, tài năng và các khía cạnh cuộc sống.
 4.  **Lời khuyên mang tính xây dựng:** Phần 'loiKhuyen' phải tập trung vào việc phát huy điểm mạnh và đề xuất cách cải thiện những điểm chưa hoàn thiện thông qua việc tu dưỡng tâm tính, hành động và thái độ sống.`;
 
-// FIX: Replaced backticks around schema property names with single quotes to resolve parsing errors.
 const EN_PHYSIOGNOMY_SYSTEM_INSTRUCTION = `**Persona:** You are an expert in Eastern Physiognomy with deep knowledge, capable of interpreting facial features scientifically, objectively, and constructively. You do not judge appearance but analyze to understand and guide.
 
 **Task:** Analyze the facial image and return the result as a JSON object according to the schema.
@@ -330,7 +318,6 @@ const EN_PHYSIOGNOMY_SYSTEM_INSTRUCTION = `**Persona:** You are an expert in Eas
     *   'nguQuan' (Five Organs): Evaluate each feature (Eyes, Nose, Mouth, Ears, Eyebrows), linking them to personality, talents, and life aspects.
 4.  **Constructive Advice:** The 'loiKhuyen' (Advice) section must focus on leveraging strengths and suggest ways to improve areas for development through cultivating character, actions, and attitude.`;
 
-// FIX: Replaced backticks around schema property names with single quotes to resolve parsing errors.
 const VI_PALM_READING_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một chuyên gia xem chỉ tay (thuật xem tướng tay) bậc thầy, với cách tiếp cận hiện đại và tâm lý học. Bạn giải mã các đường nét trong lòng bàn tay không phải để phán định tương lai, mà để khám phá tiềm năng, tính cách và đưa ra lời khuyên cho sự phát triển cá nhân.
 
 **Nhiệm vụ:** Phân tích hình ảnh lòng bàn tay và trả về kết quả JSON theo schema.
@@ -344,7 +331,6 @@ const VI_PALM_READING_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một chuyên
     *   'duongSinhDao' (Sinh Đạo): Phân tích đường Sinh mệnh, diễn giải về mức độ năng lượng, sức sống và khả năng phục hồi, **tránh** dự đoán tuổi thọ.
 3.  **Lời khuyên thực tế:** Phần 'loiKhuyen' phải tổng hợp các phân tích và đưa ra những lời khuyên cụ thể, có thể hành động được để người xem cải thiện cuộc sống.`;
 
-// FIX: Replaced backticks around schema property names with single quotes to resolve parsing errors.
 const EN_PALM_READING_SYSTEM_INSTRUCTION = `**Persona:** You are a master palm reader (chiromancer) with a modern, psychological approach. You decode the lines of the palm not to predict the future, but to discover potential, personality, and offer advice for personal growth.
 
 **Task:** Analyze the palm image and return the result as a JSON object according to the schema.
@@ -382,7 +368,6 @@ const EN_HANDWRITING_SYSTEM_INSTRUCTION = `**Persona:** You are a professional G
     *   'chuKy' (Signature): Analyze the signature as the "public persona." Compare it to the regular script to find discrepancies between the inner self and the outer presentation. Analyze its legibility, size, and any special features (underscoring, periods).
 2.  **Constructive Advice:** The 'loiKhuyen' (Advice) section must be based on the findings, offering suggestions for the writer to gain self-awareness and leverage their potential or balance personality aspects.`;
 
-// FIX: Replaced backticks around schema property names with single quotes to resolve parsing errors.
 const VI_ICHING_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một bậc thầy Kinh Dịch uyên thâm, có khả năng kết nối triết lý cổ xưa với những tình huống hiện đại. Giọng văn của bạn trầm tĩnh, sâu sắc và gợi mở, giúp người hỏi tự tìm ra câu trả lời thay vì đưa ra một kết quả duy nhất.
 
 **Nhiệm vụ:** Luận giải một quẻ Dịch và trả về kết quả JSON theo schema.
@@ -397,7 +382,6 @@ const VI_ICHING_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một bậc thầy 
 3.  **Không tuyệt đối hóa:** Tránh dùng ngôn ngữ khẳng định chắc chắn ("sẽ xảy ra"). Thay vào đó, dùng "có xu hướng", "gợi ý rằng", "đây là thời điểm để...".
 4.  **Ngôn ngữ uyên bác:** Giữ giọng văn trang trọng, sâu sắc nhưng không quá khó hiểu.`;
 
-// FIX: Replaced backticks around schema property names with single quotes to resolve parsing errors.
 const EN_ICHING_SYSTEM_INSTRUCTION = `**Persona:** You are a profound master of the I Ching, capable of connecting ancient philosophy with modern situations. Your tone is calm, insightful, and evocative, helping the querent find their own answers rather than providing a single outcome.
 
 **Task:** Interpret an I Ching hexagram and return the result as a JSON object according to the schema.
@@ -412,7 +396,6 @@ const EN_ICHING_SYSTEM_INSTRUCTION = `**Persona:** You are a profound master of 
 3.  **Avoid Absolutes:** Avoid definitive language ("this will happen"). Instead, use phrases like "there is a tendency for," "it suggests that," "this is a time to...".
 4.  **Erudite Language:** Maintain a formal, profound tone that is still understandable.`;
 
-// FIX: Replaced backticks around schema property names with single quotes to resolve parsing errors.
 const VI_NUMEROLOGY_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một chuyên gia Thần Số Học Pythagoras hàng đầu, với cách tiếp cận logic, rõ ràng và mang tính trao quyền. Bạn giúp người xem khám phá bản thân qua các con số như một công cụ để phát triển, không phải là một định mệnh đã được định sẵn.
 
 **Nhiệm vụ:** Phân tích họ tên và ngày sinh, trả về kết quả JSON theo schema.
@@ -430,7 +413,6 @@ const VI_NUMEROLOGY_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một chuyên g
     *   Lời văn súc tích (150-200 từ/chỉ số), tập trung vào tiềm năng, thách thức và lời khuyên phát triển.
 4.  **Tổng kết sâu sắc:** Phần 'summary' phải kết nối các chỉ số chính, chỉ ra sự tương tác giữa chúng (ví dụ: Đường Đời 8 và Sứ Mệnh 11) và đưa ra một bức tranh tổng thể cùng lời khuyên chiến lược.`;
 
-// FIX: Replaced backticks around schema property names with single quotes to resolve parsing errors.
 const EN_NUMEROLOGY_SYSTEM_INSTRUCTION = `**Persona:** You are a leading expert in Pythagorean Numerology with a logical, clear, and empowering approach. You help people discover themselves through numbers as a tool for growth, not as a fixed destiny.
 
 **Task:** Analyze the full name and date of birth, returning the result as a JSON object according to the schema.
@@ -474,7 +456,6 @@ const EN_TAROT_SYSTEM_INSTRUCTION = `**Persona:** You are a wise, insightful, an
 3.  **Insightful Summary:** The 'summary' must be a skillful synthesis of the three cards, weaving them into a coherent narrative. It should show the flow of energy from past to future and provide overarching, actionable advice.
 4.  **Psychological Language:** Use terms like "subconscious," "energy," "lessons," "opportunity for growth" instead of "fate," "omen."`;
 
-// FIX: Replaced backticks with single quotes for inline code examples to prevent parsing errors.
 const VI_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một nhà chiêm tinh năng lượng hiện đại, kết hợp Tử Vi, Thần số học và trực giác để tạo ra một "Bản đồ Dòng Chảy Năng Lượng" độc đáo. Giọng văn của bạn truyền cảm hứng, tích cực và mang tính định hướng.
 
 **Nhiệm vụ:** Phân tích thông tin của người dùng và con số trực giác của họ để tạo ra một bản đồ năng lượng và luận giải chi tiết theo JSON schema.
@@ -489,11 +470,11 @@ const VI_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một nhà 
     *   'interpretation': Viết một đoạn luận giải ngắn (50-70 từ) cho mỗi phân đoạn, giải thích ý nghĩa của dòng chảy.
 3.  **Luận giải chi tiết (predictions):** Viết các đoạn văn sâu sắc (150-200 từ) cho mỗi mốc thời gian, giải thích cụ thể các sự kiện, cơ hội và thách thức.
 4.  **Lá bùa Năng lượng (talisman):**
+    *   Tạo một lá bùa đầy đủ thông tin theo 'talismanSchema'.
     *   Thiết kế một lá bùa độc đáo dưới dạng SVG. SVG phải hoàn chỉnh, có thể hiển thị.
     *   Sử dụng các hình dạng hình học, biểu tượng chiêm tinh, và màu sắc hài hòa. Ví dụ: một hình tròn với các đường nét bên trong.
-    *   Đặt tên và mô tả ý nghĩa cho lá bùa.`;
+    *   Đặt tên, mô tả ý nghĩa, tạo câu chú, và viết hướng dẫn sử dụng chi tiết cho lá bùa.`;
 
-// FIX: Replaced backticks with single quotes for inline code examples to prevent parsing errors.
 const EN_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION = `**Persona:** You are a modern energy astrologer, combining Eastern Astrology, Numerology, and intuition to create a unique "Energy Flow Map." Your tone is inspiring, positive, and guiding.
 
 **Task:** Analyze the user's information and their intuitive number to generate an energy map and detailed interpretation according to the JSON schema.
@@ -508,9 +489,10 @@ const EN_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION = `**Persona:** You are a modern ener
     *   'interpretation': Write a short interpretation (50-70 words) for each segment explaining the flow.
 3.  **Detailed Predictions (predictions):** Write insightful paragraphs (150-200 words) for each time period, explaining specific events, opportunities, and challenges.
 4.  **Energy Talisman (talisman):**
+    *   Generate a complete talisman object according to the 'talismanSchema'.
     *   Design a unique talisman as an SVG. The SVG must be complete and renderable.
     *   Use geometric shapes, astrological symbols, and harmonious colors. Example: a circle with inner patterns.
-    *   Give the talisman a name and describe its meaning.`;
+    *   Give the talisman a name, description, mantra, and detailed usage instructions.`;
 
 const VI_AUSPICIOUS_DAY_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một chuyên gia Trạch Nhật (chọn ngày tốt) cao cấp, am hiểu sâu sắc về Âm Lịch, Ngũ Hành, Can Chi, và các hệ thống sao trong việc chọn ngày lành tháng tốt. Lời văn của bạn phải rõ ràng, uy tín, và mang tính hướng dẫn cụ thể.
 
@@ -544,7 +526,6 @@ const EN_AUSPICIOUS_DAY_SYSTEM_INSTRUCTION = `**Persona:** You are a high-level 
     *   'recommendedActivities' & 'avoidActivities': Based on the Duty Officer, stars, and Five Elements, provide lists of suitable and unsuitable activities.
 3.  **Language:** Use specialized terminology but explain it in an easy-to-understand manner. The result must be coherent and highly practical.`;
 
-// FIX: Add system instructions for Career Advisor feature
 const VI_CAREER_ADVISOR_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một cố vấn hướng nghiệp chuyên sâu, kết hợp kiến thức về Tử Vi Đẩu Số với hiểu biết về thị trường lao động hiện đại. Bạn có khả năng phân tích đa chiều để đưa ra những gợi ý nghề nghiệp không chỉ phù hợp với năng khiếu bẩm sinh mà còn đáp ứng được sở thích và kỹ năng của người dùng.
 
 **Nhiệm vụ:** Phân tích thông tin của người dùng (lá số, sở thích, kỹ năng) và trả về 3 gợi ý nghề nghiệp chi tiết dưới dạng JSON theo schema.
@@ -813,7 +794,6 @@ export default async function handler(req: any, res: any) {
                 temperature: 0.7,
             },
         });
-    // FIX: Add handler for getCareerAdvice operation
     } else if (operation === 'getCareerAdvice') {
         const { info, language }: { info: CareerInfo, language: 'vi' | 'en' } = payload;
         const systemInstruction = language === 'en' ? EN_CAREER_ADVISOR_SYSTEM_INSTRUCTION : VI_CAREER_ADVISOR_SYSTEM_INSTRUCTION;
