@@ -1,6 +1,6 @@
 import React from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'special' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology' | 'career' | 'talisman' | 'naming';
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'special' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology' | 'career' | 'talisman' | 'naming' | 'bioenergy';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -35,6 +35,7 @@ const Button: React.FC<Props> = ({
     career: 'bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:brightness-110 focus-visible:ring-blue-400 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40',
     talisman: 'bg-gradient-to-r from-red-600 to-amber-600 text-white hover:brightness-110 focus-visible:ring-red-400 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40',
     naming: 'bg-gradient-to-r from-sky-500 to-green-500 text-white hover:brightness-110 focus-visible:ring-sky-400 shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40',
+    bioenergy: 'bg-gradient-to-r from-cyan-400 to-green-500 text-white hover:brightness-110 focus-visible:ring-cyan-400 shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-cyan-500/40',
   };
 
   const sizeClasses: Record<ButtonSize, string> = {

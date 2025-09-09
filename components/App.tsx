@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense, useMemo } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload } from '../lib/types';
+import type { BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload, BioEnergyInfo, BioEnergyCard, BioEnergyData } from '../lib/types';
 import { AppState } from '../lib/types';
-import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName } from '../lib/gemini';
+import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName, generateBioEnergyReading } from '../lib/gemini';
 import Header from './Header';
 import DonationModal from './PaymentModal';
 import Spinner from './Spinner';
@@ -40,6 +40,10 @@ const TalismanGeneratorForm = lazy(() => import('./TalismanGeneratorForm'));
 const TalismanResult = lazy(() => import('./TalismanResult'));
 const AuspiciousNamingForm = lazy(() => import('./AuspiciousNamingForm'));
 const AuspiciousNamingResult = lazy(() => import('./AuspiciousNamingResult'));
+const BioEnergyForm = lazy(() => import('./BioEnergyForm'));
+const BioEnergyCapture = lazy(() => import('./BioEnergyCapture'));
+const BioEnergyCardDraw = lazy(() => import('./BioEnergyCardDraw'));
+const BioEnergyResult = lazy(() => import('./BioEnergyResult'));
 const AdminLogin = lazy(() => import('./AdminLogin'));
 const AdminDashboard = lazy(() => import('./AdminDashboard'));
 
@@ -84,6 +88,11 @@ const getBackgroundClassForState = (state: AppState): string => {
 
         case AppState.ICHING_DIVINATION:
         case AppState.TAROT_READING:
+        case AppState.BIO_ENERGY_FORM:
+        case AppState.BIO_ENERGY_CAPTURE:
+        case AppState.BIO_ENERGY_CARD_DRAW:
+        case AppState.BIO_ENERGY_LOADING:
+        case AppState.BIO_ENERGY_RESULT:
             return 'bg-theme-divination';
 
         case AppState.SHOP:
@@ -120,6 +129,10 @@ const App: React.FC = () => {
   const [talismanData, setTalismanData] = useState<TalismanData | null>(null);
   const [auspiciousNamingInfo, setAuspiciousNamingInfo] = useState<AuspiciousNamingInfo | null>(null);
   const [auspiciousNamingData, setAuspiciousNamingData] = useState<AuspiciousNamingData | null>(null);
+  const [bioEnergyInfo, setBioEnergyInfo] = useState<BioEnergyInfo | null>(null);
+  const [capturedEnergyColor, setCapturedEnergyColor] = useState<string | null>(null);
+  const [drawnBioEnergyCard, setDrawnBioEnergyCard] = useState<BioEnergyCard | null>(null);
+  const [bioEnergyData, setBioEnergyData] = useState<BioEnergyData | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedPalmImage, setCapturedPalmImage] = useState<string | null>(null);
   const [capturedHandwritingImage, setCapturedHandwritingImage] = useState<string | null>(null);
@@ -234,6 +247,10 @@ const App: React.FC = () => {
     setTalismanData(null);
     setAuspiciousNamingInfo(null);
     setAuspiciousNamingData(null);
+    setBioEnergyInfo(null);
+    setCapturedEnergyColor(null);
+    setDrawnBioEnergyCard(null);
+    setBioEnergyData(null);
     setError(null);
   }, []);
   
@@ -271,6 +288,10 @@ const App: React.FC = () => {
              id = `naming-${createDeterministicId(payload.info.childLastName, payload.info.childYear, payload.info.childMonth, payload.info.childDay)}`;
              isUpdate = true;
              break;
+        case 'bioEnergy':
+            id = `bioenergy-${createDeterministicId(payload.info.name, payload.info.year, payload.info.month, payload.info.day)}`;
+            isUpdate = true;
+            break;
         default:
             id = `${payload.type}-${crypto.randomUUID()}`;
             break;
@@ -470,6 +491,26 @@ const App: React.FC = () => {
         setAppState(AppState.AUSPICIOUS_NAMING_FORM);
     }
   }, [language, t, user, saveItem]);
+  
+  const handleGenerateBioEnergy = useCallback(async (card: BioEnergyCard) => {
+    if (!bioEnergyInfo || !capturedEnergyColor) return;
+    trackFeatureUsage('bioEnergyReading');
+    logAdminEvent('Generate Bio-Energy Reading', user?.email || 'Guest', `For: ${bioEnergyInfo.name}`);
+    setDrawnBioEnergyCard(card);
+    setAppState(AppState.BIO_ENERGY_LOADING);
+    setError(null);
+    try {
+      const data = await generateBioEnergyReading(bioEnergyInfo, capturedEnergyColor, card, language);
+      setBioEnergyData(data);
+      saveItem({ type: 'bioEnergy', info: bioEnergyInfo, color: capturedEnergyColor, card, data });
+      setAppState(AppState.BIO_ENERGY_RESULT);
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : t('errorUnknown'));
+      setAppState(AppState.BIO_ENERGY_FORM);
+    }
+  }, [bioEnergyInfo, capturedEnergyColor, language, t, user, saveItem]);
+
 
   const handleCaptureImage = useCallback((imageDataUrl: string) => { setCapturedImage(imageDataUrl); }, []);
   const handleRetakeCapture = useCallback(() => { setCapturedImage(null); setError(null); }, []);
@@ -526,6 +567,7 @@ const App: React.FC = () => {
   const handleStartShop = useCallback(() => { trackFeatureUsage('shop'); setError(null); setAppState(AppState.SHOP); }, []);
   const handleStartTalismanGenerator = useCallback(() => { trackFeatureUsage('talismanForm'); setError(null); setAppState(AppState.TALISMAN_GENERATOR); }, []);
   const handleStartAuspiciousNaming = useCallback(() => { trackFeatureUsage('auspiciousNamingForm'); setError(null); setAppState(AppState.AUSPICIOUS_NAMING_FORM); }, []);
+  const handleStartBioEnergy = useCallback(() => { trackFeatureUsage('bioEnergyForm'); setError(null); setAppState(AppState.BIO_ENERGY_FORM); }, []);
 
   const handleStartCareerAdvisor = useCallback(() => {
     const action = () => { setError(null); setAppState(AppState.CAREER_ADVISOR_FORM); };
@@ -583,6 +625,13 @@ const App: React.FC = () => {
             setAuspiciousNamingInfo(payload.info);
             setAuspiciousNamingData(payload.data);
             setAppState(AppState.AUSPICIOUS_NAMING_RESULT);
+            break;
+        case 'bioEnergy':
+            setBioEnergyInfo(payload.info);
+            setCapturedEnergyColor(payload.color);
+            setDrawnBioEnergyCard(payload.card);
+            setBioEnergyData(payload.data);
+            setAppState(AppState.BIO_ENERGY_RESULT);
             break;
     }
   }, [user, resetAllDynamicData]);
@@ -681,7 +730,6 @@ const App: React.FC = () => {
       setAdminActionToConfirm(null);
   }, [adminActionToConfirm]);
 
-  // FIX: Correctly handle different name properties for saved item types.
   const getDeleteItemMessage = (item: SavedItem): string => {
       const { payload } = item;
       switch (payload.type) {
@@ -690,6 +738,8 @@ const App: React.FC = () => {
         case 'numerology':
           return t('confirmDeleteMessageWithName', { name: payload.info.fullName });
         case 'flowAstrology':
+          return t('confirmDeleteMessageWithName', { name: payload.info.name });
+        case 'bioEnergy':
           return t('confirmDeleteMessageWithName', { name: payload.info.name });
         default:
           return t('confirmDeleteMessage');
@@ -711,7 +761,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} onStartHandwritingAnalysis={handleStartHandwritingAnalysis} onStartCareerAdvisor={handleStartCareerAdvisor} onStartTalismanGenerator={handleStartTalismanGenerator} onStartAuspiciousNaming={handleStartAuspiciousNaming} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} onStartHandwritingAnalysis={handleStartHandwritingAnalysis} onStartCareerAdvisor={handleStartCareerAdvisor} onStartTalismanGenerator={handleStartTalismanGenerator} onStartAuspiciousNaming={handleStartAuspiciousNaming} onStartBioEnergy={handleStartBioEnergy} />;
       case AppState.SAVED_ITEMS:
         return <SavedItems 
           items={savedItems}
@@ -787,6 +837,16 @@ const App: React.FC = () => {
           return <Spinner message={t('spinnerAuspiciousNaming')} />;
       case AppState.AUSPICIOUS_NAMING_RESULT:
           return auspiciousNamingData && <AuspiciousNamingResult data={auspiciousNamingData} info={auspiciousNamingInfo!} onReset={handleStartAuspiciousNaming} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.BIO_ENERGY_FORM:
+        return <BioEnergyForm onSubmit={(info) => { setBioEnergyInfo(info); setAppState(AppState.BIO_ENERGY_CAPTURE); }} initialName={user?.name} />;
+      case AppState.BIO_ENERGY_CAPTURE:
+        return <BioEnergyCapture onCapture={(color) => { setCapturedEnergyColor(color); setAppState(AppState.BIO_ENERGY_CARD_DRAW); }} onBack={() => setAppState(AppState.BIO_ENERGY_FORM)} />;
+      case AppState.BIO_ENERGY_CARD_DRAW:
+        return <BioEnergyCardDraw onDraw={handleGenerateBioEnergy} onBack={() => setAppState(AppState.BIO_ENERGY_CAPTURE)} energyColor={capturedEnergyColor!} />;
+      case AppState.BIO_ENERGY_LOADING:
+        return <Spinner message={t('spinnerBioEnergy')} />;
+      case AppState.BIO_ENERGY_RESULT:
+        return bioEnergyData && <BioEnergyResult data={bioEnergyData} info={bioEnergyInfo!} color={capturedEnergyColor!} card={drawnBioEnergyCard!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.ADMIN_LOGIN:
           return <AdminLogin onSuccess={handleAdminLoginSuccess} onBack={handleResetToHome} />;
       case AppState.ADMIN_DASHBOARD:

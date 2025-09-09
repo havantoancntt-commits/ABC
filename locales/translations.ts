@@ -103,6 +103,7 @@ export const translations = {
     itemTypeNumerology: 'Biểu Đồ Thần Số Học',
     itemTypeFlowAstrology: 'Tử Vi Dòng Chảy Năng Lượng',
     itemTypeAuspiciousNaming: 'Tư Vấn Đặt Tên',
+    itemTypeBioEnergy: 'Luận Giải Năng Lượng',
     itemDescAstrology: 'Lá số cho {{name}}',
     itemDescPhysiognomy: 'Phân tích ngày {{date}}',
     itemDescPalmReading: 'Phân tích ngày {{date}}',
@@ -110,6 +111,7 @@ export const translations = {
     itemDescNumerology: 'Báo cáo cho {{name}}',
     itemDescFlowAstrology: 'Dự báo cho {{name}}',
     itemDescAuspiciousNaming: 'Gợi ý cho gia đình {{lastName}}',
+    itemDescBioEnergy: 'Luận giải cho {{name}}',
 
     // Delete Confirmation
     confirmDeleteTitle: 'Xác Nhận Xóa',
@@ -160,9 +162,7 @@ export const translations = {
     faceScanAnalyze: 'Bắt Đầu Phân Tích',
     faceScanManualCapture: 'Chụp ảnh',
     faceScanCapturedAlt: 'Ảnh chân dung đã chụp',
-    // FIX: Add missing translation key for camera spinner
     spinnerCamera: 'Đang khởi động camera...',
-    // FIX: Add missing translation key for astrology spinner
     spinnerAstrology: 'AI đang phân tích các cung sao và luận giải lá số... Quá trình này có thể mất một chút thời gian.',
     spinnerPhysiognomy: 'AI đang phân tích thần thái, khí sắc và các đặc điểm trên khuôn mặt... Quá trình này có thể mất một vài giây.',
     errorCameraPermission: 'Không thể truy cập camera. Vui lòng cấp quyền trong cài đặt trình duyệt.',
@@ -410,6 +410,36 @@ export const translations = {
     phoneticsAnalysis: 'Phân Tích Âm Vận',
     overall: 'Tổng kết',
 
+    // Bio-Energy
+    bioEnergyTitle: 'Năng Lượng Sinh Học',
+    bioEnergyDesc: 'Đo lường trường năng lượng của bạn và rút một lá bài định mệnh để nhận thông điệp dành riêng cho bạn.',
+    bioEnergyButton: 'Xem Năng Lượng',
+    spinnerBioEnergy: 'AI đang cảm nhận trường năng lượng và giải mã thông điệp...',
+    bioEnergyFormTitle: 'Luận Giải Năng Lượng Sinh Học',
+    bioEnergyFormSubtitle: 'Nhập thông tin của bạn để bắt đầu quá trình cảm nhận trường năng lượng và rút lá bài thông điệp.',
+    bioEnergyFormSubmitButton: 'Bắt Đầu Cảm Nhận Năng Lượng',
+    bioEnergyCaptureTitle: 'Cảm Nhận Năng Lượng',
+    bioEnergyCaptureIdle: 'Chạm và giữ quả cầu để truyền năng lượng của bạn.',
+    bioEnergyCaptureHolding: 'Đang cảm nhận... Xin hãy giữ yên.',
+    bioEnergyCaptureCaptured: 'Đã ghi nhận năng lượng!',
+    bioEnergyCardDrawTitle: 'Rút Lá Bài Thông Điệp',
+    bioEnergyCardDrawSubtitle: 'Năng lượng của bạn có màu',
+    energyColorRed: 'Đỏ',
+    energyColorGreen: 'Xanh Lục',
+    energyColorBlue: 'Xanh Dương',
+    energyColorPurple: 'Tím',
+    energyColorYellow: 'Vàng',
+    energyColorWhite: 'Trắng',
+    energyColorBlack: 'Đen',
+    bioEnergyResultTitle: 'Kết Quả Luận Giải Năng Lượng',
+    bioEnergyColorTitle: 'Màu Năng Lượng',
+    bioEnergyCardTitle: 'Lá Bài Thông Điệp',
+    bioEnergyDobTitle: 'Ngày Sinh',
+    bioEnergyColorAnalysis: 'Luận Giải Màu Năng Lượng',
+    bioEnergyCardAnalysis: 'Luận Giải Lá Bài',
+    bioEnergyPrediction: 'Tổng Kết & Dự Báo',
+    bioEnergyTryAgain: 'Thử Lại',
+
     // Shop
     shopPageTitle: 'Chào Mừng đến Huyền Phong Phật Các',
     shopPageSubtitle: 'Nơi tri thức huyền học cổ xưa và năng lượng tâm linh hội tụ. Chúng tôi cung cấp các dịch vụ tư vấn và vật phẩm phong thủy được tuyển chọn kỹ lưỡng để mang lại bình an, may mắn và vượng khí cho quý vị.',
@@ -489,7 +519,6 @@ export const translations = {
     errorUnknown: 'An unknown error occurred. Please try again.',
     errorInvalidImageData: 'Invalid image data.',
     errorCloseAriaLabel: 'Close error message',
-    // FIX: Add missing translation keys for Error Boundary
     errorBoundaryTitle: 'Oops, Something Went Wrong!',
     errorBoundaryMessage: 'The application encountered an unexpected error. Please reload the page to continue.',
     errorBoundaryButton: 'Reload Page',
@@ -585,6 +614,7 @@ export const translations = {
     itemTypeNumerology: 'Numerology Chart',
     itemTypeFlowAstrology: 'Energy Flow Astrology',
     itemTypeAuspiciousNaming: 'Name Consultation',
+    itemTypeBioEnergy: 'Bio-Energy Reading',
     itemDescAstrology: 'Chart for {{name}}',
     itemDescPhysiognomy: 'Analysis from {{date}}',
     itemDescPalmReading: 'Analysis from {{date}}',
@@ -592,6 +622,7 @@ export const translations = {
     itemDescNumerology: 'Report for {{name}}',
     itemDescFlowAstrology: 'Forecast for {{name}}',
     itemDescAuspiciousNaming: 'Suggestions for the {{lastName}} family',
+    itemDescBioEnergy: 'Reading for {{name}}',
 
     // Delete Confirmation
     confirmDeleteTitle: 'Confirm Deletion',
@@ -642,9 +673,7 @@ export const translations = {
     faceScanAnalyze: 'Start Analysis',
     faceScanManualCapture: 'Take photo',
     faceScanCapturedAlt: 'Captured portrait photo',
-    // FIX: Add missing translation key for camera spinner
     spinnerCamera: 'Starting camera...',
-    // FIX: Add missing translation key for astrology spinner
     spinnerAstrology: 'The AI is analyzing the star palaces and interpreting your chart... This may take a moment.',
     spinnerPhysiognomy: 'The AI is analyzing the aura, complexion, and features of the face... This may take a few seconds.',
     errorCameraPermission: 'Could not access the camera. Please grant permission in your browser settings.',
@@ -891,6 +920,36 @@ export const translations = {
     fiveElementsAnalysis: 'Five Elements Analysis',
     phoneticsAnalysis: 'Phonetic Analysis',
     overall: 'Overall',
+
+    // Bio-Energy
+    bioEnergyTitle: 'Bio-Energy Reading',
+    bioEnergyDesc: 'Measure your energy field and draw a destiny card to receive a message meant just for you.',
+    bioEnergyButton: 'Read My Energy',
+    spinnerBioEnergy: 'AI is sensing your energy field and decoding the message...',
+    bioEnergyFormTitle: 'Bio-Energy Reading',
+    bioEnergyFormSubtitle: 'Enter your information to begin the process of sensing your energy field and drawing a message card.',
+    bioEnergyFormSubmitButton: 'Begin Sensing Energy',
+    bioEnergyCaptureTitle: 'Sense Your Energy',
+    bioEnergyCaptureIdle: 'Touch and hold the orb to transfer your energy.',
+    bioEnergyCaptureHolding: 'Sensing... Please hold still.',
+    bioEnergyCaptureCaptured: 'Energy captured!',
+    bioEnergyCardDrawTitle: 'Draw a Message Card',
+    bioEnergyCardDrawSubtitle: 'Your energy color is',
+    energyColorRed: 'Red',
+    energyColorGreen: 'Green',
+    energyColorBlue: 'Blue',
+    energyColorPurple: 'Purple',
+    energyColorYellow: 'Yellow',
+    energyColorWhite: 'White',
+    energyColorBlack: 'Black',
+    bioEnergyResultTitle: 'Energy Reading Results',
+    bioEnergyColorTitle: 'Energy Color',
+    bioEnergyCardTitle: 'Message Card',
+    bioEnergyDobTitle: 'Date of Birth',
+    bioEnergyColorAnalysis: 'Energy Color Analysis',
+    bioEnergyCardAnalysis: 'Card Analysis',
+    bioEnergyPrediction: 'Summary & Forecast',
+    bioEnergyTryAgain: 'Try Again',
 
     // Shop
     shopPageTitle: 'Welcome to the Mystic Pavilion',

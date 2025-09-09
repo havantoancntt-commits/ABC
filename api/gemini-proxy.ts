@@ -1,7 +1,7 @@
 // This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
 import { GoogleGenAI, Type, BlockedReason } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
-import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo, TalismanInfo, AuspiciousNamingInfo } from '../lib/types';
+import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo, TalismanInfo, AuspiciousNamingInfo, BioEnergyInfo, BioEnergyCard } from '../lib/types';
 
 // By removing the `export const config = { runtime: 'edge' };`, this function
 // will default to the standard Node.js serverless runtime, which has a longer
@@ -698,7 +698,6 @@ export default async function handler(req: any, res: any) {
         : `Lập lá số tử vi chi tiết cho người có thông tin sau:\n- Tên: ${info.name}\n- Giới tính: ${genderString}\n- Ngày sinh (Dương Lịch): ${info.day}/${info.month}/${info.year}\n- Giờ sinh: ${hourString}`;
       
       response = await ai.models.generateContent({
-        // FIX: Update deprecated model to 'gemini-2.5-flash'
         model: "gemini-2.5-flash",
         contents: userPrompt,
         config: {
@@ -714,7 +713,6 @@ export default async function handler(req: any, res: any) {
       const promptText = language === 'en' ? "Analyze the physiognomy of the face in this image." : "Phân tích nhân tướng học cho khuôn mặt trong ảnh này.";
       const imagePart = { inlineData: { mimeType: 'image/jpeg', data: base64Image } };
       response = await ai.models.generateContent({
-        // FIX: Update deprecated model to 'gemini-2.5-flash'
         model: "gemini-2.5-flash",
         contents: { parts: [imagePart, { text: promptText }] },
         config: {
@@ -730,7 +728,6 @@ export default async function handler(req: any, res: any) {
         const promptText = language === 'en' ? "Analyze the palm in this image." : "Phân tích chỉ tay trong ảnh này.";
         const imagePart = { inlineData: { mimeType: 'image/jpeg', data: base64Image } };
         response = await ai.models.generateContent({
-            // FIX: Update deprecated model to 'gemini-2.5-flash'
             model: "gemini-2.5-flash",
             contents: { parts: [imagePart, { text: promptText }] },
             config: {
@@ -746,7 +743,6 @@ export default async function handler(req: any, res: any) {
         const promptText = language === 'en' ? "Analyze the handwriting and signature in this image." : "Phân tích chữ viết tay và chữ ký trong ảnh này.";
         const imagePart = { inlineData: { mimeType: 'image/jpeg', data: base64Image } };
         response = await ai.models.generateContent({
-            // FIX: Update deprecated model to 'gemini-2.5-flash'
             model: "gemini-2.5-flash",
             contents: { parts: [imagePart, { text: promptText }] },
             config: {
@@ -769,7 +765,6 @@ export default async function handler(req: any, res: any) {
         : `Luận giải quẻ Kinh Dịch sau:\n- Câu hỏi: "${question || 'Một câu hỏi chung về tình hình hiện tại.'}"\n- Quẻ Chính: ${castResult.primaryHexagram.number}. ${primaryName}\n- Hào Động: ${changingLines}\n- Quẻ Biến: ${secondaryName}`;
 
         response = await ai.models.generateContent({
-            // FIX: Update deprecated model to 'gemini-2.5-flash'
             model: "gemini-2.5-flash",
             contents: userPrompt,
             config: {

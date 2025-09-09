@@ -258,6 +258,25 @@ export interface AuspiciousNamingData {
     nameSuggestions: NameSuggestion[];
 }
 
+export interface BioEnergyInfo {
+    name: string;
+    year: number;
+    month: number;
+    day: number;
+}
+
+export interface BioEnergyCard {
+    id: number;
+    group: { vi: string; en: string };
+    name: { vi: string; en: string };
+}
+
+export interface BioEnergyData {
+    colorAnalysis: string;
+    cardAnalysis: string;
+    synthesizedPrediction: string;
+}
+
 export interface GoogleUser {
     sub: string;
     name: string;
@@ -319,6 +338,14 @@ export interface SavedAuspiciousNamingPayload {
     data: AuspiciousNamingData;
 }
 
+export interface SavedBioEnergyPayload {
+    type: 'bioEnergy';
+    info: BioEnergyInfo;
+    color: string;
+    card: BioEnergyCard;
+    data: BioEnergyData;
+}
+
 export type SavedItemPayload = 
     | SavedAstrologyPayload 
     | SavedPhysiognomyPayload 
@@ -326,7 +353,8 @@ export type SavedItemPayload =
     | SavedPalmReadingPayload 
     | SavedHandwritingPayload 
     | SavedFlowAstrologyPayload 
-    | SavedAuspiciousNamingPayload;
+    | SavedAuspiciousNamingPayload
+    | SavedBioEnergyPayload;
 
 export interface SavedItem {
     id: string;
@@ -372,6 +400,11 @@ export enum AppState {
   AUSPICIOUS_NAMING_FORM,
   AUSPICIOUS_NAMING_LOADING,
   AUSPICIOUS_NAMING_RESULT,
+  BIO_ENERGY_FORM,
+  BIO_ENERGY_CAPTURE,
+  BIO_ENERGY_CARD_DRAW,
+  BIO_ENERGY_LOADING,
+  BIO_ENERGY_RESULT,
   ADMIN_LOGIN,
   ADMIN_DASHBOARD,
 }

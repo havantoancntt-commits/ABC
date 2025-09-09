@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, BioEnergyInfo, BioEnergyCard, BioEnergyData } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -179,5 +179,18 @@ export const generateAuspiciousName = async (info: AuspiciousNamingInfo, languag
             throw error;
         }
         throw new Error("Could not generate name suggestions due to a connection error or server issue. Please try again.");
+    }
+};
+
+export const generateBioEnergyReading = async (info: BioEnergyInfo, color: string, card: BioEnergyCard, language: string): Promise<BioEnergyData> => {
+    try {
+        const data = await callProxy('generateBioEnergyReading', { info, color, card, language });
+        return data as BioEnergyData;
+    } catch (error) {
+        console.error("Error generating bio-energy reading:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Could not generate bio-energy reading due to a connection error or server issue. Please try again.");
     }
 };

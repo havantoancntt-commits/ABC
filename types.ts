@@ -59,17 +59,3 @@ export interface ZodiacHourData {
     dayCanChi: string;
     hours: ZodiacHour[];
 }
-
-
-export enum AppState {
-  HOME,
-  SAVED_CHARTS,
-  ASTROLOGY_FORM,
-  LOADING,
-  RESULT,
-  FACE_SCAN_CAPTURE,
-  FACE_SCAN_LOADING,
-  FACE_SCAN_RESULT,
-  ZODIAC_HOUR_FINDER,
-  ZODIAC_HOUR_LOADING,
-}
