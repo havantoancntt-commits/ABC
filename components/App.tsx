@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData } from '../lib/types';
+import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, GoogleUser } from '../lib/types';
 import { AppState } from '../lib/types';
 import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName } from '../lib/gemini';
 import Header from './Header';
@@ -9,6 +9,8 @@ import ZaloContact from './ZaloContact';
 import ConfirmationModal from './ConfirmationModal';
 import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
+import { useGoogleAuth } from '../hooks/useGoogleAuth';
+import { logAdminEvent } from '../lib/logger';
 import type { TranslationKey } from '../hooks/useLocalization';
 import Button from './Button';
 
@@ -78,37 +80,56 @@ const App: React.FC = () => {
   const [postLoginAction, setPostLoginAction] = useState<(() => void) | null>(null);
   const [adminActionToConfirm, setAdminActionToConfirm] = useState<{ action: string; title: string; message: string; } | null>(null);
   const { language, t } = useLocalization();
+  const { user, handleSignIn, handleSignOut, authError } = useGoogleAuth({
+    onSuccess: (gUser) => logAdminEvent('User Signed In', gUser.email, `Name: ${gUser.name}`),
+    onError: () => setError(t('googleSignInError')),
+  });
+
+  const getChartStorageKey = useCallback((userId?: string) => {
+    const id = userId || user?.sub;
+    return id ? `astrologyCharts_${id}` : 'astrologyCharts_guest';
+  }, [user]);
 
   useEffect(() => {
+    const currentChartStorageKey = getChartStorageKey();
     try {
-      const storedCharts = localStorage.getItem('astrologyCharts');
+      const storedCharts = localStorage.getItem(currentChartStorageKey);
       if (storedCharts) {
         const parsedCharts = JSON.parse(storedCharts);
         if (Array.isArray(parsedCharts) && parsedCharts.every(c => c.id && c.birthInfo && c.chartData)) {
             setSavedCharts(parsedCharts);
-            if (parsedCharts.length > 0 && sessionStorage.getItem('admin_auth') !== 'true') {
+            // If logged in and has charts, go to saved charts screen.
+            if (user && parsedCharts.length > 0 && sessionStorage.getItem('admin_auth') !== 'true') {
                setAppState(AppState.SAVED_CHARTS);
             }
         } else {
-            console.warn("Invalid chart data in localStorage, clearing...");
-            localStorage.removeItem('astrologyCharts');
+            localStorage.removeItem(currentChartStorageKey);
         }
+      } else {
+        setSavedCharts([]); // Clear charts if nothing is in storage for the user
       }
     } catch (e) {
       console.error("Could not load charts from localStorage", e);
-      localStorage.removeItem('astrologyCharts');
+      localStorage.removeItem(currentChartStorageKey);
     }
+  }, [user, getChartStorageKey]);
 
-    try {
+  useEffect(() => {
+    // Log initial visit
+    if (sessionStorage.getItem('visit_logged') !== 'true') {
         let currentCount = parseInt(localStorage.getItem('visitCount') || '0', 10);
         currentCount++;
         localStorage.setItem('visitCount', currentCount.toString());
         setVisitCount(currentCount);
-    } catch (e) {
-        console.error("Failed to update visit count", e);
-        setVisitCount(1);
+        logAdminEvent('App Visit', 'Guest', `Total Visits: ${currentCount}`);
+        sessionStorage.setItem('visit_logged', 'true');
+    } else {
+        setVisitCount(parseInt(localStorage.getItem('visitCount') || '0', 10));
     }
-  }, []);
+    
+    // Set auth error if it exists
+    if(authError) setError(authError);
+  }, [authError]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -156,6 +177,7 @@ const App: React.FC = () => {
 
   const handleGenerateChart = useCallback(async (info: BirthInfo) => {
     trackFeatureUsage('astrologyChart');
+    logAdminEvent('Generate Astrology Chart', user?.email || 'Guest', `For: ${info.name}`);
     setBirthInfo(info);
     setAppState(AppState.LOADING);
     setError(null);
@@ -168,9 +190,10 @@ const App: React.FC = () => {
           birthInfo: info,
           chartData: data
       };
+      
       const updatedCharts = [...savedCharts.filter(c => c.id !== newChart.id), newChart];
       setSavedCharts(updatedCharts);
-      localStorage.setItem('astrologyCharts', JSON.stringify(updatedCharts));
+      localStorage.setItem(getChartStorageKey(), JSON.stringify(updatedCharts));
 
       setAppState(AppState.RESULT);
     } catch (err) {
@@ -178,11 +201,12 @@ const App: React.FC = () => {
       setError(err instanceof Error ? err.message : t('errorUnknown'));
       setAppState(AppState.ASTROLOGY_FORM);
     }
-  }, [savedCharts, language, t]);
+  }, [savedCharts, language, t, user, getChartStorageKey]);
   
   const handleAnalyzeFace = useCallback(async () => {
     if (!capturedImage) return;
     trackFeatureUsage('physiognomy');
+    logAdminEvent('Analyze Physiognomy', user?.email || 'Guest');
     setAppState(AppState.FACE_SCAN_LOADING);
     setError(null);
     const base64Data = capturedImage.split(',')[1];
@@ -201,11 +225,12 @@ const App: React.FC = () => {
        setError(err instanceof Error ? err.message : t('errorUnknown'));
        setAppState(AppState.FACE_SCAN_CAPTURE);
     }
-  }, [capturedImage, language, t]);
+  }, [capturedImage, language, t, user]);
 
   const handleAnalyzePalm = useCallback(async () => {
     if (!capturedPalmImage) return;
     trackFeatureUsage('palmReading');
+    logAdminEvent('Analyze Palm', user?.email || 'Guest');
     setAppState(AppState.PALM_SCAN_LOADING);
     setError(null);
     const base64Data = capturedPalmImage.split(',')[1];
@@ -224,11 +249,12 @@ const App: React.FC = () => {
        setError(err instanceof Error ? err.message : t('errorUnknown'));
        setAppState(AppState.PALM_SCAN_CAPTURE);
     }
-  }, [capturedPalmImage, language, t]);
+  }, [capturedPalmImage, language, t, user]);
 
   const handleAnalyzeHandwriting = useCallback(async () => {
     if (!capturedHandwritingImage) return;
     trackFeatureUsage('handwriting');
+    logAdminEvent('Analyze Handwriting', user?.email || 'Guest');
     setAppState(AppState.HANDWRITING_ANALYSIS_LOADING);
     setError(null);
     const base64Data = capturedHandwritingImage.split(',')[1];
@@ -247,10 +273,11 @@ const App: React.FC = () => {
        setError(err instanceof Error ? err.message : t('errorUnknown'));
        setAppState(AppState.HANDWRITING_ANALYSIS_CAPTURE);
     }
-  }, [capturedHandwritingImage, language, t]);
+  }, [capturedHandwritingImage, language, t, user]);
 
   const handleGenerateNumerology = useCallback(async (info: NumerologyInfo) => {
     trackFeatureUsage('numerology');
+    logAdminEvent('Generate Numerology', user?.email || 'Guest', `For: ${info.fullName}`);
     setNumerologyInfo(info);
     setAppState(AppState.NUMEROLOGY_LOADING);
     setError(null);
@@ -263,10 +290,11 @@ const App: React.FC = () => {
         setError(err instanceof Error ? err.message : t('errorUnknown'));
         setAppState(AppState.NUMEROLOGY_FORM);
     }
-  }, [language, t]);
+  }, [language, t, user]);
 
   const handleGenerateFlowAstrology = useCallback(async (info: FlowAstrologyInfo) => {
     trackFeatureUsage('flowAstrology');
+    logAdminEvent('Generate Flow Astrology', user?.email || 'Guest', `For: ${info.name}`);
     setFlowAstrologyInfo(info);
     setAppState(AppState.FLOW_ASTROLOGY_LOADING);
     setError(null);
@@ -279,10 +307,11 @@ const App: React.FC = () => {
         setError(err instanceof Error ? err.message : t('errorUnknown'));
         setAppState(AppState.FLOW_ASTROLOGY_FORM);
     }
-  }, [language, t]);
+  }, [language, t, user]);
 
     const handleGenerateCareerAdvice = useCallback(async (info: CareerInfo) => {
     trackFeatureUsage('careerAdvisor');
+    logAdminEvent('Get Career Advice', user?.email || 'Guest', `For: ${info.name}`);
     setCareerInfo(info);
     setAppState(AppState.CAREER_ADVISOR_LOADING);
     setError(null);
@@ -295,10 +324,11 @@ const App: React.FC = () => {
         setError(err instanceof Error ? err.message : t('errorUnknown'));
         setAppState(AppState.CAREER_ADVISOR_FORM);
     }
-  }, [language, t]);
+  }, [language, t, user]);
 
   const handleGenerateTalisman = useCallback(async (info: TalismanInfo) => {
     trackFeatureUsage('talisman');
+    logAdminEvent('Generate Talisman', user?.email || 'Guest', `For: ${info.name}`);
     setTalismanInfo(info);
     setAppState(AppState.TALISMAN_LOADING);
     setError(null);
@@ -311,10 +341,11 @@ const App: React.FC = () => {
         setError(err instanceof Error ? err.message : t('errorUnknown'));
         setAppState(AppState.TALISMAN_GENERATOR);
     }
-  }, [language, t]);
+  }, [language, t, user]);
 
   const handleGenerateAuspiciousName = useCallback(async (info: AuspiciousNamingInfo) => {
     trackFeatureUsage('auspiciousNaming');
+    logAdminEvent('Generate Auspicious Name', user?.email || 'Guest', `For family: ${info.childLastName}`);
     setAuspiciousNamingInfo(info);
     setAppState(AppState.AUSPICIOUS_NAMING_LOADING);
     setError(null);
@@ -327,7 +358,7 @@ const App: React.FC = () => {
         setError(err instanceof Error ? err.message : t('errorUnknown'));
         setAppState(AppState.AUSPICIOUS_NAMING_FORM);
     }
-  }, [language, t]);
+  }, [language, t, user]);
 
   const handleCaptureImage = useCallback((imageDataUrl: string) => {
     setCapturedImage(imageDataUrl);
@@ -374,25 +405,25 @@ const App: React.FC = () => {
         setAppState(AppState.ADMIN_DASHBOARD);
         return;
     }
-    if (savedCharts.length > 0) {
+    if (user && savedCharts.length > 0) {
         setAppState(AppState.SAVED_CHARTS);
     } else {
         setAppState(AppState.HOME);
     }
     resetAllDynamicData();
-  }, [savedCharts, resetAllDynamicData]);
+  }, [user, savedCharts, resetAllDynamicData]);
   
   const handleStartAstrology = useCallback(() => {
     const action = () => {
         setAppState(AppState.ASTROLOGY_FORM);
     };
-    if (sessionStorage.getItem('astrology_unlocked') === 'true') {
+    if (sessionStorage.getItem('astrology_unlocked') === 'true' || !user) {
         action();
     } else {
         setPostLoginAction(() => action);
         setAppState(AppState.ASTROLOGY_PASSWORD);
     }
-  }, []);
+  }, [user]);
 
   const handleStartPhysiognomy = useCallback(() => { trackFeatureUsage('physiognomyScan'); setAppState(AppState.FACE_SCAN_CAPTURE) }, []);
   const handleStartPalmReading = useCallback(() => { trackFeatureUsage('palmScan'); setAppState(AppState.PALM_SCAN_CAPTURE) }, []);
@@ -412,13 +443,13 @@ const App: React.FC = () => {
         setError(null);
         setAppState(AppState.CAREER_ADVISOR_FORM);
     };
-    if (sessionStorage.getItem('career_unlocked') === 'true') {
+    if (sessionStorage.getItem('career_unlocked') === 'true' || !user) {
         action();
     } else {
         setPostLoginAction(() => action);
         setAppState(AppState.CAREER_ADVISOR_PASSWORD);
     }
-  }, []);
+  }, [user]);
 
   const handleViewChart = useCallback((chart: SavedChart) => {
     const action = () => {
@@ -426,13 +457,13 @@ const App: React.FC = () => {
       setChartData(chart.chartData);
       setAppState(AppState.RESULT);
     };
-    if (sessionStorage.getItem('astrology_unlocked') === 'true') {
+    if (sessionStorage.getItem('astrology_unlocked') === 'true' || !user) {
         action();
     } else {
         setPostLoginAction(() => action);
         setAppState(AppState.ASTROLOGY_PASSWORD);
     }
-  }, []);
+  }, [user]);
 
   const handleDeleteChart = useCallback((chart: SavedChart) => {
     setChartToDelete(chart);
@@ -442,9 +473,10 @@ const App: React.FC = () => {
     if (!chartToDelete) return;
     const updatedCharts = savedCharts.filter(chart => chart.id !== chartToDelete.id);
     setSavedCharts(updatedCharts);
-    localStorage.setItem('astrologyCharts', JSON.stringify(updatedCharts));
+    localStorage.setItem(getChartStorageKey(), JSON.stringify(updatedCharts));
+    logAdminEvent('Deleted Chart', user?.email || 'Guest', `For: ${chartToDelete.birthInfo.name}`);
     setChartToDelete(null);
-  }, [chartToDelete, savedCharts]);
+  }, [chartToDelete, savedCharts, user, getChartStorageKey]);
   
   const handleCreateNew = useCallback(() => {
       setAppState(AppState.ASTROLOGY_FORM);
@@ -476,45 +508,61 @@ const App: React.FC = () => {
 
   const handleAstrologyPasswordSuccess = useCallback(() => {
     sessionStorage.setItem('astrology_unlocked', 'true');
+    logAdminEvent('Unlocked Astrology', user?.email || 'Guest');
     if (postLoginAction) {
       postLoginAction();
     } else {
       setAppState(AppState.ASTROLOGY_FORM);
     }
     setPostLoginAction(null);
-  }, [postLoginAction]);
+  }, [postLoginAction, user]);
   
   const handleCareerPasswordSuccess = useCallback(() => {
     sessionStorage.setItem('career_unlocked', 'true');
+    logAdminEvent('Unlocked Career Advisor', user?.email || 'Guest');
     if (postLoginAction) {
         postLoginAction();
     } else {
         setAppState(AppState.CAREER_ADVISOR_FORM);
     }
     setPostLoginAction(null);
-  }, [postLoginAction]);
+  }, [postLoginAction, user]);
 
   const handleStartAdminLogin = useCallback(() => {
     setAppState(AppState.ADMIN_LOGIN);
   }, []);
 
   const handleAdminLoginSuccess = useCallback(() => {
+      logAdminEvent('Admin Signed In', 'Admin');
       setAppState(AppState.ADMIN_DASHBOARD);
   }, []);
 
-  const handleAdminClearCharts = useCallback(() => {
-      setAdminActionToConfirm({
-          action: 'clear_charts',
-          title: t('adminClearChartsConfirmTitle'),
-          message: t('adminClearChartsConfirmMessage'),
-      });
+  const handleAdminAction = useCallback((action: string) => {
+      const confirmConfig = {
+          clear_charts: { title: t('adminClearChartsConfirmTitle'), message: t('adminClearChartsConfirmMessage') },
+          clear_history: { title: t('adminClearHistoryConfirmTitle'), message: t('adminClearHistoryConfirmMessage') },
+      }[action];
+
+      if(confirmConfig) {
+          setAdminActionToConfirm({ action, ...confirmConfig });
+      }
   }, [t]);
 
   const confirmAdminAction = useCallback(() => {
       if (!adminActionToConfirm) return;
-      if (adminActionToConfirm.action === 'clear_charts') {
-          setSavedCharts([]);
-          localStorage.removeItem('astrologyCharts');
+      const { action } = adminActionToConfirm;
+      
+      logAdminEvent(`Admin Action: ${action}`, 'Admin');
+
+      if (action === 'clear_charts') {
+          Object.keys(localStorage).forEach(key => {
+              if (key.startsWith('astrologyCharts_')) {
+                  localStorage.removeItem(key);
+              }
+          });
+          setSavedCharts([]); // Clear current user's view
+      } else if (action === 'clear_history') {
+          localStorage.removeItem('adminHistoryLog');
       }
       setAdminActionToConfirm(null);
   }, [adminActionToConfirm]);
@@ -548,7 +596,7 @@ const App: React.FC = () => {
       case AppState.ASTROLOGY_PASSWORD:
         return <PasswordPrompt onSuccess={handleAstrologyPasswordSuccess} onBack={handleResetToHome} feature="astrology"/>;
       case AppState.ASTROLOGY_FORM:
-        return <BirthInfoForm onSubmit={handleFormSubmit} />;
+        return <BirthInfoForm onSubmit={handleFormSubmit} initialName={user?.name} />;
       case AppState.LOADING:
         return <Spinner message={t('spinnerAstrology')} />;
       case AppState.RESULT:
@@ -618,13 +666,13 @@ const App: React.FC = () => {
       case AppState.SHOP:
           return <Shop onBack={handleResetToHome} />;
       case AppState.NUMEROLOGY_FORM:
-          return <NumerologyForm onSubmit={handleGenerateNumerology} />;
+          return <NumerologyForm onSubmit={handleGenerateNumerology} initialName={user?.name} />;
       case AppState.NUMEROLOGY_LOADING:
           return <Spinner message={t('spinnerNumerology')} />;
       case AppState.NUMEROLOGY_RESULT:
           return numerologyData && <NumerologyChart data={numerologyData} info={numerologyInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.FLOW_ASTROLOGY_FORM:
-          return <FlowAstrologyForm onSubmit={handleGenerateFlowAstrology} />;
+          return <FlowAstrologyForm onSubmit={handleGenerateFlowAstrology} initialName={user?.name} />;
       case AppState.FLOW_ASTROLOGY_LOADING:
           return <Spinner message={t('spinnerFlowAstrology')} />;
       case AppState.FLOW_ASTROLOGY_RESULT:
@@ -632,13 +680,13 @@ const App: React.FC = () => {
       case AppState.CAREER_ADVISOR_PASSWORD:
           return <PasswordPrompt onSuccess={handleCareerPasswordSuccess} onBack={handleResetToHome} feature="career" />;
       case AppState.CAREER_ADVISOR_FORM:
-          return <CareerAdvisorForm onSubmit={handleGenerateCareerAdvice} />;
+          return <CareerAdvisorForm onSubmit={handleGenerateCareerAdvice} initialName={user?.name} />;
       case AppState.CAREER_ADVISOR_LOADING:
           return <Spinner message={t('spinnerCareerAdvisor')} />;
       case AppState.CAREER_ADVISOR_RESULT:
           return careerAdviceData && <CareerAdvisorResult data={careerAdviceData} info={careerInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.TALISMAN_GENERATOR:
-          return <TalismanGeneratorForm onSubmit={handleGenerateTalisman} />;
+          return <TalismanGeneratorForm onSubmit={handleGenerateTalisman} initialName={user?.name} />;
       case AppState.TALISMAN_LOADING:
           return <Spinner message={t('spinnerTalisman')} />;
       case AppState.TALISMAN_RESULT:
@@ -652,7 +700,7 @@ const App: React.FC = () => {
       case AppState.ADMIN_LOGIN:
           return <AdminLogin onSuccess={handleAdminLoginSuccess} onBack={handleResetToHome} />;
       case AppState.ADMIN_DASHBOARD:
-          return <AdminDashboard visitCount={visitCount} onClearCharts={handleAdminClearCharts} onBack={handleResetToHome} />;
+          return <AdminDashboard visitCount={visitCount} onAdminAction={handleAdminAction} onBack={handleResetToHome} />;
       default:
         return null;
     }

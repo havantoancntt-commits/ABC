@@ -13,7 +13,8 @@
     "react-dom": "^19.1.1",
     "@google/genai": "^1.17.0",
     "html2canvas": "^1.4.1",
-    "jspdf": "^3.0.2"
+    "jspdf": "^3.0.2",
+    "jwt-decode": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

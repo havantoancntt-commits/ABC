@@ -104,7 +104,6 @@ export interface IChingInterpretation {
         line: number; // 1-6
         interpretation: string;
     }[];
-    // FIX: Corrected typo from queBienDoI to queBienDoi to match schema and usage.
     queBienDoi: string | null;
 }
 
@@ -265,6 +264,19 @@ export interface AuspiciousNamingData {
     nameSuggestions: NameSuggestion[];
 }
 
+export interface GoogleUser {
+    sub: string;
+    name: string;
+    picture: string;
+    email: string;
+}
+
+export interface AdminLogEntry {
+    timestamp: string;
+    user: string;
+    action: string;
+    details: string;
+}
 
 export enum AppState {
   HOME,

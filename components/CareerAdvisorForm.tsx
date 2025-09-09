@@ -7,6 +7,8 @@ import type { TranslationKey } from '../hooks/useLocalization';
 
 interface Props {
   onSubmit: (data: CareerInfo) => void;
+  // FIX: Add initialName prop to pre-fill the form.
+  initialName?: string;
 }
 
 const ProgressBar: React.FC<{ step: number; totalSteps: number }> = ({ step, totalSteps }) => (
@@ -18,13 +20,14 @@ const ProgressBar: React.FC<{ step: number; totalSteps: number }> = ({ step, tot
     </div>
 );
 
-const CareerAdvisorForm: React.FC<Props> = ({ onSubmit }) => {
+const CareerAdvisorForm: React.FC<Props> = ({ onSubmit, initialName }) => {
     const { t } = useLocalization();
     const currentYear = new Date().getFullYear();
     const [step, setStep] = useState(1);
 
     // Form data states
-    const [name, setName] = useState('');
+    // FIX: Use initialName to set the initial state for the name.
+    const [name, setName] = useState(initialName || '');
     const [gender, setGender] = useState<'male' | 'female'>('male');
     const [day, setDay] = useState(1);
     const [month, setMonth] = useState(1);

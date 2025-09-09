@@ -6,12 +6,15 @@ import { useLocalization } from '../hooks/useLocalization';
 
 interface Props {
   onSubmit: (data: NumerologyInfo) => void;
+  // FIX: Add initialName prop to pre-fill the form.
+  initialName?: string;
 }
 
-const NumerologyForm: React.FC<Props> = ({ onSubmit }) => {
+const NumerologyForm: React.FC<Props> = ({ onSubmit, initialName }) => {
   const { t } = useLocalization();
   const currentYear = new Date().getFullYear();
-  const [fullName, setFullName] = useState('');
+  // FIX: Use initialName to set the initial state for the name.
+  const [fullName, setFullName] = useState(initialName || '');
   const [day, setDay] = useState(1);
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(currentYear - 20);

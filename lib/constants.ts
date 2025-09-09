@@ -11,6 +11,10 @@ export const SUPPORT_INFO = {
   paypalUrl: 'https://www.paypal.me/TOANVAIO',
 };
 
+// This will be populated by the build process from environment variables
+export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+
+
 export const TAROT_CARDS_MAJOR_ARCANA: readonly TarotCard[] = [
   { id: 0, name: { vi: 'The Fool', en: 'The Fool' } },
   { id: 1, name: { vi: 'The Magician', en: 'The Magician' } },

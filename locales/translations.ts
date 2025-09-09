@@ -30,6 +30,12 @@ export const translations = {
     locale: 'vi-VN',
     resultSupportMessage: 'Mỗi luận giải là một sản phẩm trí tuệ đòi hỏi chi phí vận hành và phát triển. Nếu bạn thấy giá trị, xin hãy gieo một duyên lành để nền tảng này có thể tiếp tục lan tỏa tri thức đến cộng đồng.',
 
+    // Google Auth
+    signInWithGoogle: 'Đăng nhập với Google',
+    signOut: 'Đăng xuất',
+    welcomeUser: 'Chào mừng, {{name}}',
+    googleSignInError: 'Đăng nhập Google thất bại. Vui lòng thử lại.',
+
     // Backend Errors
     errorAiOverloaded: 'Hệ thống AI hiện đang quá tải hoặc đã hết tài nguyên. Vui lòng thử lại sau ít phút.',
     errorApiKeyMissing: 'Khóa API chưa được cấu hình trên máy chủ. Vui lòng liên hệ quản trị viên.',
@@ -45,6 +51,8 @@ export const translations = {
     // Home
     homeTitle: 'Khám Phá Huyền Học Cổ Đại',
     homeSubtitle: 'Ứng dụng Trí Tuệ Nhân Tạo để luận giải các bộ môn kinh điển của văn hóa phương Đông, mang đến một góc nhìn sâu sắc để thấu hiểu bản thân và định hướng tương lai.',
+    homeSubtitleLoggedIn: 'Chọn một tính năng bên dưới để bắt đầu hành trình khám phá bản thân của bạn.',
+    homeAuthPrompt: 'Đăng nhập để lưu lại các lá số và trải nghiệm được cá nhân hóa.',
     astrologyTitle: 'Tử Vi Đẩu Số',
     astrologyDesc: 'Lập và luận giải lá số tử vi chi tiết dựa trên ngày giờ sinh. Khám phá bản đồ vận mệnh, các cung số và nhận định hướng cho tương lai.',
     astrologyButton: 'Lập Lá Số Ngay',
@@ -402,7 +410,6 @@ export const translations = {
     auspiciousNamingTitle: 'Đặt Tên Hợp Mệnh',
     auspiciousNamingDesc: 'Dựa trên Ngũ hành và ngày sinh, AI sẽ gợi ý những cái tên ý nghĩa, mang lại may mắn, bình an và thành công cho con của bạn.',
     auspiciousNamingButton: 'Tìm Tên Cho Con',
-    // FIX: Removed duplicate translation key that was causing parsing errors.
     namingFormTitle: 'Kiến Tạo Tương Lai Con Trẻ Qua Tên Gọi',
     namingFormSubtitle: 'Một cái tên không chỉ để gọi mà còn là một lời chúc phúc, một nguồn năng lượng đi theo con suốt cuộc đời. Hãy cung cấp thông tin để AI có thể đưa ra những gợi ý tên gọi ý nghĩa và hợp mệnh nhất.',
     namingFormStep1Title: 'Bước 1: Thông Tin Của Con',
@@ -448,12 +455,24 @@ export const translations = {
     adminClearCharts: 'Clear All Saved Horoscopes',
     adminClearChartsConfirmTitle: 'Confirm Clear Horoscopes',
     adminClearChartsConfirmMessage: 'Are you sure you want to delete ALL saved horoscopes on this browser? This action cannot be undone.',
-    adminUnlockFeatures: 'Unlock Features',
+    adminUnlockFeatures: 'Unlock Features (Session)',
     adminUnlockAstrology: 'Unlock Astrology',
     adminUnlockCareer: 'Unlock Career Advisor',
     adminUnlocked: 'Unlocked',
     adminLock: 'Lock',
     adminNotAvailable: 'N/A',
+    adminHistoryLog: 'Activity Log',
+    adminClearHistory: 'Clear Activity Log',
+    adminClearHistoryConfirmTitle: 'Confirm Clear History',
+    adminClearHistoryConfirmMessage: 'Are you sure you want to delete the entire activity log? This action cannot be undone.',
+    adminSearchPlaceholder: 'Search logs...',
+    adminLogTimestamp: 'Timestamp',
+    adminLogUser: 'User',
+    adminLogAction: 'Action',
+    adminLogDetails: 'Details',
+    adminTabStats: 'Statistics',
+    adminTabHistory: 'History',
+
   },
   en: {
     // Common
@@ -486,6 +505,12 @@ export const translations = {
     locale: 'en-US',
     resultSupportMessage: 'Each analysis is an intellectual product that requires operational and development costs. If you find it valuable, please contribute so this platform can continue to spread knowledge to the community.',
 
+    // Google Auth
+    signInWithGoogle: 'Sign in with Google',
+    signOut: 'Sign Out',
+    welcomeUser: 'Welcome, {{name}}',
+    googleSignInError: 'Google Sign-In failed. Please try again.',
+
     // Backend Errors
     errorAiOverloaded: 'The AI system is currently overloaded or has exhausted its resources. Please try again in a few moments.',
     errorApiKeyMissing: 'API Key is not configured on the server. Please contact the administrator.',
@@ -501,6 +526,8 @@ export const translations = {
     // Home
     homeTitle: 'Explore Ancient Mysticism',
     homeSubtitle: 'Leveraging Artificial Intelligence to interpret the classic disciplines of Eastern culture, offering profound insights for self-understanding and future guidance.',
+    homeSubtitleLoggedIn: 'Choose a feature below to begin your journey of self-discovery.',
+    homeAuthPrompt: 'Sign in to save your charts and get a personalized experience.',
     astrologyTitle: 'Astrology (Tử Vi)',
     astrologyDesc: 'Generate and interpret detailed horoscopes based on your birth date and time. Discover your destiny map, palaces, and get guidance for the future.',
     astrologyButton: 'Generate Horoscope',
@@ -857,7 +884,6 @@ export const translations = {
     auspiciousNamingTitle: 'Auspicious Naming',
     auspiciousNamingDesc: 'Based on Five Elements and birth date, the AI will suggest meaningful names that bring luck, peace, and success to your child.',
     auspiciousNamingButton: 'Find a Name',
-    // FIX: Removed duplicate translation key that was causing parsing errors.
     namingFormTitle: 'Shape Your Child\'s Future Through a Name',
     namingFormSubtitle: 'A name is not just a label but a lifelong blessing and source of energy. Provide the information below for the AI to suggest the most meaningful and harmonious names.',
     namingFormStep1Title: 'Step 1: Child\'s Information',
@@ -903,11 +929,22 @@ export const translations = {
     adminClearCharts: 'Clear All Saved Horoscopes',
     adminClearChartsConfirmTitle: 'Confirm Clear Horoscopes',
     adminClearChartsConfirmMessage: 'Are you sure you want to delete ALL saved horoscopes on this browser? This action cannot be undone.',
-    adminUnlockFeatures: 'Unlock Features',
+    adminUnlockFeatures: 'Unlock Features (Session)',
     adminUnlockAstrology: 'Unlock Astrology',
     adminUnlockCareer: 'Unlock Career Advisor',
     adminUnlocked: 'Unlocked',
     adminLock: 'Lock',
     adminNotAvailable: 'N/A',
+    adminHistoryLog: 'Activity Log',
+    adminClearHistory: 'Clear Activity Log',
+    adminClearHistoryConfirmTitle: 'Confirm Clear History',
+    adminClearHistoryConfirmMessage: 'Are you sure you want to delete the entire activity log? This action cannot be undone.',
+    adminSearchPlaceholder: 'Search logs...',
+    adminLogTimestamp: 'Timestamp',
+    adminLogUser: 'User',
+    adminLogAction: 'Action',
+    adminLogDetails: 'Details',
+    adminTabStats: 'Statistics',
+    adminTabHistory: 'History',
   }
 };
