@@ -20,10 +20,13 @@ interface UseGoogleAuthProps {
 export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
     const [user, setUser] = useState<GoogleUser | null>(null);
     const [authError, setAuthError] = useState<string | null>(null);
+    const [isConfigured, setIsConfigured] = useState(false);
 
     const handleSignOut = useCallback(() => {
         logAdminEvent('User Signed Out', user?.email || 'Unknown');
-        window.google.accounts.id.disableAutoSelect();
+        if (window.google) {
+          window.google.accounts.id.disableAutoSelect();
+        }
         setUser(null);
         sessionStorage.removeItem('google_user');
     }, [user]);
@@ -55,30 +58,36 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
             }
         }
 
-        if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE_CLIENT_ID')) {
-            console.error("Google Sign-In is not configured. Please provide a valid Client ID in the 'google-client-id' meta tag in index.html.");
-            setAuthError("Google Sign-In is not configured.");
+        const isSignInConfigured = GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE_CLIENT_ID');
+        setIsConfigured(isSignInConfigured);
+
+        if (!isSignInConfigured) {
+            console.warn("Google Sign-In is not configured. Login functionality will be disabled.");
             return;
         }
 
         const initializeGoogleSignIn = () => {
             if (window.google) {
-                window.google.accounts.id.initialize({
-                    client_id: GOOGLE_CLIENT_ID,
-                    callback: handleCredentialResponse,
-                });
+                try {
+                    window.google.accounts.id.initialize({
+                        client_id: GOOGLE_CLIENT_ID,
+                        callback: handleCredentialResponse,
+                    });
 
-                const signInButton = document.getElementById('google-signin-button');
-                if (signInButton) {
-                    window.google.accounts.id.renderButton(
-                        signInButton,
-                        { theme: "outline", size: "large", type: "standard", shape: "pill" }
-                    );
-                }
+                    const signInButton = document.getElementById('google-signin-button');
+                    if (signInButton) {
+                        window.google.accounts.id.renderButton(
+                            signInButton,
+                            { theme: "outline", size: "large", type: "standard", shape: "pill" }
+                        );
+                    }
 
-                // If not logged in, show the One Tap prompt for a seamless login experience.
-                if (!sessionStorage.getItem('google_user')) {
-                     window.google.accounts.id.prompt();
+                    if (!sessionStorage.getItem('google_user')) {
+                         window.google.accounts.id.prompt();
+                    }
+                } catch (e) {
+                     console.error("Google Sign-In initialization error:", e);
+                     setAuthError(e instanceof Error ? e.message : "An unknown error occurred during Google Sign-In setup.");
                 }
 
             } else {
@@ -86,7 +95,6 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
             }
         };
 
-        // Ensure the Google script is loaded before initializing
         if (window.google) {
             initializeGoogleSignIn();
         } else {
@@ -100,10 +108,10 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
     }, [handleCredentialResponse]);
 
     const handleSignIn = () => {
-        if (window.google) {
+        if (isConfigured && window.google) {
             window.google.accounts.id.prompt();
         }
     };
     
-    return { user, handleSignIn, handleSignOut, authError };
+    return { user, handleSignIn, handleSignOut, authError, isConfigured };
 };

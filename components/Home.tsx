@@ -62,7 +62,7 @@ const FeatureCard: React.FC<{
 
 const Home: React.FC<Props> = (props) => {
     const { t } = useLocalization();
-    const { user, handleSignIn } = useGoogleAuth({});
+    const { user, isConfigured } = useGoogleAuth({});
 
     const features = [
         { title: t('astrologyTitle'), description: t('astrologyDesc'), buttonText: t('astrologyButton'), onClick: props.onStartAstrology, buttonVariant: 'primary' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-12v4m-2-2h4m5 4v4m-2-2h4M5 11h14M5 11a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 01-2 2M5 11v2a2 2 0 002 2h10a2 2 0 002-2v-2" /></svg> },
@@ -93,19 +93,21 @@ const Home: React.FC<Props> = (props) => {
                 {!user && (
                     <div className="mt-8 animate-fade-in" style={{ animationDelay: '0.6s' }}>
                         <p className="text-amber-200/80 mb-4">{t('homeAuthPrompt')}</p>
-                        <div id="google-signin-button"></div>
+                        {isConfigured ? (
+                           <div id="google-signin-button"></div>
+                        ) : (
+                           <p className="text-sm text-gray-500 italic">{t('homeAuthUnavailable')}</p>
+                        )}
                     </div>
                 )}
             </div>
-            {user && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-10">
-                    {features.map((feature, index) => (
-                        <div key={feature.title} className="animate-fade-in" style={{ animationDelay: `${0.1 + index * 0.05}s` }}>
-                            <FeatureCard {...feature} />
-                        </div>
-                    ))}
-                </div>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-10">
+                {features.map((feature, index) => (
+                    <div key={feature.title} className="animate-fade-in" style={{ animationDelay: `${0.1 + index * 0.05}s` }}>
+                        <FeatureCard {...feature} />
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
