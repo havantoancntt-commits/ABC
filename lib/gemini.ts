@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -166,5 +166,18 @@ export const generateTalisman = async (info: TalismanInfo, language: string): Pr
             throw error;
         }
         throw new Error("Could not generate talisman due to a connection error or server issue. Please try again.");
+    }
+};
+
+export const generateAuspiciousName = async (info: AuspiciousNamingInfo, language: string): Promise<AuspiciousNamingData> => {
+    try {
+        const data = await callProxy('generateAuspiciousName', { info, language });
+        return data as AuspiciousNamingData;
+    } catch (error) {
+        console.error("Error generating auspicious name:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Could not generate name suggestions due to a connection error or server issue. Please try again.");
     }
 };

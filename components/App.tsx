@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData } from '../lib/types';
+import type { BirthInfo, AstrologyChartData, SavedChart, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData } from '../lib/types';
 import { AppState } from '../lib/types';
-import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman } from '../lib/gemini';
+import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName } from '../lib/gemini';
 import Header from './Header';
 import DonationModal from './PaymentModal';
 import Spinner from './Spinner';
@@ -37,6 +37,8 @@ const CareerAdvisorForm = lazy(() => import('./CareerAdvisorForm'));
 const CareerAdvisorResult = lazy(() => import('./CareerAdvisorResult'));
 const TalismanGeneratorForm = lazy(() => import('./TalismanGeneratorForm'));
 const TalismanResult = lazy(() => import('./TalismanResult'));
+const AuspiciousNamingForm = lazy(() => import('./AuspiciousNamingForm'));
+const AuspiciousNamingResult = lazy(() => import('./AuspiciousNamingResult'));
 
 
 const createChartId = (info: BirthInfo): string => {
@@ -61,6 +63,8 @@ const App: React.FC = () => {
   const [careerAdviceData, setCareerAdviceData] = useState<CareerAdviceData | null>(null);
   const [talismanInfo, setTalismanInfo] = useState<TalismanInfo | null>(null);
   const [talismanData, setTalismanData] = useState<TalismanData | null>(null);
+  const [auspiciousNamingInfo, setAuspiciousNamingInfo] = useState<AuspiciousNamingInfo | null>(null);
+  const [auspiciousNamingData, setAuspiciousNamingData] = useState<AuspiciousNamingData | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedPalmImage, setCapturedPalmImage] = useState<string | null>(null);
   const [capturedHandwritingImage, setCapturedHandwritingImage] = useState<string | null>(null);
@@ -131,6 +135,8 @@ const App: React.FC = () => {
     setCareerAdviceData(null);
     setTalismanInfo(null);
     setTalismanData(null);
+    setAuspiciousNamingInfo(null);
+    setAuspiciousNamingData(null);
     setError(null);
   }, []);
 
@@ -288,6 +294,21 @@ const App: React.FC = () => {
     }
   }, [language, t]);
 
+  const handleGenerateAuspiciousName = useCallback(async (info: AuspiciousNamingInfo) => {
+    setAuspiciousNamingInfo(info);
+    setAppState(AppState.AUSPICIOUS_NAMING_LOADING);
+    setError(null);
+    try {
+        const data = await generateAuspiciousName(info, language);
+        setAuspiciousNamingData(data);
+        setAppState(AppState.AUSPICIOUS_NAMING_RESULT);
+    } catch (err) {
+        console.error(err);
+        setError(err instanceof Error ? err.message : t('errorUnknown'));
+        setAppState(AppState.AUSPICIOUS_NAMING_FORM);
+    }
+  }, [language, t]);
+
   const handleCaptureImage = useCallback((imageDataUrl: string) => {
     setCapturedImage(imageDataUrl);
   }, []);
@@ -383,6 +404,10 @@ const App: React.FC = () => {
   const handleStartTalismanGenerator = useCallback(() => {
     setError(null);
     setAppState(AppState.TALISMAN_GENERATOR);
+  }, []);
+  const handleStartAuspiciousNaming = useCallback(() => {
+    setError(null);
+    setAppState(AppState.AUSPICIOUS_NAMING_FORM);
   }, []);
 
   const handleStartCareerAdvisor = useCallback(() => {
@@ -496,7 +521,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (appState) {
       case AppState.HOME:
-        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} onStartHandwritingAnalysis={handleStartHandwritingAnalysis} onStartCareerAdvisor={handleStartCareerAdvisor} onStartTalismanGenerator={handleStartTalismanGenerator} />;
+        return <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} onStartHandwritingAnalysis={handleStartHandwritingAnalysis} onStartCareerAdvisor={handleStartCareerAdvisor} onStartTalismanGenerator={handleStartTalismanGenerator} onStartAuspiciousNaming={handleStartAuspiciousNaming} />;
       case AppState.SAVED_CHARTS:
         return <SavedCharts 
           charts={savedCharts}
@@ -602,6 +627,12 @@ const App: React.FC = () => {
           return <Spinner message={t('spinnerTalisman')} />;
       case AppState.TALISMAN_RESULT:
           return talismanData && <TalismanResult data={talismanData} info={talismanInfo!} onReset={() => setAppState(AppState.TALISMAN_GENERATOR)} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.AUSPICIOUS_NAMING_FORM:
+          return <AuspiciousNamingForm onSubmit={handleGenerateAuspiciousName} />;
+      case AppState.AUSPICIOUS_NAMING_LOADING:
+          return <Spinner message={t('spinnerAuspiciousNaming')} />;
+      case AppState.AUSPICIOUS_NAMING_RESULT:
+          return auspiciousNamingData && <AuspiciousNamingResult data={auspiciousNamingData} info={auspiciousNamingInfo!} onReset={handleStartAuspiciousNaming} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       default:
         return null;
     }

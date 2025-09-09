@@ -1,7 +1,7 @@
 // This is a Vercel serverless function that acts as a secure proxy to the Google Gemini API.
 import { GoogleGenAI, Type, BlockedReason } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
-import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo, TalismanInfo } from '../lib/types';
+import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo, TalismanInfo, AuspiciousNamingInfo } from '../lib/types';
 
 // By removing the `export const config = { runtime: 'edge' };`, this function
 // will default to the standard Node.js serverless runtime, which has a longer
@@ -266,6 +266,30 @@ const careerAdviceSchema = {
         }
     },
     required: ['overallAnalysis', 'topSuggestions']
+};
+
+const auspiciousNamingSchema = {
+    type: Type.OBJECT,
+    properties: {
+        analysisSummary: { type: Type.STRING, description: "Phân tích tổng quan về mệnh của đứa trẻ dựa trên ngày sinh và các yếu tố Ngũ hành. Giải thích cơ sở cho các gợi ý tên." },
+        nameSuggestions: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    fullName: { type: Type.STRING, description: "Tên đầy đủ được gợi ý (Họ + Tên lót + Tên chính)." },
+                    meaningAnalysis: { type: Type.STRING, description: "Phân tích sâu sắc về ý nghĩa Hán Việt và ý nghĩa mở rộng của tên." },
+                    fiveElementsAnalysis: { type: Type.STRING, description: "Phân tích tên này bổ trợ cho Ngũ hành của bản mệnh đứa trẻ như thế nào (ví dụ: Mệnh khuyết Mộc, tên có bộ Mộc...)." },
+                    phoneticsAnalysis: { type: Type.STRING, description: "Phân tích về sự hài hòa âm điệu, bằng trắc của tên, dễ gọi, dễ nghe." },
+                    overall: { type: Type.STRING, description: "Tóm tắt lý do tại sao đây là một cái tên tốt, kết nối với mong muốn của cha mẹ." }
+                },
+                required: ['fullName', 'meaningAnalysis', 'fiveElementsAnalysis', 'phoneticsAnalysis', 'overall']
+            },
+            minItems: 3,
+            maxItems: 5,
+        }
+    },
+    required: ['analysisSummary', 'nameSuggestions']
 };
 
 
@@ -596,6 +620,36 @@ const EN_TALISMAN_SYSTEM_INSTRUCTION = `**Persona:** You are an Eastern Esoteric
     *   'interpretation': Provide a detailed explanation of the meaning of the guardian deity, symbols, and colors on the talisman.
     *   'usage': Give specific instructions on how to "activate" and use the talisman, incorporating the chanting of the mantra.`;
 
+const VI_AUSPICIOUS_NAMING_SYSTEM_INSTRUCTION = `**Persona:** Bạn là một chuyên gia đặt tên phong thủy và Hán học uyên bác. Bạn kết hợp kiến thức về Tứ Trụ, Ngũ Hành, và ý nghĩa Hán Việt để đưa ra những cái tên không chỉ hay, ý nghĩa mà còn hài hòa với vận mệnh của đứa trẻ.
+
+**Nhiệm vụ:** Dựa trên thông tin cung cấp, hãy tạo ra các gợi ý tên và trả về kết quả JSON theo schema.
+
+**Yêu cầu cốt lõi:**
+1.  **Phân tích Mệnh:** Dựa vào ngày tháng năm sinh của đứa trẻ để xác định bản mệnh Ngũ Hành (ví dụ: Kim, Mộc, Thủy, Hỏa, Thổ) và các yếu tố vượng/khuyết. Đây là cơ sở quan trọng nhất. Phần 'analysisSummary' phải giải thích rõ điều này.
+2.  **Gợi ý chất lượng:**
+    *   Tạo 3-5 gợi ý tên. Mỗi tên phải có Tên Lót và Tên Chính.
+    *   'meaningAnalysis': Phân tích sâu về ý nghĩa của từng chữ trong tên.
+    *   'fiveElementsAnalysis': Giải thích rõ ràng tên đó bổ trợ cho mệnh như thế nào. Ví dụ: "Bé mệnh Hỏa, thiếu Mộc để tương sinh, tên 'Lâm' (bộ Mộc) sẽ giúp nuôi dưỡng bản mệnh...".
+    *   'phoneticsAnalysis': Nhận xét về sự cân bằng bằng-trắc, âm điệu dễ nghe.
+    *   'overall': Kết nối ý nghĩa của tên với mong muốn của cha mẹ (thông minh, mạnh mẽ...).
+3.  **Tôn trọng yêu cầu:** Tuyệt đối tuân thủ các yêu cầu khác của cha mẹ (tên lót, tránh tên...).
+4.  **Sáng tạo & Hợp thời:** Các tên gợi ý cần phải vừa hay, vừa ý nghĩa, vừa không quá cũ kỹ hay xa lạ.`;
+
+const EN_AUSPICIOUS_NAMING_SYSTEM_INSTRUCTION = `**Persona:** You are a learned expert in Feng Shui naming and Sinology. You combine knowledge of Bazi (Four Pillars of Destiny), the Five Elements, and Sino-Vietnamese meanings to suggest names that are not only beautiful and meaningful but also harmonious with a child's destiny.
+
+**Task:** Based on the provided information, generate name suggestions and return the result as a JSON object according to the schema.
+
+**Core Requirements:**
+1.  **Destiny Analysis:** Use the child's date of birth to determine their Five Element destiny (e.g., Metal, Wood, Water, Fire, Earth) and any prevalent or lacking elements. This is the most critical foundation. The 'analysisSummary' must explain this clearly.
+2.  **Quality Suggestions:**
+    *   Generate 3-5 name suggestions. Each name must have a Middle Name and a Given Name.
+    *   'meaningAnalysis': Provide a deep analysis of the meaning of each character in the name.
+    *   'fiveElementsAnalysis': Clearly explain how the name supports the child's destiny element. E.g., "The child's destiny is Fire, lacking Wood for support. The name 'Lâm' (Wood element) will help nurture their destiny..."
+    *   'phoneticsAnalysis': Comment on the tonal balance and phonetic appeal of the name.
+    *   'overall': Connect the name's meaning to the parents' desired qualities (intelligent, strong, etc.).
+3.  **Respect Constraints:** Strictly adhere to any other constraints provided by the parents (specific middle name, names to avoid, etc.).
+4.  **Creative & Modern:** The suggested names should be beautiful, meaningful, and neither too archaic nor too strange.`;
+
 
 // --- Main Handler ---
 // Corrected signature for Vercel's Node.js runtime
@@ -721,159 +775,3 @@ export default async function handler(req: any, res: any) {
             },
         });
     } else if (operation === 'generateNumerologyChart') {
-        const { info, language }: { info: NumerologyInfo, language: 'vi' | 'en' } = payload;
-        const systemInstruction = language === 'en' ? EN_NUMEROLOGY_SYSTEM_INSTRUCTION : VI_NUMEROLOGY_SYSTEM_INSTRUCTION;
-
-        const userPrompt = language === 'en'
-            ? `Generate a detailed numerology report for:\n- Full Name: ${info.fullName}\n- Date of Birth: ${info.day}/${info.month}/${info.year}`
-            : `Lập sơ đồ thần số học chi tiết cho:\n- Họ và Tên: ${info.fullName}\n- Ngày sinh: ${info.day}/${info.month}/${info.year}`;
-        
-        response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: userPrompt,
-            config: {
-                systemInstruction: systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: numerologySchema,
-                temperature: 0.7,
-            },
-        });
-    } else if (operation === 'getTarotReading') {
-        const { cards, question, language }: { cards: TarotCard[], question: string, language: 'vi' | 'en' } = payload;
-        const systemInstruction = language === 'en' ? EN_TAROT_SYSTEM_INSTRUCTION : VI_TAROT_SYSTEM_INSTRUCTION;
-        
-        const cardNames = cards.map(c => c.name[language]).join(', ');
-
-        const userPrompt = language === 'en'
-            ? `Interpret the following three-card Tarot reading:\n- User's Question: "${question || 'A general question about my current life path.'}"\n- Past: ${cards[0].name.en}\n- Present: ${cards[1].name.en}\n- Future: ${cards[2].name.en}`
-            : `Luận giải trải bài Tarot 3 lá sau:\n- Câu hỏi: "${question || 'Một câu hỏi chung về con đường hiện tại của tôi.'}"\n- Quá Khứ: ${cards[0].name.vi}\n- Hiện Tại: ${cards[1].name.vi}\n- Tương Lai: ${cards[2].name.vi}`;
-
-        response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: userPrompt,
-            config: {
-                systemInstruction: systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: tarotReadingSchema,
-                temperature: 0.8,
-            },
-        });
-    } else if (operation === 'generateFlowAstrology') {
-        const { info, language }: { info: FlowAstrologyInfo, language: 'vi' | 'en' } = payload;
-        const systemInstruction = language === 'en' ? EN_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION : VI_FLOW_ASTROLOGY_SYSTEM_INSTRUCTION;
-
-        const userPrompt = language === 'en'
-            ? `Generate a Flow Astrology chart for:\n- Name: ${info.name}\n- Date of Birth: ${info.day}/${info.month}/${info.year}\n- Hour: ${info.hour}\n- Intuitive Number: ${info.intuitiveNumber}`
-            : `Tạo biểu đồ Tử Vi Dòng Chảy Năng Lượng cho:\n- Tên: ${info.name}\n- Ngày sinh: ${info.day}/${info.month}/${info.year}\n- Giờ sinh: ${info.hour}\n- Số Trực Giác: ${info.intuitiveNumber}`;
-
-        response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: userPrompt,
-            config: {
-                systemInstruction: systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: flowAstrologySchema,
-                temperature: 0.9,
-            },
-        });
-    } else if (operation === 'getAuspiciousDayAnalysis') {
-        const { info, language }: { info: AuspiciousDayInfo, language: 'vi' | 'en' } = payload;
-        const systemInstruction = language === 'en' ? EN_AUSPICIOUS_DAY_SYSTEM_INSTRUCTION : VI_AUSPICIOUS_DAY_SYSTEM_INSTRUCTION;
-
-        const userPrompt = language === 'en'
-            ? `Analyze the following date for a specific event:\n- Gregorian Date: ${info.day}/${info.month}/${info.year}\n- Event: "${info.event}"`
-            : `Phân tích ngày sau đây cho một sự việc cụ thể:\n- Ngày Dương Lịch: ${info.day}/${info.month}/${info.year}\n- Sự việc: "${info.event}"`;
-
-        response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: userPrompt,
-            config: {
-                systemInstruction: systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: auspiciousDaySchema,
-                temperature: 0.7,
-            },
-        });
-    } else if (operation === 'getCareerAdvice') {
-        const { info, language }: { info: CareerInfo, language: 'vi' | 'en' } = payload;
-        const systemInstruction = language === 'en' ? EN_CAREER_ADVISOR_SYSTEM_INSTRUCTION : VI_CAREER_ADVISOR_SYSTEM_INSTRUCTION;
-    
-        const genderString = info.gender === 'male' ? (language === 'en' ? 'Male' : 'Nam') : (language === 'en' ? 'Female' : 'Nữ');
-        const userPrompt = language === 'en'
-            ? `Generate a detailed career advice report for:\n- Name: ${info.name}\n- Gender: ${genderString}\n- Date of Birth: ${info.day}/${info.month}/${info.year}\n- Hour of Birth: ${info.hour === -1 ? 'Unknown' : info.hour}\n- Interests: ${info.interests.join(', ')}\n- Skills: ${info.skills.join(', ')}\n- Aspiration: ${info.aspiration || 'Not specified'}`
-            : `Tạo một báo cáo tư vấn hướng nghiệp chi tiết cho:\n- Tên: ${info.name}\n- Giới tính: ${genderString}\n- Ngày sinh: ${info.day}/${info.month}/${info.year}\n- Giờ sinh: ${info.hour === -1 ? 'Không rõ' : info.hour}\n- Sở thích: ${info.interests.join(', ')}\n- Kỹ năng: ${info.skills.join(', ')}\n- Khát vọng: ${info.aspiration || 'Không chỉ định'}`;
-    
-        response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: userPrompt,
-            config: {
-                systemInstruction: systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: careerAdviceSchema,
-                temperature: 0.8,
-            },
-        });
-    } else if (operation === 'generateTalisman') {
-        const { info, language }: { info: TalismanInfo, language: 'vi' | 'en' } = payload;
-        const systemInstruction = language === 'en' ? EN_TALISMAN_SYSTEM_INSTRUCTION : VI_TALISMAN_SYSTEM_INSTRUCTION;
-    
-        const userPrompt = language === 'en'
-            ? `Generate a personalized talisman for:\n- Name: ${info.name}\n- Date of Birth: ${info.day}/${info.month}/${info.year}`
-            : `Tạo một lá bùa hộ mệnh cá nhân hóa cho:\n- Tên: ${info.name}\n- Ngày sinh: ${info.day}/${info.month}/${info.year}`;
-    
-        response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: userPrompt,
-            config: {
-                systemInstruction: systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: talismanSchema,
-                temperature: 1.0, // Higher temperature for more creative SVG designs
-            },
-        });
-    } else {
-      return res.status(400).json({ error: 'error_invalid_operation' });
-    }
-
-    const responseText = response.text;
-
-    if (!responseText) {
-      const feedback = response.promptFeedback;
-      console.error('Gemini response was blocked or empty. Feedback:', JSON.stringify(feedback, null, 2));
-      if (feedback?.blockReason) {
-        return res.status(400).json({ error: 'error_ai_blocked_safety' });
-      }
-      return res.status(400).json({ error: 'error_ai_blocked_unknown' });
-    }
-
-    let parsedJson;
-    try {
-      parsedJson = JSON.parse(responseText);
-    } catch (e) {
-      console.error('Gemini response is not valid JSON:', responseText);
-      return res.status(500).json({ error: 'error_ai_invalid_json' });
-    }
-
-    return res.status(200).json(parsedJson);
-
-  } catch (error: unknown) {
-    console.error('Critical error in Gemini proxy function:', error);
-    let errorKey = 'error_server_generic';
-    let statusCode = 500;
-
-    if (error instanceof Error) {
-      const errorString = error.toString().toLowerCase();
-      if (errorString.includes('api key not valid')) {
-        errorKey = 'error_api_key_invalid';
-        statusCode = 401;
-      } else if (errorString.includes('503') || errorString.includes('unavailable') || errorString.includes('resource has been exhausted')) {
-        errorKey = 'error_ai_overloaded';
-        statusCode = 503;
-      }
-    }
-    
-    if (!res.headersSent) {
-      return res.status(statusCode).json({ error: errorKey });
-    }
-  }
-}

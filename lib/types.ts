@@ -104,6 +104,7 @@ export interface IChingInterpretation {
         line: number; // 1-6
         interpretation: string;
     }[];
+    // FIX: Corrected typo from queBienDoI to queBienDoi to match schema and usage.
     queBienDoi: string | null;
 }
 
@@ -238,6 +239,32 @@ export interface CareerAdviceData {
   topSuggestions: CareerSuggestion[];
 }
 
+export interface AuspiciousNamingInfo {
+    childLastName: string;
+    childGender: 'male' | 'female';
+    childYear: number;
+    childMonth: number;
+    childDay: number;
+    isBorn: boolean;
+    fatherName: string;
+    motherName: string;
+    desiredQualities: string[];
+    otherConstraints: string;
+}
+
+export interface NameSuggestion {
+    fullName: string;
+    meaningAnalysis: string;
+    fiveElementsAnalysis: string;
+    phoneticsAnalysis: string;
+    overall: string;
+}
+
+export interface AuspiciousNamingData {
+    analysisSummary: string;
+    nameSuggestions: NameSuggestion[];
+}
+
 
 export enum AppState {
   HOME,
@@ -273,4 +300,7 @@ export enum AppState {
   TALISMAN_GENERATOR,
   TALISMAN_LOADING,
   TALISMAN_RESULT,
+  AUSPICIOUS_NAMING_FORM,
+  AUSPICIOUS_NAMING_LOADING,
+  AUSPICIOUS_NAMING_RESULT,
 }

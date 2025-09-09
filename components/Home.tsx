@@ -17,6 +17,7 @@ interface Props {
     onStartHandwritingAnalysis: () => void;
     onStartCareerAdvisor: () => void;
     onStartTalismanGenerator: () => void;
+    onStartAuspiciousNaming: () => void;
 }
 
 const FeatureCard: React.FC<{
@@ -25,7 +26,7 @@ const FeatureCard: React.FC<{
     buttonText: string;
     icon: React.ReactNode;
     onClick: () => void;
-    buttonVariant: 'primary' | 'special' | 'secondary' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology' | 'career' | 'talisman';
+    buttonVariant: 'primary' | 'special' | 'secondary' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology' | 'career' | 'talisman' | 'naming';
 }> = ({ title, description, buttonText, icon, onClick, buttonVariant }) => (
     <div className="group relative h-full">
         <div className={`absolute -inset-0.5 bg-gradient-to-r ${
@@ -41,6 +42,7 @@ const FeatureCard: React.FC<{
             buttonVariant === 'graphology' ? 'from-slate-600 to-indigo-600' :
             buttonVariant === 'career' ? 'from-blue-600 to-teal-600' :
             buttonVariant === 'talisman' ? 'from-red-600 to-amber-600' :
+            buttonVariant === 'naming' ? 'from-sky-600 to-green-600' :
             'from-cyan-600 to-blue-600'
         } rounded-2xl blur opacity-0 group-hover:opacity-75 transition duration-500 group-hover:duration-300`}></div>
         <Card className="relative flex flex-col text-center items-center h-full transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-black/50">
@@ -57,7 +59,7 @@ const FeatureCard: React.FC<{
 );
 
 
-const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZodiacFinder, onStartIChing, onStartShop, onStartNumerology, onStartPalmReading, onStartTarot, onStartFlowAstrology, onStartAuspiciousDayFinder, onStartHandwritingAnalysis, onStartCareerAdvisor, onStartTalismanGenerator }) => {
+const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZodiacFinder, onStartIChing, onStartShop, onStartNumerology, onStartPalmReading, onStartTarot, onStartFlowAstrology, onStartAuspiciousDayFinder, onStartHandwritingAnalysis, onStartCareerAdvisor, onStartTalismanGenerator, onStartAuspiciousNaming }) => {
     const { t } = useLocalization();
     const features = [
         {
@@ -69,6 +71,11 @@ const Home: React.FC<Props> = ({ onStartAstrology, onStartPhysiognomy, onStartZo
             title: t('careerAdvisorTitle'), description: t('careerAdvisorDesc'), buttonText: t('careerAdvisorButton'),
             onClick: onStartCareerAdvisor, buttonVariant: 'career' as const,
             icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+        },
+        {
+            title: t('auspiciousNamingTitle'), description: t('auspiciousNamingDesc'), buttonText: t('auspiciousNamingButton'),
+            onClick: onStartAuspiciousNaming, buttonVariant: 'naming' as const,
+            icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /><path d="M14 6l-8 8" opacity="0.6" /></svg>
         },
         {
             title: t('flowAstrologyTitle'), description: t('flowAstrologyDesc'), buttonText: t('flowAstrologyButton'),
