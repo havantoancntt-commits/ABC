@@ -24,7 +24,7 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
 
     const handleSignOut = useCallback(() => {
         logAdminEvent('User Signed Out', user?.email || 'Unknown');
-        if (window.google) {
+        if (window.google?.accounts?.id) {
           window.google.accounts.id.disableAutoSelect();
         }
         setUser(null);
@@ -48,7 +48,7 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
     }, [onSuccess, onError]);
     
     useEffect(() => {
-        // Check for persisted user session
+        // Step 1: Check for persisted user session
         const storedUser = sessionStorage.getItem('google_user');
         if (storedUser) {
             try {
@@ -58,45 +58,59 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
             }
         }
 
+        // Step 2: Determine if Google Sign-In is configured.
+        // This runs once and triggers a re-render if `isConfigured` changes.
         const GOOGLE_CLIENT_ID = getGoogleClientId();
-        const isSignInConfigured = GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE_CLIENT_ID');
+        const isSignInConfigured = !!(GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE_CLIENT_ID'));
         setIsConfigured(isSignInConfigured);
-
-        if (!isSignInConfigured) {
-            console.warn("Google Sign-In is not configured. Login functionality will be disabled.");
+    }, []); 
+    
+    useEffect(() => {
+        // Step 3: This effect runs after `isConfigured` is set to true.
+        // By this point, the component using the hook should have rendered the button container.
+        if (!isConfigured) {
+            if (getGoogleClientId()?.includes('YOUR_GOOGLE_CLIENT_ID')) {
+              console.warn("Google Sign-In is not configured with a valid Client ID. Login functionality will be disabled.");
+            }
             return;
         }
 
+        const GOOGLE_CLIENT_ID = getGoogleClientId()!;
+
         const initializeGoogleSignIn = () => {
-            if (window.google) {
-                try {
-                    window.google.accounts.id.initialize({
-                        client_id: GOOGLE_CLIENT_ID,
-                        callback: handleCredentialResponse,
-                    });
+            if (!window.google?.accounts?.id) {
+                console.error("Google Identity Services library not loaded.");
+                setAuthError("Google Sign-In script not loaded. Please check your connection.");
+                return;
+            }
+            try {
+                window.google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: handleCredentialResponse,
+                });
 
-                    const signInButton = document.getElementById('google-signin-button');
-                    if (signInButton) {
-                        window.google.accounts.id.renderButton(
-                            signInButton,
-                            { theme: "outline", size: "large", type: "standard", shape: "pill" }
-                        );
-                    }
-
-                    if (!sessionStorage.getItem('google_user')) {
-                         window.google.accounts.id.prompt();
-                    }
-                } catch (e) {
-                     console.error("Google Sign-In initialization error:", e);
-                     setAuthError(e instanceof Error ? e.message : "An unknown error occurred during Google Sign-In setup.");
+                const signInButton = document.getElementById('google-signin-button');
+                if (signInButton) {
+                    // Clear the container in case it was rendered before (e.g., on hot-reload)
+                    signInButton.innerHTML = '';
+                    window.google.accounts.id.renderButton(
+                        signInButton,
+                        { theme: "outline", size: "large", type: "standard", shape: "pill" }
+                    );
                 }
 
-            } else {
-                console.error("Google Identity Services script not loaded.");
-                setAuthError("Google Sign-In script not loaded. Please check your connection.");
+                // Prompt for sign-in only if the user isn't already logged in from the session.
+                if (!sessionStorage.getItem('google_user')) {
+                     window.google.accounts.id.prompt();
+                }
+            } catch (e) {
+                 console.error("Google Sign-In initialization error:", e);
+                 setAuthError(e instanceof Error ? e.message : "An unknown error occurred during Google Sign-In setup.");
             }
         };
-
+        
+        // The GSI script is loaded with `async defer`, so we need to check if `window.google` is ready.
+        // If not, we wait for the script to load.
         if (window.google) {
             initializeGoogleSignIn();
         } else {
@@ -108,7 +122,6 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
                     setAuthError("Could not load Google Sign-In script. Please check your internet connection and try again.");
                     setIsConfigured(false);
                 };
-
                 script.addEventListener('load', handleScriptLoad);
                 script.addEventListener('error', handleScriptError);
                 return () => {
@@ -120,11 +133,10 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
                  setAuthError("Google Sign-In script not found.");
             }
         }
-
-    }, [handleCredentialResponse]);
+    }, [isConfigured, handleCredentialResponse]);
 
     const handleSignIn = () => {
-        if (isConfigured && window.google) {
+        if (isConfigured && window.google?.accounts?.id) {
             window.google.accounts.id.prompt();
         }
     };
