@@ -12,16 +12,15 @@ export const SUPPORT_INFO = {
 };
 
 // This function reads the Google Client ID from a meta tag in the HTML.
-// This is a robust way to handle client-side configuration without a build process.
-const getGoogleClientId = (): string | null => {
+// It is called from the useGoogleAuth hook to avoid a potential race condition
+// where this module could be evaluated before the DOM (and the meta tag) is ready.
+export const getGoogleClientId = (): string | null => {
   if (typeof document !== 'undefined') {
     const meta = document.querySelector('meta[name="google-client-id"]');
     return meta ? meta.getAttribute('content') : null;
   }
   return null;
 };
-
-export const GOOGLE_CLIENT_ID = getGoogleClientId();
 
 
 export const TAROT_CARDS_MAJOR_ARCANA: readonly TarotCard[] = [

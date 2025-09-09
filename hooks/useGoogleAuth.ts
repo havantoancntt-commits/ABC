@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { GOOGLE_CLIENT_ID } from '../lib/constants';
+import { getGoogleClientId } from '../lib/constants';
 import type { GoogleUser } from '../lib/types';
 import { logAdminEvent } from '../lib/logger';
 
@@ -58,6 +58,7 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
             }
         }
 
+        const GOOGLE_CLIENT_ID = getGoogleClientId();
         const isSignInConfigured = GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE_CLIENT_ID');
         setIsConfigured(isSignInConfigured);
 
@@ -92,6 +93,7 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
 
             } else {
                 console.error("Google Identity Services script not loaded.");
+                setAuthError("Google Sign-In script not loaded. Please check your connection.");
             }
         };
 
@@ -100,8 +102,22 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
         } else {
             const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
             if (script) {
-                script.addEventListener('load', initializeGoogleSignIn);
-                return () => script.removeEventListener('load', initializeGoogleSignIn);
+                const handleScriptLoad = () => initializeGoogleSignIn();
+                const handleScriptError = () => {
+                    console.error("Failed to load Google Identity Services script.");
+                    setAuthError("Could not load Google Sign-In script. Please check your internet connection and try again.");
+                    setIsConfigured(false);
+                };
+
+                script.addEventListener('load', handleScriptLoad);
+                script.addEventListener('error', handleScriptError);
+                return () => {
+                    script.removeEventListener('load', handleScriptLoad);
+                    script.removeEventListener('error', handleScriptError);
+                };
+            } else {
+                 console.error("Google Identity Services script tag not found in HTML.");
+                 setAuthError("Google Sign-In script not found.");
             }
         }
 
