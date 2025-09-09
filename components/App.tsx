@@ -39,6 +39,8 @@ const TalismanGeneratorForm = lazy(() => import('./TalismanGeneratorForm'));
 const TalismanResult = lazy(() => import('./TalismanResult'));
 const AuspiciousNamingForm = lazy(() => import('./AuspiciousNamingForm'));
 const AuspiciousNamingResult = lazy(() => import('./AuspiciousNamingResult'));
+const AdminLogin = lazy(() => import('./AdminLogin'));
+const AdminDashboard = lazy(() => import('./AdminDashboard'));
 
 
 const createChartId = (info: BirthInfo): string => {
@@ -74,6 +76,7 @@ const App: React.FC = () => {
   const [chartToDelete, setChartToDelete] = useState<SavedChart | null>(null);
   const [visitCount, setVisitCount] = useState<number>(0);
   const [postLoginAction, setPostLoginAction] = useState<(() => void) | null>(null);
+  const [adminActionToConfirm, setAdminActionToConfirm] = useState<{ action: string; title: string; message: string; } | null>(null);
   const { language, t } = useLocalization();
 
   useEffect(() => {
@@ -83,7 +86,7 @@ const App: React.FC = () => {
         const parsedCharts = JSON.parse(storedCharts);
         if (Array.isArray(parsedCharts) && parsedCharts.every(c => c.id && c.birthInfo && c.chartData)) {
             setSavedCharts(parsedCharts);
-            if (parsedCharts.length > 0) {
+            if (parsedCharts.length > 0 && sessionStorage.getItem('admin_auth') !== 'true') {
                setAppState(AppState.SAVED_CHARTS);
             }
         } else {
@@ -139,8 +142,20 @@ const App: React.FC = () => {
     setAuspiciousNamingData(null);
     setError(null);
   }, []);
+  
+  const trackFeatureUsage = (feature: string) => {
+    try {
+        const storedUsage = localStorage.getItem('featureUsage') || '{}';
+        const usage = JSON.parse(storedUsage);
+        usage[feature] = (usage[feature] || 0) + 1;
+        localStorage.setItem('featureUsage', JSON.stringify(usage));
+    } catch (e) {
+        console.error("Failed to track feature usage", e);
+    }
+  };
 
   const handleGenerateChart = useCallback(async (info: BirthInfo) => {
+    trackFeatureUsage('astrologyChart');
     setBirthInfo(info);
     setAppState(AppState.LOADING);
     setError(null);
@@ -167,7 +182,7 @@ const App: React.FC = () => {
   
   const handleAnalyzeFace = useCallback(async () => {
     if (!capturedImage) return;
-    
+    trackFeatureUsage('physiognomy');
     setAppState(AppState.FACE_SCAN_LOADING);
     setError(null);
     const base64Data = capturedImage.split(',')[1];
@@ -190,7 +205,7 @@ const App: React.FC = () => {
 
   const handleAnalyzePalm = useCallback(async () => {
     if (!capturedPalmImage) return;
-    
+    trackFeatureUsage('palmReading');
     setAppState(AppState.PALM_SCAN_LOADING);
     setError(null);
     const base64Data = capturedPalmImage.split(',')[1];
@@ -213,7 +228,7 @@ const App: React.FC = () => {
 
   const handleAnalyzeHandwriting = useCallback(async () => {
     if (!capturedHandwritingImage) return;
-
+    trackFeatureUsage('handwriting');
     setAppState(AppState.HANDWRITING_ANALYSIS_LOADING);
     setError(null);
     const base64Data = capturedHandwritingImage.split(',')[1];
@@ -235,6 +250,7 @@ const App: React.FC = () => {
   }, [capturedHandwritingImage, language, t]);
 
   const handleGenerateNumerology = useCallback(async (info: NumerologyInfo) => {
+    trackFeatureUsage('numerology');
     setNumerologyInfo(info);
     setAppState(AppState.NUMEROLOGY_LOADING);
     setError(null);
@@ -250,6 +266,7 @@ const App: React.FC = () => {
   }, [language, t]);
 
   const handleGenerateFlowAstrology = useCallback(async (info: FlowAstrologyInfo) => {
+    trackFeatureUsage('flowAstrology');
     setFlowAstrologyInfo(info);
     setAppState(AppState.FLOW_ASTROLOGY_LOADING);
     setError(null);
@@ -265,6 +282,7 @@ const App: React.FC = () => {
   }, [language, t]);
 
     const handleGenerateCareerAdvice = useCallback(async (info: CareerInfo) => {
+    trackFeatureUsage('careerAdvisor');
     setCareerInfo(info);
     setAppState(AppState.CAREER_ADVISOR_LOADING);
     setError(null);
@@ -280,6 +298,7 @@ const App: React.FC = () => {
   }, [language, t]);
 
   const handleGenerateTalisman = useCallback(async (info: TalismanInfo) => {
+    trackFeatureUsage('talisman');
     setTalismanInfo(info);
     setAppState(AppState.TALISMAN_LOADING);
     setError(null);
@@ -295,6 +314,7 @@ const App: React.FC = () => {
   }, [language, t]);
 
   const handleGenerateAuspiciousName = useCallback(async (info: AuspiciousNamingInfo) => {
+    trackFeatureUsage('auspiciousNaming');
     setAuspiciousNamingInfo(info);
     setAppState(AppState.AUSPICIOUS_NAMING_LOADING);
     setError(null);
@@ -350,6 +370,10 @@ const App: React.FC = () => {
   }, [savedCharts, handleGenerateChart]);
 
   const handleResetToHome = useCallback(() => {
+    if (sessionStorage.getItem('admin_auth') === 'true') {
+        setAppState(AppState.ADMIN_DASHBOARD);
+        return;
+    }
     if (savedCharts.length > 0) {
         setAppState(AppState.SAVED_CHARTS);
     } else {
@@ -370,45 +394,18 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleStartPhysiognomy = useCallback(() => setAppState(AppState.FACE_SCAN_CAPTURE), []);
-  const handleStartPalmReading = useCallback(() => setAppState(AppState.PALM_SCAN_CAPTURE), []);
-  const handleStartHandwritingAnalysis = useCallback(() => setAppState(AppState.HANDWRITING_ANALYSIS_CAPTURE), []);
-  const handleStartNumerology = useCallback(() => {
-      setError(null);
-      setAppState(AppState.NUMEROLOGY_FORM);
-  }, []);
-  const handleStartFlowAstrology = useCallback(() => {
-    setError(null);
-    setAppState(AppState.FLOW_ASTROLOGY_FORM);
-  }, []);
-  const handleStartZodiacFinder = useCallback(() => {
-      setError(null);
-      setAppState(AppState.ZODIAC_HOUR_FINDER);
-  }, []);
-  const handleStartAuspiciousDayFinder = useCallback(() => {
-    setError(null);
-    setAppState(AppState.AUSPICIOUS_DAY_FINDER);
-  }, []);
-  const handleStartIChing = useCallback(() => {
-      setError(null);
-      setAppState(AppState.ICHING_DIVINATION);
-  }, []);
-    const handleStartTarot = useCallback(() => {
-      setError(null);
-      setAppState(AppState.TAROT_READING);
-  }, []);
-  const handleStartShop = useCallback(() => {
-      setError(null);
-      setAppState(AppState.SHOP);
-  }, []);
-  const handleStartTalismanGenerator = useCallback(() => {
-    setError(null);
-    setAppState(AppState.TALISMAN_GENERATOR);
-  }, []);
-  const handleStartAuspiciousNaming = useCallback(() => {
-    setError(null);
-    setAppState(AppState.AUSPICIOUS_NAMING_FORM);
-  }, []);
+  const handleStartPhysiognomy = useCallback(() => { trackFeatureUsage('physiognomyScan'); setAppState(AppState.FACE_SCAN_CAPTURE) }, []);
+  const handleStartPalmReading = useCallback(() => { trackFeatureUsage('palmScan'); setAppState(AppState.PALM_SCAN_CAPTURE) }, []);
+  const handleStartHandwritingAnalysis = useCallback(() => { trackFeatureUsage('handwritingScan'); setAppState(AppState.HANDWRITING_ANALYSIS_CAPTURE) }, []);
+  const handleStartNumerology = useCallback(() => { trackFeatureUsage('numerologyForm'); setError(null); setAppState(AppState.NUMEROLOGY_FORM); }, []);
+  const handleStartFlowAstrology = useCallback(() => { trackFeatureUsage('flowAstrologyForm'); setError(null); setAppState(AppState.FLOW_ASTROLOGY_FORM); }, []);
+  const handleStartZodiacFinder = useCallback(() => { trackFeatureUsage('zodiacHourFinder'); setError(null); setAppState(AppState.ZODIAC_HOUR_FINDER); }, []);
+  const handleStartAuspiciousDayFinder = useCallback(() => { trackFeatureUsage('auspiciousDayFinder'); setError(null); setAppState(AppState.AUSPICIOUS_DAY_FINDER); }, []);
+  const handleStartIChing = useCallback(() => { trackFeatureUsage('iChing'); setError(null); setAppState(AppState.ICHING_DIVINATION); }, []);
+    const handleStartTarot = useCallback(() => { trackFeatureUsage('tarotReading'); setError(null); setAppState(AppState.TAROT_READING); }, []);
+  const handleStartShop = useCallback(() => { trackFeatureUsage('shop'); setError(null); setAppState(AppState.SHOP); }, []);
+  const handleStartTalismanGenerator = useCallback(() => { trackFeatureUsage('talismanForm'); setError(null); setAppState(AppState.TALISMAN_GENERATOR); }, []);
+  const handleStartAuspiciousNaming = useCallback(() => { trackFeatureUsage('auspiciousNamingForm'); setError(null); setAppState(AppState.AUSPICIOUS_NAMING_FORM); }, []);
 
   const handleStartCareerAdvisor = useCallback(() => {
     const action = () => {
@@ -497,24 +494,43 @@ const App: React.FC = () => {
     setPostLoginAction(null);
   }, [postLoginAction]);
 
+  const handleStartAdminLogin = useCallback(() => {
+    setAppState(AppState.ADMIN_LOGIN);
+  }, []);
+
+  const handleAdminLoginSuccess = useCallback(() => {
+      setAppState(AppState.ADMIN_DASHBOARD);
+  }, []);
+
+  const handleAdminClearCharts = useCallback(() => {
+      setAdminActionToConfirm({
+          action: 'clear_charts',
+          title: t('adminClearChartsConfirmTitle'),
+          message: t('adminClearChartsConfirmMessage'),
+      });
+  }, [t]);
+
+  const confirmAdminAction = useCallback(() => {
+      if (!adminActionToConfirm) return;
+      if (adminActionToConfirm.action === 'clear_charts') {
+          setSavedCharts([]);
+          localStorage.removeItem('astrologyCharts');
+      }
+      setAdminActionToConfirm(null);
+  }, [adminActionToConfirm]);
+
 
   const getTranslatedError = (errorKey: string | null): string => {
     if (!errorKey) return '';
-    // Check if the errorKey looks like one of our backend keys (e.g., "error_something_...")
     const isBackendKey = /^[a-z]+(_[a-z]+)*$/.test(errorKey);
     if (isBackendKey) {
-        // Convert snake_case_key to camelCaseKey for t() function
         const translationKey = errorKey.replace(/_([a-z])/g, (g) => g[1].toUpperCase()) as TranslationKey;
         const translated = t(translationKey);
-        
-        // If t() returns the key itself, it means translation was not found.
-        // In that case, we show a generic error message.
         if (translated === translationKey) {
             return t('errorUnknown');
         }
         return translated;
     }
-    // If it's not a key (e.g., a generic message from a library), display it as is.
     return errorKey;
   };
 
@@ -633,6 +649,10 @@ const App: React.FC = () => {
           return <Spinner message={t('spinnerAuspiciousNaming')} />;
       case AppState.AUSPICIOUS_NAMING_RESULT:
           return auspiciousNamingData && <AuspiciousNamingResult data={auspiciousNamingData} info={auspiciousNamingInfo!} onReset={handleStartAuspiciousNaming} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.ADMIN_LOGIN:
+          return <AdminLogin onSuccess={handleAdminLoginSuccess} onBack={handleResetToHome} />;
+      case AppState.ADMIN_DASHBOARD:
+          return <AdminDashboard visitCount={visitCount} onClearCharts={handleAdminClearCharts} onBack={handleResetToHome} />;
       default:
         return null;
     }
@@ -667,7 +687,12 @@ const App: React.FC = () => {
           <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="text-left">
               <h4 className="font-bold text-lg text-yellow-400 font-serif mb-2">{t('appName')}</h4>
-              <p className="text-sm text-gray-500">&copy; {new Date().getFullYear()} - {SUPPORT_INFO.channelName}. | {t('footerVisits')}: {visitCount > 0 ? visitCount.toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US') : '...'}</p>
+              <p className="text-sm text-gray-500">
+                <button onClick={handleStartAdminLogin} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 rounded">
+                    &copy; {new Date().getFullYear()} - {SUPPORT_INFO.channelName}
+                </button>
+                . | {t('footerVisits')}: {visitCount > 0 ? visitCount.toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US') : '...'}
+              </p>
               <p className="text-xs text-gray-600 mt-2">{t('footerDisclaimer')}</p>
               <p className="text-xs text-gray-600 mt-1">{t('footerAIDisclaimer')}</p>
             </div>
@@ -704,11 +729,14 @@ const App: React.FC = () => {
         <DonationModal isOpen={isDonationModalOpen} onClose={() => setIsDonationModalOpen(false)} />
         <ZaloContact />
         <ConfirmationModal
-          isOpen={!!chartToDelete}
-          onClose={() => setChartToDelete(null)}
-          onConfirm={confirmDeleteChart}
-          title={t('confirmDeleteTitle')}
-          message={t('confirmDeleteMessage', { name: chartToDelete?.birthInfo.name || '' })}
+          isOpen={!!chartToDelete || !!adminActionToConfirm}
+          onClose={() => {
+              setChartToDelete(null);
+              setAdminActionToConfirm(null);
+          }}
+          onConfirm={chartToDelete ? confirmDeleteChart : confirmAdminAction}
+          title={chartToDelete ? t('confirmDeleteTitle') : adminActionToConfirm?.title || ''}
+          message={chartToDelete ? t('confirmDeleteMessage', { name: chartToDelete?.birthInfo.name || '' }) : adminActionToConfirm?.message || ''}
         />
       </div>
     </div>

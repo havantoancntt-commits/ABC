@@ -57,11 +57,10 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const value = { language, setLanguage, t };
 
-  return (
-    <LanguageContext.Provider value={value}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  // FIX: Replaced JSX with React.createElement to be compatible with the .ts file extension.
+  // The original JSX syntax <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
+  // caused parsing errors because this is not a .tsx file.
+  return React.createElement(LanguageContext.Provider, { value: value }, children);
 };
 
 export const useLocalization = (): LanguageContextType => {

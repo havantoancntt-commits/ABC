@@ -437,6 +437,23 @@ export const translations = {
     fiveElementsAnalysis: 'Phân Tích Ngũ Hành',
     phoneticsAnalysis: 'Phân Tích Âm Luật',
     overall: 'Tổng Quan',
+    
+    // Admin
+    adminLoginTitle: 'Admin Panel Login',
+    adminDashboardTitle: 'Admin Dashboard',
+    adminStatsTitle: 'Usage Statistics',
+    adminTotalVisits: 'Total Visits',
+    adminFeatureUsage: 'Feature Usage',
+    adminActionsTitle: 'Actions',
+    adminClearCharts: 'Clear All Saved Horoscopes',
+    adminClearChartsConfirmTitle: 'Confirm Clear Horoscopes',
+    adminClearChartsConfirmMessage: 'Are you sure you want to delete ALL saved horoscopes on this browser? This action cannot be undone.',
+    adminUnlockFeatures: 'Unlock Features',
+    adminUnlockAstrology: 'Unlock Astrology',
+    adminUnlockCareer: 'Unlock Career Advisor',
+    adminUnlocked: 'Unlocked',
+    adminLock: 'Lock',
+    adminNotAvailable: 'N/A',
   },
   en: {
     // Common
@@ -875,5 +892,22 @@ export const translations = {
     fiveElementsAnalysis: 'Five Elements Analysis',
     phoneticsAnalysis: 'Phonetics Analysis',
     overall: 'Overall',
+    
+    // Admin
+    adminLoginTitle: 'Admin Panel Login',
+    adminDashboardTitle: 'Admin Dashboard',
+    adminStatsTitle: 'Usage Statistics',
+    adminTotalVisits: 'Total Visits',
+    adminFeatureUsage: 'Feature Usage',
+    adminActionsTitle: 'Actions',
+    adminClearCharts: 'Clear All Saved Horoscopes',
+    adminClearChartsConfirmTitle: 'Confirm Clear Horoscopes',
+    adminClearChartsConfirmMessage: 'Are you sure you want to delete ALL saved horoscopes on this browser? This action cannot be undone.',
+    adminUnlockFeatures: 'Unlock Features',
+    adminUnlockAstrology: 'Unlock Astrology',
+    adminUnlockCareer: 'Unlock Career Advisor',
+    adminUnlocked: 'Unlocked',
+    adminLock: 'Lock',
+    adminNotAvailable: 'N/A',
   }
 };
