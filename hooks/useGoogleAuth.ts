@@ -55,8 +55,8 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
             }
         }
 
-        if (!GOOGLE_CLIENT_ID) {
-            console.error("Google Client ID is not configured.");
+        if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE_CLIENT_ID')) {
+            console.error("Google Sign-In is not configured. Please provide a valid Client ID in the 'google-client-id' meta tag in index.html.");
             setAuthError("Google Sign-In is not configured.");
             return;
         }
@@ -75,6 +75,12 @@ export const useGoogleAuth = ({ onSuccess, onError }: UseGoogleAuthProps) => {
                         { theme: "outline", size: "large", type: "standard", shape: "pill" }
                     );
                 }
+
+                // If not logged in, show the One Tap prompt for a seamless login experience.
+                if (!sessionStorage.getItem('google_user')) {
+                     window.google.accounts.id.prompt();
+                }
+
             } else {
                 console.error("Google Identity Services script not loaded.");
             }

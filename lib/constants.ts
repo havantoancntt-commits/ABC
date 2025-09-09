@@ -11,8 +11,17 @@ export const SUPPORT_INFO = {
   paypalUrl: 'https://www.paypal.me/TOANVAIO',
 };
 
-// This will be populated by the build process from environment variables
-export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+// This function reads the Google Client ID from a meta tag in the HTML.
+// This is a robust way to handle client-side configuration without a build process.
+const getGoogleClientId = (): string | null => {
+  if (typeof document !== 'undefined') {
+    const meta = document.querySelector('meta[name="google-client-id"]');
+    return meta ? meta.getAttribute('content') : null;
+  }
+  return null;
+};
+
+export const GOOGLE_CLIENT_ID = getGoogleClientId();
 
 
 export const TAROT_CARDS_MAJOR_ARCANA: readonly TarotCard[] = [
