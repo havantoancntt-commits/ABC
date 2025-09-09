@@ -97,9 +97,6 @@ const FlowAstrologyResult: React.FC<Props> = ({ data, info, onReset, onOpenDonat
         day: '2-digit', month: '2-digit', year: 'numeric'
     }).format(new Date(info.year, info.month - 1, info.day));
     
-    // Safer way to display SVG using a data URI in an <img> tag
-    const talismanSvgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(data.talisman.svg)}`;
-    
     return (
         <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
@@ -196,7 +193,10 @@ const FlowAstrologyResult: React.FC<Props> = ({ data, info, onReset, onOpenDonat
                 <h3 className="text-3xl font-bold font-serif text-yellow-300 mb-4">{t('flowAstrologyTalismanTitle')}</h3>
                 <p className="text-gray-400 mb-6 max-w-xl mx-auto">{data.talisman.description}</p>
                 <div className="w-48 h-48 p-4 bg-gray-950 rounded-2xl border border-yellow-500/30 shadow-lg">
-                    <img src={talismanSvgDataUrl} alt={data.talisman.name} className="w-full h-full object-contain" />
+                    <div
+                        className="w-full h-full [&>svg]:w-full [&>svg]:h-full"
+                        dangerouslySetInnerHTML={{ __html: data.talisman.svg }}
+                    />
                 </div>
                 <Button onClick={handleSaveTalisman} disabled={isSaving} variant="primary" className="mt-8">
                     {isSaving ? (

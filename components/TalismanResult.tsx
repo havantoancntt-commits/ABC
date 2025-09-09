@@ -64,8 +64,6 @@ const TalismanResult: React.FC<Props> = ({ data, info, onReset, onOpenDonationMo
         }
     };
 
-    const talismanSvgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(data.svg)}`;
-
     return (
         <div className="max-w-4xl mx-auto">
             <div className="text-center mb-10">
@@ -79,7 +77,10 @@ const TalismanResult: React.FC<Props> = ({ data, info, onReset, onOpenDonationMo
                         <h3 className="text-2xl font-serif font-bold text-amber-300 mb-2">{data.name}</h3>
                         <p className="font-serif text-xl text-yellow-200/90 tracking-widest mb-4 drop-shadow-[0_1px_2px_rgba(250,204,21,0.5)]">"{data.cauChu}"</p>
                         <div className="w-full max-w-xs mx-auto aspect-[200/280] p-2 bg-black/30 rounded-lg shadow-inner">
-                            <img src={talismanSvgDataUrl} alt={data.name} className="w-full h-full object-contain" />
+                            <div
+                                className="w-full h-full [&>svg]:w-full [&>svg]:h-full"
+                                dangerouslySetInnerHTML={{ __html: data.svg }}
+                            />
                         </div>
                     </Card>
                     <Button onClick={handleSaveTalisman} disabled={isSaving} variant="primary" className="mt-6 w-full max-w-xs">
