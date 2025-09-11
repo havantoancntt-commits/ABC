@@ -1,3 +1,88 @@
+// --- App State Management ---
+export enum AppState {
+  HOME,
+  SAVED_ITEMS,
+  ASTROLOGY_PASSWORD,
+  ASTROLOGY_FORM,
+  LOADING,
+  RESULT,
+  FACE_SCAN_CAPTURE,
+  FACE_SCAN_LOADING,
+  FACE_SCAN_RESULT,
+  ZODIAC_HOUR_FINDER,
+  ICHING_DIVINATION,
+  SHOP,
+  NUMEROLOGY_FORM,
+  NUMEROLOGY_LOADING,
+  NUMEROLOGY_RESULT,
+  PALM_SCAN_CAPTURE,
+  PALM_SCAN_LOADING,
+  PALM_SCAN_RESULT,
+  TAROT_READING,
+  FLOW_ASTROLOGY_FORM,
+  FLOW_ASTROLOGY_LOADING,
+  FLOW_ASTROLOGY_RESULT,
+  AUSPICIOUS_DAY_FINDER,
+  HANDWRITING_ANALYSIS_CAPTURE,
+  HANDWRITING_ANALYSIS_LOADING,
+  HANDWRITING_ANALYSIS_RESULT,
+  CAREER_ADVISOR_FORM,
+  CAREER_ADVISOR_LOADING,
+  CAREER_ADVISOR_RESULT,
+  CAREER_ADVISOR_PASSWORD,
+  TALISMAN_GENERATOR,
+  TALISMAN_LOADING,
+  TALISMAN_RESULT,
+  AUSPICIOUS_NAMING_FORM,
+  AUSPICIOUS_NAMING_LOADING,
+  AUSPICIOUS_NAMING_RESULT,
+  BIO_ENERGY_FORM,
+  BIO_ENERGY_CAPTURE,
+  BIO_ENERGY_CARD_DRAW,
+  BIO_ENERGY_LOADING,
+  BIO_ENERGY_RESULT,
+  ADMIN_LOGIN,
+  ADMIN_DASHBOARD,
+}
+
+export interface AppStateStructure {
+  currentView: AppState;
+  data: {
+    birthInfo: BirthInfo | null;
+    chartData: AstrologyChartData | null;
+    physiognomyData: PhysiognomyData | null;
+    numerologyInfo: NumerologyInfo | null;
+    numerologyData: NumerologyData | null;
+    palmReadingData: PalmReadingData | null;
+    handwritingData: HandwritingData | null;
+    tarotReadingData: TarotReadingData | null;
+    flowAstrologyInfo: FlowAstrologyInfo | null;
+    flowAstrologyData: FlowAstrologyData | null;
+    careerInfo: CareerInfo | null;
+    careerAdviceData: CareerAdviceData | null;
+    talismanInfo: TalismanInfo | null;
+    talismanData: TalismanData | null;
+    auspiciousNamingInfo: AuspiciousNamingInfo | null;
+    auspiciousNamingData: AuspiciousNamingData | null;
+    bioEnergyInfo: BioEnergyInfo | null;
+    bioEnergyData: BioEnergyData | null;
+    capturedImage: string | null;
+    capturedPalmImage: string | null;
+    capturedHandwritingImage: string | null;
+    capturedEnergyColor: string | null;
+    drawnBioEnergyCard: BioEnergyCard | null;
+  };
+  error: string | null;
+  postLoginAction: (() => void) | null;
+}
+
+export type ConfirmationModalState = 
+    | { type: 'deleteItem'; item: SavedItem } 
+    | { type: 'adminAction'; action: 'clear_charts' | 'clear_history' };
+
+
+// --- Feature-Specific Types ---
+
 export interface BirthInfo {
   name: string;
   gender: 'male' | 'female';
@@ -8,7 +93,7 @@ export interface BirthInfo {
 }
 
 export interface Palace {
-  name:string;
+  name: string;
   stars: string[];
   interpretation: string;
 }
@@ -360,51 +445,4 @@ export interface SavedItem {
     id: string;
     timestamp: string; // ISO string for sorting
     payload: SavedItemPayload;
-}
-
-
-export enum AppState {
-  HOME,
-  SAVED_ITEMS,
-  ASTROLOGY_PASSWORD,
-  ASTROLOGY_FORM,
-  LOADING,
-  RESULT,
-  FACE_SCAN_CAPTURE,
-  FACE_SCAN_LOADING,
-  FACE_SCAN_RESULT,
-  ZODIAC_HOUR_FINDER,
-  ICHING_DIVINATION,
-  SHOP,
-  NUMEROLOGY_FORM,
-  NUMEROLOGY_LOADING,
-  NUMEROLOGY_RESULT,
-  PALM_SCAN_CAPTURE,
-  PALM_SCAN_LOADING,
-  PALM_SCAN_RESULT,
-  TAROT_READING,
-  FLOW_ASTROLOGY_FORM,
-  FLOW_ASTROLOGY_LOADING,
-  FLOW_ASTROLOGY_RESULT,
-  AUSPICIOUS_DAY_FINDER,
-  HANDWRITING_ANALYSIS_CAPTURE,
-  HANDWRITING_ANALYSIS_LOADING,
-  HANDWRITING_ANALYSIS_RESULT,
-  CAREER_ADVISOR_FORM,
-  CAREER_ADVISOR_LOADING,
-  CAREER_ADVISOR_RESULT,
-  CAREER_ADVISOR_PASSWORD,
-  TALISMAN_GENERATOR,
-  TALISMAN_LOADING,
-  TALISMAN_RESULT,
-  AUSPICIOUS_NAMING_FORM,
-  AUSPICIOUS_NAMING_LOADING,
-  AUSPICIOUS_NAMING_RESULT,
-  BIO_ENERGY_FORM,
-  BIO_ENERGY_CAPTURE,
-  BIO_ENERGY_CARD_DRAW,
-  BIO_ENERGY_LOADING,
-  BIO_ENERGY_RESULT,
-  ADMIN_LOGIN,
-  ADMIN_DASHBOARD,
 }

@@ -1,13 +1,12 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense, useMemo, useReducer } from 'react';
-import type { BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload, BioEnergyInfo, BioEnergyCard, BioEnergyData, GoogleUser } from '../lib/types';
-import { AppState } from '../lib/types';
+import type { AppStateStructure, ConfirmationModalState, BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload, BioEnergyInfo, BioEnergyCard, BioEnergyData, GoogleUser } from '../types';
+import { AppState } from '../types';
 import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName, generateBioEnergyReading } from '../lib/gemini';
 import Header from './Header';
 import DonationModal from './PaymentModal';
 import Spinner from './Spinner';
 import ZaloContact from './ZaloContact';
 import ConfirmationModal from './ConfirmationModal';
-import { SUPPORT_INFO } from '../lib/constants';
 import { useLocalization } from '../hooks/useLocalization';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
 import { logAdminEvent } from '../lib/logger';
@@ -48,37 +47,6 @@ const AdminLogin = lazy(() => import('./AdminLogin'));
 const AdminDashboard = lazy(() => import('./AdminDashboard'));
 
 // --- State Management with useReducer ---
-
-interface AppStateStructure {
-  currentView: AppState;
-  data: {
-    birthInfo: BirthInfo | null;
-    chartData: AstrologyChartData | null;
-    physiognomyData: PhysiognomyData | null;
-    numerologyInfo: NumerologyInfo | null;
-    numerologyData: NumerologyData | null;
-    palmReadingData: PalmReadingData | null;
-    handwritingData: HandwritingData | null;
-    tarotReadingData: TarotReadingData | null;
-    flowAstrologyInfo: FlowAstrologyInfo | null;
-    flowAstrologyData: FlowAstrologyData | null;
-    careerInfo: CareerInfo | null;
-    careerAdviceData: CareerAdviceData | null;
-    talismanInfo: TalismanInfo | null;
-    talismanData: TalismanData | null;
-    auspiciousNamingInfo: AuspiciousNamingInfo | null;
-    auspiciousNamingData: AuspiciousNamingData | null;
-    bioEnergyInfo: BioEnergyInfo | null;
-    bioEnergyData: BioEnergyData | null;
-    capturedImage: string | null;
-    capturedPalmImage: string | null;
-    capturedHandwritingImage: string | null;
-    capturedEnergyColor: string | null;
-    drawnBioEnergyCard: BioEnergyCard | null;
-  };
-  error: string | null;
-  postLoginAction: (() => void) | null;
-}
 
 const initialState: AppStateStructure = {
   currentView: AppState.HOME,
@@ -184,9 +152,8 @@ const App: React.FC = () => {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<SavedItem | null>(null);
+  const [modalState, setModalState] = useState<ConfirmationModalState | null>(null);
   const [visitCount, setVisitCount] = useState<number>(0);
-  const [adminActionToConfirm, setAdminActionToConfirm] = useState<{ action: string; title: string; message: string; } | null>(null);
   
   const { language, t } = useLocalization();
   const { user, authError } = useGoogleAuth();
@@ -594,16 +561,19 @@ const App: React.FC = () => {
     }
   }, [user]);
 
-  const handleDeleteItem = useCallback((item: SavedItem) => { setItemToDelete(item); }, []);
+  const handleDeleteItem = useCallback((item: SavedItem) => { 
+    setModalState({ type: 'deleteItem', item });
+  }, []);
 
   const confirmDeleteItem = useCallback(() => {
-    if (!itemToDelete) return;
+    if (modalState?.type !== 'deleteItem') return;
+    const itemToDelete = modalState.item;
     const updatedItems = savedItems.filter(item => item.id !== itemToDelete.id);
     setSavedItems(updatedItems);
     localStorage.setItem(getStorageKey(), JSON.stringify(updatedItems));
     logAdminEvent('Deleted Saved Item', user?.email || 'Guest', `ID: ${itemToDelete.id}`);
-    setItemToDelete(null);
-  }, [itemToDelete, savedItems, user, getStorageKey]);
+    setModalState(null);
+  }, [modalState, savedItems, user, getStorageKey]);
 
   const handleAstrologyPasswordSuccess = useCallback(() => {
     sessionStorage.setItem('astrology_unlocked', 'true');
@@ -621,17 +591,13 @@ const App: React.FC = () => {
     dispatch({ type: 'SET_POST_LOGIN_ACTION', payload: null });
   }, [state.postLoginAction, user]);
 
-  const handleAdminAction = useCallback((action: string) => {
-      const confirmConfig = {
-          clear_charts: { title: t('adminClearChartsConfirmTitle'), message: t('adminClearChartsConfirmMessage') },
-          clear_history: { title: t('adminClearHistoryConfirmTitle'), message: t('adminClearHistoryConfirmMessage') },
-      }[action];
-      if(confirmConfig) setAdminActionToConfirm({ action, ...confirmConfig });
-  }, [t]);
+  const handleAdminAction = useCallback((action: 'clear_charts' | 'clear_history') => {
+      setModalState({ type: 'adminAction', action });
+  }, []);
 
   const confirmAdminAction = useCallback(() => {
-      if (!adminActionToConfirm) return;
-      const { action } = adminActionToConfirm;
+      if (modalState?.type !== 'adminAction') return;
+      const { action } = modalState;
       logAdminEvent(`Admin Action: ${action}`, 'Admin');
       if (action === 'clear_charts') {
           Object.keys(localStorage).forEach(key => {
@@ -641,19 +607,49 @@ const App: React.FC = () => {
       } else if (action === 'clear_history') {
           localStorage.removeItem('adminHistoryLog');
       }
-      setAdminActionToConfirm(null);
-  }, [adminActionToConfirm]);
+      setModalState(null);
+  }, [modalState]);
 
-  const getDeleteItemMessage = (item: SavedItem): string => {
-      const { payload } = item;
+  const getConfirmationModalProps = () => {
+    if (!modalState) return { isOpen: false, onConfirm: () => {}, onClose: () => {}, title: '', message: '' };
+
+    if (modalState.type === 'deleteItem') {
+      const { payload } = modalState.item;
+      let name: string | undefined;
       switch (payload.type) {
-        case 'astrology': return t('confirmDeleteMessageWithName', { name: payload.birthInfo.name });
-        case 'numerology': return t('confirmDeleteMessageWithName', { name: payload.info.fullName });
-        case 'flowAstrology': return t('confirmDeleteMessageWithName', { name: payload.info.name });
-        case 'bioEnergy': return t('confirmDeleteMessageWithName', { name: payload.info.name });
-        default: return t('confirmDeleteMessage');
+        case 'astrology': name = payload.birthInfo.name; break;
+        case 'numerology': name = payload.info.fullName; break;
+        case 'flowAstrology': name = payload.info.name; break;
+        case 'bioEnergy': name = payload.info.name; break;
       }
+      return {
+        isOpen: true,
+        onConfirm: confirmDeleteItem,
+        onClose: () => setModalState(null),
+        title: t('confirmDeleteTitle'),
+        message: name ? t('confirmDeleteMessageWithName', { name }) : t('confirmDeleteMessage'),
+      };
+    }
+
+    if (modalState.type === 'adminAction') {
+      const configMap = {
+          clear_charts: { titleKey: 'adminClearChartsConfirmTitle' as const, messageKey: 'adminClearChartsConfirmMessage' as const },
+          clear_history: { titleKey: 'adminClearHistoryConfirmTitle' as const, messageKey: 'adminClearHistoryConfirmMessage' as const },
+      };
+      const config = configMap[modalState.action];
+      return {
+        isOpen: true,
+        onConfirm: confirmAdminAction,
+        onClose: () => setModalState(null),
+        title: t(config.titleKey),
+        message: t(config.messageKey),
+      };
+    }
+
+    return { isOpen: false, onConfirm: () => {}, onClose: () => {}, title: '', message: '' };
   };
+  
+  const confirmationProps = getConfirmationModalProps();
 
   const getTranslatedError = (errorKey: string | null): string => {
     if (!errorKey) return '';
@@ -721,78 +717,4 @@ const App: React.FC = () => {
           {state.error && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-3 rounded-lg relative mb-6 flex items-start justify-between animate-fade-in" role="alert" aria-live="assertive">
               <div className="flex items-start">
-                <svg className="w-6 h-6 mr-3 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                <div>
-                  <strong className="font-bold text-red-300">{t('errorTitle')}</strong>
-                  <span className="block mt-1">{getTranslatedError(state.error)}</span>
-                </div>
-              </div>
-              <button onClick={() => dispatch({ type: 'SET_ERROR', payload: null })} className="p-1 rounded-full hover:bg-red-500/20 transition-colors ml-4" aria-label={t('errorCloseAriaLabel')}>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-              </button>
-            </div>
-          )}
-          <Suspense fallback={<Spinner message={t('processing')} />}>
-            <div className="animate-slide-in-up">
-              {viewMap[state.currentView] ?? null}
-            </div>
-          </Suspense>
-        </main>
-        <footer className="text-center py-8 text-gray-400 bg-black bg-opacity-50 mt-8 border-t border-gray-700/50">
-          <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div className="text-left">
-              <h4 className="font-bold text-lg text-yellow-400 font-serif mb-2">{t('appName')}</h4>
-              <p className="text-sm text-gray-500">
-                <button onClick={() => dispatch({ type: 'SET_VIEW', payload: AppState.ADMIN_LOGIN })} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 rounded">
-                    &copy; {new Date().getFullYear()} - {SUPPORT_INFO.channelName}
-                </button>
-                . | {t('footerVisits')}: {visitCount > 0 ? visitCount.toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US') : '...'}
-              </p>
-              <p className="text-xs text-gray-600 mt-2">{t('footerDisclaimer')}</p>
-              <p className="text-xs text-gray-600 mt-1">{t('footerAIDisclaimer')}</p>
-            </div>
-            <div className="bg-gray-900/40 p-4 rounded-lg border border-gray-700/50 text-left md:text-right">
-              <h4 className="font-bold text-lg text-yellow-400 font-serif mb-2">{t('footerSupportTitle')}</h4>
-              <p className="text-sm">{t('footerSupportDesc')}</p>
-              <div className="flex items-center flex-wrap gap-3 mt-3 md:justify-end">
-                <a 
-                  href={`https://zalo.me/${SUPPORT_INFO.zaloPhone}`}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M16.999 15.826h-2.922v-2.145h2.922v-1.125l-4.047-2.344v-2.313h4.047v-2.148h-5.242v7.929h-1.758v-7.929h-5.25v2.148h4.055v2.313l-4.055 2.344v1.125h2.922v2.145h-2.922v1.125l4.055 2.344v2.313h-4.055v2.148h5.25v-7.93h1.758v7.93h5.242v-2.148h-4.047v-2.313l4.047-2.344v-1.125z" />
-                  </svg>
-                  <span>Zalo: {SUPPORT_INFO.zaloPhone}</span>
-                </a>
-                <a 
-                  href="https://www.tiktok.com/@jar_of_luck?_t=ZS-8zV1Gs8cJVp&_r=1"
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-black text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors border border-gray-600"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-2.43.05-4.85-.38-6.95-1.91-1.83-1.36-3.17-3.46-3.86-5.71-.02-.08-.03-.16-.05-.24-.1-.38-.21-.77-.28-1.16 1.47.01 2.93-.01 4.4.02.05.78.22 1.54.51 2.25.51 1.25 1.72 2.18 3.11 2.31.65.06 1.3.04 1.94-.04 1.13-.14 2.18-.58 3.01-1.35.69-.62 1.15-1.45 1.39-2.35.09-.34.15-.7.15-1.06.01-2.93-.01-5.85.02-8.77-.02-1.89-1.14-3.58-2.6-4.57-.75-.5-1.6-.78-2.5-.88-1.18-.13-2.38-.04-3.56.09-1.08.11-2.12.39-3.12.82V4.54c1.46-.35 2.94-.52 4.41-.56z"></path>
-                  </svg>
-                  <span>{t('followTikTok')}</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </footer>
-        <DonationModal isOpen={isDonationModalOpen} onClose={() => setIsDonationModalOpen(false)} />
-        <ZaloContact />
-        <ConfirmationModal
-          isOpen={!!itemToDelete || !!adminActionToConfirm}
-          onClose={() => { setItemToDelete(null); setAdminActionToConfirm(null); }}
-          onConfirm={itemToDelete ? confirmDeleteItem : confirmAdminAction}
-          title={itemToDelete ? t('confirmDeleteTitle') : adminActionToConfirm?.title || ''}
-          message={itemToDelete ? getDeleteItemMessage(itemToDelete) : adminActionToConfirm?.message || ''}
-        />
-      </div>
-    </div>
-  );
-};
-
-export default App;
+                <svg className="w-6 h-6 mr-3 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.244

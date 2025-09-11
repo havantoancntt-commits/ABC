@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { BirthInfo } from '../lib/types';
+import type { BirthInfo } from '../types';
 import Button from './Button';
 import Card from './Card';
 import DonationInfo from './DonationInfo';
