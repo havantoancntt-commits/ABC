@@ -182,6 +182,8 @@ export const translations = {
     physiognomyResultSection3: 'Phân Tích Ngũ Quan',
     physiognomyResultSection4: 'Lời Khuyên & Định Hướng',
     physiognomyResultTryAgain: 'Thử Lại Với Ảnh Khác',
+    palmReadingTryAgain: 'Thử Lại Với Ảnh Khác',
+    handwritingTryAgain: 'Thử Lại Với Mẫu Chữ Khác',
 
     // Palm Reading
     palmReadingTitle: 'Xem Chỉ Tay (Thuật Tướng Tay)',
@@ -693,6 +695,8 @@ export const translations = {
     physiognomyResultSection3: 'Analysis of the Five Organs',
     physiognomyResultSection4: 'Advice & Guidance',
     physiognomyResultTryAgain: 'Try With Another Photo',
+    palmReadingTryAgain: 'Try With Another Photo',
+    handwritingTryAgain: 'Try With Another Sample',
 
     // Palm Reading
     palmReadingTitle: 'Palmistry (Chiromancy)',

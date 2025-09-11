@@ -394,9 +394,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         switch (operation) {
             case 'generateAstrologyChart': {
                 const info: BirthInfo = params.info;
-                // FIX: Moved systemInstruction into the config object.
+                // FIX: Corrected generateContent call structure.
                 const response = await ai.models.generateContent({
-                    ...commonConfig,
+                    model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: astrologySchema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: `Hãy lập lá số tử vi cho: Tên: ${info.name}, Giới tính: ${info.gender}, Năm sinh: ${info.year}, Tháng: ${info.month}, Ngày: ${info.day}, Giờ: ${info.hour === -1 ? 'Không rõ' : info.hour}.`,
                 });
@@ -408,9 +408,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                  const { base64Image } = params;
                  const schema = operation === 'analyzePhysiognomy' ? physiognomySchema : (operation === 'analyzePalm' ? palmReadingSchema : handwritingSchema);
                  const promptText = operation === 'analyzePhysiognomy' ? 'Phân tích khuôn mặt trong ảnh này.' : (operation === 'analyzePalm' ? 'Phân tích lòng bàn tay trong ảnh này.' : 'Phân tích chữ viết tay trong ảnh này.');
-                 // FIX: Moved systemInstruction into the config object.
+                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
-                    ...commonConfig,
+                    model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: schema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: { parts: [{ inlineData: { mimeType: 'image/jpeg', data: base64Image } }, { text: promptText }] },
                 });
@@ -418,9 +418,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'getIChingInterpretation': {
                 const { castResult, question } = params as { castResult: CastResult, question: string };
-                // FIX: Moved systemInstruction into the config object.
+                // FIX: Corrected generateContent call structure.
                 const response = await ai.models.generateContent({
-                     ...commonConfig,
+                    model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: iChingSchema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: `Câu hỏi: "${question || 'Không có câu hỏi cụ thể'}". Quẻ chính: ${castResult.primaryHexagram.name.vi}. Các hào động: ${castResult.changingLinesIndices.map(i => i + 1).join(', ') || 'Không có'}. Quẻ biến: ${castResult.secondaryHexagram?.name.vi || 'Không có'}.`,
                 });
@@ -428,9 +428,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'generateNumerologyChart': {
                 const info: NumerologyInfo = params.info;
-                 // FIX: Moved systemInstruction into the config object.
+                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
-                    ...commonConfig,
+                    model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: numerologySchema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: `Luận giải thần số học cho: Họ tên: ${info.fullName}, Ngày sinh: ${info.day}/${info.month}/${info.year}.`,
                 });
@@ -438,9 +438,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'getTarotReading': {
                 const { cards, question } = params as { cards: TarotCard[], question: string };
-                // FIX: Moved systemInstruction into the config object.
+                // FIX: Corrected generateContent call structure.
                 const response = await ai.models.generateContent({
-                    ...commonConfig,
+                    model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: tarotReadingSchema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: `Câu hỏi: "${question || 'Tổng quan'}". Lá bài Quá Khứ: ${cards[0].name.vi}. Lá bài Hiện Tại: ${cards[1].name.vi}. Lá bài Tương Lai: ${cards[2].name.vi}.`,
                 });
@@ -448,9 +448,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'generateFlowAstrology': {
                 const info: FlowAstrologyInfo = params.info;
-                 // FIX: Moved systemInstruction into the config object.
+                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
-                    ...commonConfig,
+                    model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: flowAstrologySchema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: `Tạo bản đồ dòng chảy năng lượng và bùa hộ mệnh cho: Tên: ${info.name}, Ngày sinh: ${info.day}/${info.month}/${info.year}, Số trực giác: ${info.intuitiveNumber}.`,
                 });
@@ -458,9 +458,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'getAuspiciousDayAnalysis': {
                  const info: AuspiciousDayInfo = params.info;
-                 // FIX: Moved systemInstruction into the config object.
+                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
-                    ...commonConfig,
+                    model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: auspiciousDaySchema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: `Phân tích ngày ${info.day}/${info.month}/${info.year} để thực hiện sự việc: "${info.event}".`,
                 });
@@ -468,9 +468,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'getCareerAdvice': {
                 const info: CareerInfo = params.info;
-                 // FIX: Moved systemInstruction into the config object.
+                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
-                    ...commonConfig,
+                    model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: careerAdviceSchema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: `Tư vấn hướng nghiệp cho người có thông tin lá số: ${JSON.stringify(info)}. Sở thích: ${info.interests.join(', ')}. Kỹ năng: ${info.skills.join(', ')}. Nguyện vọng: ${info.aspiration || 'Không có'}.`,
                 });
@@ -478,9 +478,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'generateTalisman': {
                 const info: TalismanInfo = params.info;
-                 // FIX: Moved systemInstruction into the config object.
+                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
-                    ...commonConfig,
+                    model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: talismanSchema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: `Tạo một lá bùa may mắn cho: Tên: ${info.name}, Ngày sinh: ${info.day}/${info.month}/${info.year}.`,
                 });
@@ -488,9 +488,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'generateAuspiciousName': {
                 const info: AuspiciousNamingInfo = params.info;
-                 // FIX: Moved systemInstruction into the config object.
+                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
-                    ...commonConfig,
+                    model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: auspiciousNamingSchema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: `Gợi ý tên cho bé: ${JSON.stringify(info)}.`,
                 });
@@ -498,9 +498,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'generateBioEnergyReading': {
                 const { info, color, card } = params as { info: BioEnergyInfo, color: string, card: BioEnergyCard };
-                 // FIX: Moved systemInstruction into the config object.
+                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
-                    ...commonConfig,
+                    model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: bioEnergySchema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: `Luận giải năng lượng cho người có thông tin: ${JSON.stringify(info)}. Màu năng lượng đo được: ${color}. Lá bài rút được: ${card.name.vi}.`,
                 });

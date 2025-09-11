@@ -22,32 +22,36 @@ interface Props {
     onStartBioEnergy: () => void;
 }
 
+type ButtonVariantForFeature = 'primary' | 'special' | 'secondary' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology' | 'career' | 'talisman' | 'naming' | 'bioenergy';
+
+const buttonVariantGradients: Record<ButtonVariantForFeature, string> = {
+    primary: 'from-yellow-600 to-purple-600',
+    special: 'from-purple-600 to-indigo-600',
+    iching: 'from-emerald-600 to-teal-600',
+    shop: 'from-amber-600 to-yellow-600',
+    numerology: 'from-cyan-600 to-blue-600',
+    palm: 'from-rose-600 to-pink-600',
+    tarot: 'from-purple-600 to-pink-600',
+    flow: 'from-sky-500 to-fuchsia-600',
+    dayselection: 'from-teal-600 to-cyan-600',
+    graphology: 'from-slate-600 to-indigo-600',
+    career: 'from-blue-600 to-teal-600',
+    talisman: 'from-red-600 to-amber-600',
+    naming: 'from-sky-600 to-green-600',
+    bioenergy: 'from-cyan-500 to-green-500',
+    secondary: 'from-cyan-600 to-blue-600', // Fallback
+};
+
 const FeatureCard: React.FC<{
     title: string;
     description: string;
     buttonText: string;
     icon: React.ReactNode;
     onClick: () => void;
-    buttonVariant: 'primary' | 'special' | 'secondary' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology' | 'career' | 'talisman' | 'naming' | 'bioenergy';
+    buttonVariant: ButtonVariantForFeature;
 }> = ({ title, description, buttonText, icon, onClick, buttonVariant }) => (
     <div className="group relative h-full">
-        <div className={`absolute -inset-0.5 bg-gradient-to-r ${
-            buttonVariant === 'primary' ? 'from-yellow-600 to-purple-600' : 
-            buttonVariant === 'special' ? 'from-purple-600 to-indigo-600' :
-            buttonVariant === 'iching' ? 'from-emerald-600 to-teal-600' :
-            buttonVariant === 'shop' ? 'from-amber-600 to-yellow-600' :
-            buttonVariant === 'numerology' ? 'from-cyan-600 to-blue-600' :
-            buttonVariant === 'palm' ? 'from-rose-600 to-pink-600' :
-            buttonVariant === 'tarot' ? 'from-purple-600 to-pink-600' :
-            buttonVariant === 'flow' ? 'from-sky-500 to-fuchsia-600' :
-            buttonVariant === 'dayselection' ? 'from-teal-600 to-cyan-600' :
-            buttonVariant === 'graphology' ? 'from-slate-600 to-indigo-600' :
-            buttonVariant === 'career' ? 'from-blue-600 to-teal-600' :
-            buttonVariant === 'talisman' ? 'from-red-600 to-amber-600' :
-            buttonVariant === 'naming' ? 'from-sky-600 to-green-600' :
-            buttonVariant === 'bioenergy' ? 'from-cyan-500 to-green-500' :
-            'from-cyan-600 to-blue-600'
-        } rounded-2xl blur opacity-0 group-hover:opacity-75 transition duration-500 group-hover:duration-300`}></div>
+        <div className={`absolute -inset-0.5 bg-gradient-to-r ${buttonVariantGradients[buttonVariant]} rounded-2xl blur opacity-0 group-hover:opacity-75 transition duration-500 group-hover:duration-300`}></div>
         <Card className="relative flex flex-col text-center items-center h-full transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-black/50">
             <div className="p-4 bg-gray-900/50 rounded-full mb-4 border border-gray-700 transition-all duration-300 group-hover:scale-110 group-hover:bg-gray-900 group-hover:border-yellow-400/50">
                 {icon}

@@ -96,8 +96,11 @@ export const GoogleAuthProvider: React.FC<{ children: ReactNode }> = ({ children
 
     const value = { user, handleSignOut, isConfigured, isInitialized, authError };
 
-    // FIX: Replaced JSX with React.createElement to be compatible with a .ts file extension.
-    return React.createElement(GoogleAuthContext.Provider, { value: value }, children);
+    return (
+        <GoogleAuthContext.Provider value={value}>
+            {children}
+        </GoogleAuthContext.Provider>
+    );
 };
 
 export const useGoogleAuth = (): GoogleAuthContextType => {
