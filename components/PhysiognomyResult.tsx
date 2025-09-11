@@ -7,8 +7,8 @@ import { useLocalization } from '../hooks/useLocalization';
 interface Props {
   analysisData: PhysiognomyData;
   imageData: string;
-  onReset: () => void;
-  onBackToHome: () => void;
+  onTryAgain: () => void;
+  onGoHome: () => void;
   onOpenDonationModal: () => void;
 }
 
@@ -30,7 +30,7 @@ const AnalysisSection: React.FC<{ title: string; content: string; icon: React.Re
     </Card>
 ));
 
-const PhysiognomyResult: React.FC<Props> = ({ analysisData, imageData, onReset, onBackToHome, onOpenDonationModal }) => {
+const PhysiognomyResult: React.FC<Props> = ({ analysisData, imageData, onTryAgain, onGoHome, onOpenDonationModal }) => {
   const { t } = useLocalization();
   const analysisSections = [
       { title: t('physiognomyResultSection1'), content: analysisData.tongQuan, icon: ICONS.tongQuan },
@@ -66,8 +66,21 @@ const PhysiognomyResult: React.FC<Props> = ({ analysisData, imageData, onReset, 
           <p>{t('resultSupportMessage')}</p>
       </div>
       <div className="mt-6 flex flex-wrap justify-center gap-4">
-        <Button onClick={onBackToHome} variant="secondary">
+        <Button onClick={onGoHome} variant="secondary">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
           {t('home')}
         </Button>
-        
+        <Button onClick={onTryAgain} variant="secondary">
+           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5m9-1-9 9-9-9" /></svg>
+          {t('physiognomyResultTryAgain')}
+        </Button>
+        <Button onClick={onOpenDonationModal} variant="primary">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+            {t('donate')}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default PhysiognomyResult;

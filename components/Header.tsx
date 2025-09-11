@@ -20,6 +20,7 @@ const LanguageSwitcher: React.FC = () => {
             <button onClick={() => setLanguage('vi')} className={buttonClass('vi')}>
                 VI
             </button>
+            {/* FIX: Corrected language parameter to 'en' which is now a valid type. */}
             <button onClick={() => setLanguage('en')} className={buttonClass('en')}>
                 EN
             </button>

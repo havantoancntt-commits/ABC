@@ -1,8 +1,9 @@
-import React, { useState, useCallback, useEffect, lazy, Suspense, useMemo, useReducer } from 'react';
+import React, { useState, useCallback, useEffect, lazy, Suspense, useReducer } from 'react';
 import type { AppStateStructure, ConfirmationModalState, BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload, BioEnergyInfo, BioEnergyCard, BioEnergyData, GoogleUser } from '../types';
 import { AppState } from '../types';
 import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName, generateBioEnergyReading } from '../lib/gemini';
 import Header from './Header';
+import Footer from './Footer';
 import DonationModal from './PaymentModal';
 import Spinner from './Spinner';
 import ZaloContact from './ZaloContact';
@@ -94,60 +95,6 @@ function appReducer(state: AppStateStructure, action: AppAction): AppStateStruct
   }
 }
 
-// --- Background Theme Mapping ---
-const backgroundClassMap: Partial<Record<AppState, string>> = {
-    [AppState.HOME]: 'bg-theme-home',
-    [AppState.SAVED_ITEMS]: 'bg-theme-home',
-    [AppState.ZODIAC_HOUR_FINDER]: 'bg-theme-home',
-    [AppState.ADMIN_LOGIN]: 'bg-theme-home',
-    [AppState.ADMIN_DASHBOARD]: 'bg-theme-home',
-
-    [AppState.ASTROLOGY_FORM]: 'bg-theme-astrology',
-    [AppState.ASTROLOGY_PASSWORD]: 'bg-theme-astrology',
-    [AppState.LOADING]: 'bg-theme-astrology',
-    [AppState.RESULT]: 'bg-theme-astrology',
-    [AppState.NUMEROLOGY_FORM]: 'bg-theme-astrology',
-    [AppState.NUMEROLOGY_LOADING]: 'bg-theme-astrology',
-    [AppState.NUMEROLOGY_RESULT]: 'bg-theme-astrology',
-    [AppState.FLOW_ASTROLOGY_FORM]: 'bg-theme-astrology',
-    [AppState.FLOW_ASTROLOGY_LOADING]: 'bg-theme-astrology',
-    [AppState.FLOW_ASTROLOGY_RESULT]: 'bg-theme-astrology',
-    [AppState.CAREER_ADVISOR_FORM]: 'bg-theme-astrology',
-    [AppState.CAREER_ADVISOR_PASSWORD]: 'bg-theme-astrology',
-    [AppState.CAREER_ADVISOR_LOADING]: 'bg-theme-astrology',
-    [AppState.CAREER_ADVISOR_RESULT]: 'bg-theme-astrology',
-    [AppState.AUSPICIOUS_NAMING_FORM]: 'bg-theme-astrology',
-    [AppState.AUSPICIOUS_NAMING_LOADING]: 'bg-theme-astrology',
-    [AppState.AUSPICIOUS_NAMING_RESULT]: 'bg-theme-astrology',
-    [AppState.AUSPICIOUS_DAY_FINDER]: 'bg-theme-astrology',
-
-    [AppState.FACE_SCAN_CAPTURE]: 'bg-theme-personal',
-    [AppState.FACE_SCAN_LOADING]: 'bg-theme-personal',
-    [AppState.FACE_SCAN_RESULT]: 'bg-theme-personal',
-    [AppState.PALM_SCAN_CAPTURE]: 'bg-theme-personal',
-    [AppState.PALM_SCAN_LOADING]: 'bg-theme-personal',
-    [AppState.PALM_SCAN_RESULT]: 'bg-theme-personal',
-    [AppState.HANDWRITING_ANALYSIS_CAPTURE]: 'bg-theme-personal',
-    [AppState.HANDWRITING_ANALYSIS_LOADING]: 'bg-theme-personal',
-    [AppState.HANDWRITING_ANALYSIS_RESULT]: 'bg-theme-personal',
-    
-    [AppState.ICHING_DIVINATION]: 'bg-theme-divination',
-    [AppState.TAROT_READING]: 'bg-theme-divination',
-    [AppState.BIO_ENERGY_FORM]: 'bg-theme-divination',
-    [AppState.BIO_ENERGY_CAPTURE]: 'bg-theme-divination',
-    [AppState.BIO_ENERGY_CARD_DRAW]: 'bg-theme-divination',
-    [AppState.BIO_ENERGY_LOADING]: 'bg-theme-divination',
-    [AppState.BIO_ENERGY_RESULT]: 'bg-theme-divination',
-
-    [AppState.SHOP]: 'bg-theme-shop',
-    [AppState.TALISMAN_GENERATOR]: 'bg-theme-shop',
-    [AppState.TALISMAN_LOADING]: 'bg-theme-shop',
-    [AppState.TALISMAN_RESULT]: 'bg-theme-shop',
-};
-
-const getBackgroundClassForState = (state: AppState): string => backgroundClassMap[state] || 'bg-theme-home';
-
-
 const App: React.FC = () => {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
@@ -157,8 +104,6 @@ const App: React.FC = () => {
   
   const { language, t } = useLocalization();
   const { user, authError } = useGoogleAuth();
-
-  const backgroundClass = useMemo(() => getBackgroundClassForState(state.currentView), [state.currentView]);
 
   const getStorageKey = useCallback((userId?: string) => {
     const id = userId || user?.sub;
@@ -467,79 +412,64 @@ const App: React.FC = () => {
   const handleRetakePalmCapture = useCallback(() => { dispatch({ type: 'SET_DATA', payload: { capturedPalmImage: null } }); dispatch({type: 'SET_ERROR', payload: null}); }, []);
   const handleCaptureHandwritingImage = useCallback((imageDataUrl: string) => { dispatch({ type: 'SET_DATA', payload: { capturedHandwritingImage: imageDataUrl } }); }, []);
   const handleRetakeHandwritingCapture = useCallback(() => { dispatch({ type: 'SET_DATA', payload: { capturedHandwritingImage: null } }); dispatch({type: 'SET_ERROR', payload: null}); }, []);
+  const handleCaptureEnergy = useCallback((color: string) => { dispatch({ type: 'SET_DATA', payload: { capturedEnergyColor: color } }); dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_CARD_DRAW }); }, []);
   
-  const handleFormSubmit = useCallback((info: BirthInfo) => {
-    const chartId = `astrology-${info.name.replace(/\s/g, '_')}-${info.gender}-${info.year}-${info.month}-${info.day}-${info.hour}`;
-    const existingItem = savedItems.find(item => item.id === chartId);
+  const handleStartBioEnergy = useCallback((info: BioEnergyInfo) => { dispatch({ type: 'SET_DATA', payload: { bioEnergyInfo: info } }); dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_CAPTURE }); }, []);
 
-    if (existingItem && existingItem.payload.type === 'astrology') {
-      dispatch({ type: 'SET_DATA', payload: { birthInfo: existingItem.payload.birthInfo, chartData: existingItem.payload.chartData } });
-      dispatch({ type: 'SET_VIEW', payload: AppState.RESULT });
-    } else {
-      handleGenerateChart(info);
-    }
-  }, [savedItems, handleGenerateChart]);
-
-  const handleResetToHome = useCallback(() => dispatch({ type: 'RESET_VIEW', payload: { user, savedItems } }), [user, savedItems]);
+  const handleDeleteItem = (itemToDelete: SavedItem) => {
+      const name = itemToDelete.payload.type === 'astrology' ? itemToDelete.payload.birthInfo.name : t(`itemType${itemToDelete.payload.type.charAt(0).toUpperCase() + itemToDelete.payload.type.slice(1)}` as TranslationKey);
+      // FIX: Added missing title and message properties to match the updated ConfirmationModalState type.
+      setModalState({ type: 'deleteItem', item: itemToDelete, title: t('confirmDeleteTitle'), message: t('confirmDeleteMessageWithName', { name }) });
+  };
   
-  const handleStartAstrology = useCallback(() => {
-    const action = () => { dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.ASTROLOGY_FORM }); };
-    if (sessionStorage.getItem('astrology_unlocked') === 'true' || !user) action();
-    else {
-        dispatch({ type: 'SET_POST_LOGIN_ACTION', payload: () => action });
-        dispatch({ type: 'SET_VIEW', payload: AppState.ASTROLOGY_PASSWORD });
-    }
-  }, [user]);
+  const handleAdminAction = (action: 'clear_charts' | 'clear_history') => {
+      // FIX: Corrected translation keys to match those defined in locales/translations.ts.
+      const title = action === 'clear_charts' ? t('adminClearChartsConfirmTitle') : t('adminClearHistoryConfirmTitle');
+      // FIX: Corrected translation keys to match those defined in locales/translations.ts.
+      const message = action === 'clear_charts' ? t('adminClearChartsConfirmMessage') : t('adminClearHistoryConfirmMessage');
+      // FIX: Added missing title and message properties to match the updated ConfirmationModalState type.
+      setModalState({ type: 'adminAction', action, title, message });
+  };
 
-  const handleStartPhysiognomy = useCallback(() => { trackFeatureUsage('physiognomyScan'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_CAPTURE }); }, []);
-  const handleStartPalmReading = useCallback(() => { trackFeatureUsage('palmScan'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_CAPTURE }); }, []);
-  const handleStartHandwritingAnalysis = useCallback(() => { trackFeatureUsage('handwritingScan'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_CAPTURE }); }, []);
-  const handleStartNumerology = useCallback(() => { trackFeatureUsage('numerologyForm'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_FORM }); }, []);
-  const handleStartFlowAstrology = useCallback(() => { trackFeatureUsage('flowAstrologyForm'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_FORM }); }, []);
-  const handleStartZodiacFinder = useCallback(() => { trackFeatureUsage('zodiacHourFinder'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.ZODIAC_HOUR_FINDER }); }, []);
-  const handleStartAuspiciousDayFinder = useCallback(() => { trackFeatureUsage('auspiciousDayFinder'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_DAY_FINDER }); }, []);
-  const handleStartIChing = useCallback(() => { trackFeatureUsage('iChing'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.ICHING_DIVINATION }); }, []);
-  const handleStartTarot = useCallback(() => { trackFeatureUsage('tarotReading'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.TAROT_READING }); }, []);
-  const handleStartShop = useCallback(() => { trackFeatureUsage('shop'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.SHOP }); }, []);
-  const handleStartTalismanGenerator = useCallback(() => { trackFeatureUsage('talismanForm'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_GENERATOR }); }, []);
-  const handleStartAuspiciousNaming = useCallback(() => { trackFeatureUsage('auspiciousNamingForm'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_FORM }); }, []);
-  const handleStartBioEnergy = useCallback(() => { trackFeatureUsage('bioEnergyForm'); dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_FORM }); }, []);
-
-  const handleStartCareerAdvisor = useCallback(() => {
-    const action = () => { dispatch({ type: 'RESET_FEATURE_DATA' }); dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_FORM }); };
-    if (sessionStorage.getItem('career_unlocked') === 'true' || !user) action();
-    else {
-        dispatch({ type: 'SET_POST_LOGIN_ACTION', payload: () => action });
-        dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_PASSWORD });
-    }
-  }, [user]);
-
-  const handleViewItem = useCallback((item: SavedItem) => {
-    dispatch({ type: 'RESET_FEATURE_DATA' });
-    const { payload } = item;
-    switch(payload.type) {
-        case 'astrology': {
-             const viewAction = () => {
-                dispatch({ type: 'SET_DATA', payload: { birthInfo: payload.birthInfo, chartData: payload.chartData } });
-                dispatch({ type: 'SET_VIEW', payload: AppState.RESULT });
-            };
-            if (sessionStorage.getItem('astrology_unlocked') === 'true' || !user) viewAction();
-            else {
-                dispatch({ type: 'SET_POST_LOGIN_ACTION', payload: () => viewAction });
-                dispatch({ type: 'SET_VIEW', payload: AppState.ASTROLOGY_PASSWORD });
-            }
-            break;
+  const confirmModalAction = () => {
+    if (!modalState) return;
+    if (modalState.type === 'deleteItem') {
+      const itemToDelete = modalState.item;
+      logAdminEvent('Delete Item', user?.email || 'Guest', `ID: ${itemToDelete.id}, Type: ${itemToDelete.payload.type}`);
+      const newItems = savedItems.filter(item => item.id !== itemToDelete.id);
+      setSavedItems(newItems);
+      localStorage.setItem(getStorageKey(), JSON.stringify(newItems));
+    } else if (modalState.type === 'adminAction') {
+        if (modalState.action === 'clear_charts') {
+            logAdminEvent('Admin Action', user?.email || 'Admin', 'Cleared all charts');
+            // This is a bit brute-force, but effective for cleaning up all users.
+            Object.keys(localStorage).filter(key => key.startsWith('savedItems_')).forEach(key => localStorage.removeItem(key));
+            setSavedItems([]);
+        } else if (modalState.action === 'clear_history') {
+             logAdminEvent('Admin Action', user?.email || 'Admin', 'Cleared activity log');
+            localStorage.removeItem('adminHistoryLog');
         }
+    }
+    setModalState(null);
+  };
+  
+  const handleViewItem = useCallback((item: SavedItem) => {
+    const { payload } = item;
+    switch (payload.type) {
+        case 'astrology':
+            dispatch({ type: 'SET_DATA', payload: { birthInfo: payload.birthInfo, chartData: payload.chartData } });
+            dispatch({ type: 'SET_VIEW', payload: AppState.RESULT });
+            break;
         case 'physiognomy':
-            dispatch({ type: 'SET_DATA', payload: { physiognomyData: payload.analysisData, capturedImage: payload.imageData } });
+            dispatch({ type: 'SET_DATA', payload: { capturedImage: payload.imageData, physiognomyData: payload.analysisData } });
             dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_RESULT });
             break;
         case 'palmReading':
-            dispatch({ type: 'SET_DATA', payload: { palmReadingData: payload.analysisData, capturedPalmImage: payload.imageData } });
+            dispatch({ type: 'SET_DATA', payload: { capturedPalmImage: payload.imageData, palmReadingData: payload.analysisData } });
             dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_RESULT });
             break;
         case 'handwriting':
-            dispatch({ type: 'SET_DATA', payload: { handwritingData: payload.analysisData, capturedHandwritingImage: payload.imageData } });
+            dispatch({ type: 'SET_DATA', payload: { capturedHandwritingImage: payload.imageData, handwritingData: payload.analysisData } });
             dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_RESULT });
             break;
         case 'numerology':
@@ -550,7 +480,7 @@ const App: React.FC = () => {
             dispatch({ type: 'SET_DATA', payload: { flowAstrologyInfo: payload.info, flowAstrologyData: payload.data } });
             dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_RESULT });
             break;
-        case 'auspiciousNaming':
+         case 'auspiciousNaming':
             dispatch({ type: 'SET_DATA', payload: { auspiciousNamingInfo: payload.info, auspiciousNamingData: payload.data } });
             dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_RESULT });
             break;
@@ -558,163 +488,168 @@ const App: React.FC = () => {
             dispatch({ type: 'SET_DATA', payload: { bioEnergyInfo: payload.info, capturedEnergyColor: payload.color, drawnBioEnergyCard: payload.card, bioEnergyData: payload.data } });
             dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_RESULT });
             break;
+        default: break;
     }
-  }, [user]);
-
-  const handleDeleteItem = useCallback((item: SavedItem) => { 
-    setModalState({ type: 'deleteItem', item });
   }, []);
 
-  const confirmDeleteItem = useCallback(() => {
-    if (modalState?.type !== 'deleteItem') return;
-    const itemToDelete = modalState.item;
-    const updatedItems = savedItems.filter(item => item.id !== itemToDelete.id);
-    setSavedItems(updatedItems);
-    localStorage.setItem(getStorageKey(), JSON.stringify(updatedItems));
-    logAdminEvent('Deleted Saved Item', user?.email || 'Guest', `ID: ${itemToDelete.id}`);
-    setModalState(null);
-  }, [modalState, savedItems, user, getStorageKey]);
-
-  const handleAstrologyPasswordSuccess = useCallback(() => {
-    sessionStorage.setItem('astrology_unlocked', 'true');
-    logAdminEvent('Unlocked Astrology', user?.email || 'Guest');
-    if (state.postLoginAction) state.postLoginAction();
-    else dispatch({ type: 'SET_VIEW', payload: AppState.ASTROLOGY_FORM });
-    dispatch({ type: 'SET_POST_LOGIN_ACTION', payload: null });
-  }, [state.postLoginAction, user]);
+  const { birthInfo, chartData } = state.data;
   
-  const handleCareerPasswordSuccess = useCallback(() => {
-    sessionStorage.setItem('career_unlocked', 'true');
-    logAdminEvent('Unlocked Career Advisor', user?.email || 'Guest');
-    if (state.postLoginAction) state.postLoginAction();
-    else dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_FORM });
-    dispatch({ type: 'SET_POST_LOGIN_ACTION', payload: null });
-  }, [state.postLoginAction, user]);
+  const handleGoHome = useCallback(() => { dispatch({ type: 'RESET_VIEW', payload: { user, savedItems } }); }, [user, savedItems]);
+  const createResetHandler = (view: AppState) => useCallback(() => {
+      dispatch({ type: 'RESET_FEATURE_DATA' });
+      dispatch({ type: 'SET_VIEW', payload: view });
+  }, [view]);
 
-  const handleAdminAction = useCallback((action: 'clear_charts' | 'clear_history') => {
-      setModalState({ type: 'adminAction', action });
-  }, []);
+  const handleResetAstrology = createResetHandler(AppState.ASTROLOGY_FORM);
+  const handleResetPhysiognomy = createResetHandler(AppState.FACE_SCAN_CAPTURE);
+  const handleResetPalmReading = createResetHandler(AppState.PALM_SCAN_CAPTURE);
+  const handleResetHandwriting = createResetHandler(AppState.HANDWRITING_ANALYSIS_CAPTURE);
+  const handleResetNumerology = createResetHandler(AppState.NUMEROLOGY_FORM);
+  const handleResetFlowAstrology = createResetHandler(AppState.FLOW_ASTROLOGY_FORM);
+  const handleResetCareerAdvisor = createResetHandler(AppState.CAREER_ADVISOR_FORM);
+  const handleResetTalisman = createResetHandler(AppState.TALISMAN_GENERATOR);
+  const handleResetAuspiciousNaming = createResetHandler(AppState.AUSPICIOUS_NAMING_FORM);
+  const handleResetBioEnergy = createResetHandler(AppState.BIO_ENERGY_FORM);
+  const handleResetTarot = useCallback(() => { dispatch({ type: 'SET_VIEW', payload: AppState.TAROT_READING }); }, []);
 
-  const confirmAdminAction = useCallback(() => {
-      if (modalState?.type !== 'adminAction') return;
-      const { action } = modalState;
-      logAdminEvent(`Admin Action: ${action}`, 'Admin');
-      if (action === 'clear_charts') {
-          Object.keys(localStorage).forEach(key => {
-              if (key.startsWith('savedItems_') || key.startsWith('astrologyCharts_')) localStorage.removeItem(key);
-          });
-          setSavedItems([]);
-      } else if (action === 'clear_history') {
-          localStorage.removeItem('adminHistoryLog');
-      }
-      setModalState(null);
-  }, [modalState]);
-
-  const getConfirmationModalProps = () => {
-    if (!modalState) return { isOpen: false, onConfirm: () => {}, onClose: () => {}, title: '', message: '' };
-
-    if (modalState.type === 'deleteItem') {
-      const { payload } = modalState.item;
-      let name: string | undefined;
-      switch (payload.type) {
-        case 'astrology': name = payload.birthInfo.name; break;
-        case 'numerology': name = payload.info.fullName; break;
-        case 'flowAstrology': name = payload.info.name; break;
-        case 'bioEnergy': name = payload.info.name; break;
-      }
-      return {
-        isOpen: true,
-        onConfirm: confirmDeleteItem,
-        onClose: () => setModalState(null),
-        title: t('confirmDeleteTitle'),
-        message: name ? t('confirmDeleteMessageWithName', { name }) : t('confirmDeleteMessage'),
-      };
+  const renderContent = () => {
+    switch (state.currentView) {
+      case AppState.HOME:
+        return <Home 
+            onStartAstrology={() => dispatch({ type: 'SET_VIEW', payload: AppState.ASTROLOGY_FORM })} 
+            onStartPhysiognomy={() => dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_CAPTURE })}
+            onStartZodiacFinder={() => dispatch({ type: 'SET_VIEW', payload: AppState.ZODIAC_HOUR_FINDER })}
+            onStartIChing={() => dispatch({ type: 'SET_VIEW', payload: AppState.ICHING_DIVINATION })}
+            onStartShop={() => dispatch({ type: 'SET_VIEW', payload: AppState.SHOP })}
+            onStartNumerology={() => dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_FORM })}
+            onStartPalmReading={() => dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_CAPTURE })}
+            onStartTarot={() => dispatch({ type: 'SET_VIEW', payload: AppState.TAROT_READING })}
+            onStartFlowAstrology={() => dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_FORM })}
+            onStartAuspiciousDayFinder={() => dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_DAY_FINDER })}
+            onStartHandwritingAnalysis={() => dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_CAPTURE })}
+            onStartCareerAdvisor={() => {
+                const isUnlocked = sessionStorage.getItem('career_unlocked') === 'true';
+                dispatch({ type: 'SET_VIEW', payload: isUnlocked ? AppState.CAREER_ADVISOR_FORM : AppState.CAREER_ADVISOR_PASSWORD });
+            }}
+            onStartTalismanGenerator={() => dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_GENERATOR })}
+            onStartAuspiciousNaming={() => dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_FORM })}
+            onStartBioEnergy={() => dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_FORM })}
+        />;
+      case AppState.SAVED_ITEMS:
+        return <SavedItems items={savedItems} onView={handleViewItem} onDelete={handleDeleteItem} onCreateNew={handleGoHome} />;
+      case AppState.ASTROLOGY_PASSWORD:
+        return <PasswordPrompt feature="astrology" onSuccess={() => dispatch({ type: 'SET_VIEW', payload: AppState.ASTROLOGY_FORM })} onBack={handleGoHome} />;
+      case AppState.ASTROLOGY_FORM:
+        return <BirthInfoForm onSubmit={handleGenerateChart} initialName={user?.name} />;
+      case AppState.LOADING:
+        return <Spinner message={t('spinnerAstrology')} />;
+      case AppState.RESULT:
+        return birthInfo && chartData && <AstrologyChart data={chartData} birthInfo={birthInfo} onTryAgain={handleResetAstrology} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.FACE_SCAN_CAPTURE:
+        return <FaceScan onCapture={handleCaptureImage} onAnalyze={handleAnalyzeFace} capturedImage={state.data.capturedImage} onRetake={handleRetakeCapture} onBack={handleGoHome} />;
+      case AppState.FACE_SCAN_LOADING:
+        return <Spinner message={t('spinnerPhysiognomy')} />;
+      case AppState.FACE_SCAN_RESULT:
+        return state.data.physiognomyData && state.data.capturedImage && <PhysiognomyResult analysisData={state.data.physiognomyData} imageData={state.data.capturedImage} onTryAgain={handleResetPhysiognomy} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.PALM_SCAN_CAPTURE:
+        return <PalmScan onCapture={handleCapturePalmImage} onAnalyze={handleAnalyzePalm} capturedImage={state.data.capturedPalmImage} onRetake={handleRetakePalmCapture} onBack={handleGoHome} />;
+      case AppState.PALM_SCAN_LOADING:
+        return <Spinner message={t('spinnerPalmReading')} />;
+      case AppState.PALM_SCAN_RESULT:
+        return state.data.palmReadingData && state.data.capturedPalmImage && <PalmReadingResult analysisData={state.data.palmReadingData} imageData={state.data.capturedPalmImage} onTryAgain={handleResetPalmReading} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+       case AppState.HANDWRITING_ANALYSIS_CAPTURE:
+        return <HandwritingScan onCapture={handleCaptureHandwritingImage} onAnalyze={handleAnalyzeHandwriting} capturedImage={state.data.capturedHandwritingImage} onRetake={handleRetakeHandwritingCapture} onBack={handleGoHome} />;
+      case AppState.HANDWRITING_ANALYSIS_LOADING:
+        return <Spinner message={t('spinnerHandwriting')} />;
+      case AppState.HANDWRITING_ANALYSIS_RESULT:
+        return state.data.handwritingData && state.data.capturedHandwritingImage && <HandwritingResult analysisData={state.data.handwritingData} imageData={state.data.capturedHandwritingImage} onTryAgain={handleResetHandwriting} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.ZODIAC_HOUR_FINDER:
+        return <ZodiacHourFinder />;
+      case AppState.ICHING_DIVINATION:
+        return <IChingDivination onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.SHOP:
+        return <Shop onBack={handleGoHome} />;
+      case AppState.NUMEROLOGY_FORM:
+        return <NumerologyForm onSubmit={handleGenerateNumerology} initialName={user?.name} />;
+      case AppState.NUMEROLOGY_LOADING:
+        return <Spinner message={t('spinnerNumerology')} />;
+      case AppState.NUMEROLOGY_RESULT:
+        return state.data.numerologyData && state.data.numerologyInfo && <NumerologyChart data={state.data.numerologyData} info={state.data.numerologyInfo} onTryAgain={handleResetNumerology} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.TAROT_READING:
+        return <TarotReading onOpenDonationModal={() => setIsDonationModalOpen(true)} onBack={handleGoHome} />;
+       case AppState.FLOW_ASTROLOGY_FORM:
+        return <FlowAstrologyForm onSubmit={handleGenerateFlowAstrology} initialName={user?.name} />;
+      case AppState.FLOW_ASTROLOGY_LOADING:
+        return <Spinner message={t('spinnerFlowAstrology')} />;
+      case AppState.FLOW_ASTROLOGY_RESULT:
+        return state.data.flowAstrologyData && state.data.flowAstrologyInfo && <FlowAstrologyResult data={state.data.flowAstrologyData} info={state.data.flowAstrologyInfo} onTryAgain={handleResetFlowAstrology} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.AUSPICIOUS_DAY_FINDER:
+        return <AuspiciousDayFinder />;
+      case AppState.CAREER_ADVISOR_PASSWORD:
+        return <PasswordPrompt feature="career" onSuccess={() => dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_FORM })} onBack={handleGoHome} />;
+      case AppState.CAREER_ADVISOR_FORM:
+        return <CareerAdvisorForm onSubmit={handleGenerateCareerAdvice} initialName={user?.name} />;
+      case AppState.CAREER_ADVISOR_LOADING:
+        return <Spinner message={t('spinnerCareerAdvisor')} />;
+      case AppState.CAREER_ADVISOR_RESULT:
+        return state.data.careerAdviceData && state.data.careerInfo && <CareerAdvisorResult data={state.data.careerAdviceData} info={state.data.careerInfo} onTryAgain={handleResetCareerAdvisor} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.TALISMAN_GENERATOR:
+        return <TalismanGeneratorForm onSubmit={handleGenerateTalisman} initialName={user?.name} />;
+      case AppState.TALISMAN_LOADING:
+        return <Spinner message={t('spinnerTalisman')} />;
+      case AppState.TALISMAN_RESULT:
+        return state.data.talismanData && state.data.talismanInfo && <TalismanResult data={state.data.talismanData} info={state.data.talismanInfo} onTryAgain={handleResetTalisman} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.AUSPICIOUS_NAMING_FORM:
+        return <AuspiciousNamingForm onSubmit={handleGenerateAuspiciousName} />;
+      case AppState.AUSPICIOUS_NAMING_LOADING:
+        {/* FIX: Corrected invalid translation key. */}
+        return <Spinner message={t('spinnerAuspiciousNaming')} />;
+      case AppState.AUSPICIOUS_NAMING_RESULT:
+        return state.data.auspiciousNamingData && state.data.auspiciousNamingInfo && <AuspiciousNamingResult data={state.data.auspiciousNamingData} info={state.data.auspiciousNamingInfo} onTryAgain={handleResetAuspiciousNaming} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.BIO_ENERGY_FORM:
+        return <BioEnergyForm onSubmit={handleStartBioEnergy} initialName={user?.name} />;
+      case AppState.BIO_ENERGY_CAPTURE:
+        return <BioEnergyCapture onCapture={handleCaptureEnergy} onBack={() => dispatch({type: 'SET_VIEW', payload: AppState.BIO_ENERGY_FORM})} />;
+      case AppState.BIO_ENERGY_CARD_DRAW:
+        return state.data.capturedEnergyColor && <BioEnergyCardDraw onDraw={handleGenerateBioEnergy} onBack={() => dispatch({type: 'SET_VIEW', payload: AppState.BIO_ENERGY_CAPTURE})} energyColor={state.data.capturedEnergyColor} />;
+      case AppState.BIO_ENERGY_LOADING:
+        {/* FIX: Corrected invalid translation key. */}
+        return <Spinner message={t('spinnerBioEnergy')} />;
+      case AppState.BIO_ENERGY_RESULT:
+        return state.data.bioEnergyData && state.data.bioEnergyInfo && state.data.capturedEnergyColor && state.data.drawnBioEnergyCard && <BioEnergyResult data={state.data.bioEnergyData} info={state.data.bioEnergyInfo} color={state.data.capturedEnergyColor} card={state.data.drawnBioEnergyCard} onTryAgain={handleResetBioEnergy} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.ADMIN_LOGIN:
+          return <AdminLogin onSuccess={() => dispatch({type: 'SET_VIEW', payload: AppState.ADMIN_DASHBOARD})} onBack={handleGoHome} />;
+      case AppState.ADMIN_DASHBOARD:
+          return <AdminDashboard visitCount={visitCount} onAdminAction={handleAdminAction} onBack={handleGoHome} />;
+      default:
+        return <Home onStartAstrology={() => {}} onStartPhysiognomy={() => {}} onStartZodiacFinder={() => {}} onStartIChing={() => {}} onStartShop={() => {}} onStartNumerology={() => {}} onStartPalmReading={() => {}} onStartTarot={() => {}} onStartFlowAstrology={() => {}} onStartAuspiciousDayFinder={() => {}} onStartHandwritingAnalysis={() => {}} onStartCareerAdvisor={() => {}} onStartTalismanGenerator={() => {}} onStartAuspiciousNaming={() => {}} onStartBioEnergy={() => {}} />;
     }
-
-    if (modalState.type === 'adminAction') {
-      const configMap = {
-          clear_charts: { titleKey: 'adminClearChartsConfirmTitle' as const, messageKey: 'adminClearChartsConfirmMessage' as const },
-          clear_history: { titleKey: 'adminClearHistoryConfirmTitle' as const, messageKey: 'adminClearHistoryConfirmMessage' as const },
-      };
-      const config = configMap[modalState.action];
-      return {
-        isOpen: true,
-        onConfirm: confirmAdminAction,
-        onClose: () => setModalState(null),
-        title: t(config.titleKey),
-        message: t(config.messageKey),
-      };
-    }
-
-    return { isOpen: false, onConfirm: () => {}, onClose: () => {}, title: '', message: '' };
-  };
-  
-  const confirmationProps = getConfirmationModalProps();
-
-  const getTranslatedError = (errorKey: string | null): string => {
-    if (!errorKey) return '';
-    const isBackendKey = /^[a-z]+(_[a-z]+)*$/.test(errorKey);
-    if (isBackendKey) {
-        const translationKey = errorKey.replace(/_([a-z])/g, (g) => g[1].toUpperCase()) as TranslationKey;
-        const translated = t(translationKey);
-        return translated === translationKey ? t('errorUnknown') : translated;
-    }
-    return errorKey;
-  };
-
-  // --- View Mapping ---
-  const viewMap: Partial<Record<AppState, React.ReactNode>> = {
-      [AppState.HOME]: <Home onStartAstrology={handleStartAstrology} onStartPhysiognomy={handleStartPhysiognomy} onStartZodiacFinder={handleStartZodiacFinder} onStartIChing={handleStartIChing} onStartShop={handleStartShop} onStartNumerology={handleStartNumerology} onStartPalmReading={handleStartPalmReading} onStartTarot={handleStartTarot} onStartFlowAstrology={handleStartFlowAstrology} onStartAuspiciousDayFinder={handleStartAuspiciousDayFinder} onStartHandwritingAnalysis={handleStartHandwritingAnalysis} onStartCareerAdvisor={handleStartCareerAdvisor} onStartTalismanGenerator={handleStartTalismanGenerator} onStartAuspiciousNaming={handleStartAuspiciousNaming} onStartBioEnergy={handleStartBioEnergy} />,
-      [AppState.SAVED_ITEMS]: <SavedItems items={savedItems} onView={handleViewItem} onDelete={handleDeleteItem} onCreateNew={handleStartAstrology} />,
-      [AppState.ASTROLOGY_PASSWORD]: <PasswordPrompt onSuccess={handleAstrologyPasswordSuccess} onBack={handleResetToHome} feature="astrology"/>,
-      [AppState.ASTROLOGY_FORM]: <BirthInfoForm onSubmit={handleFormSubmit} initialName={user?.name} />,
-      [AppState.LOADING]: <Spinner message={t('spinnerAstrology')} />,
-      [AppState.RESULT]: state.data.chartData && <AstrologyChart data={state.data.chartData} birthInfo={state.data.birthInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />,
-      [AppState.FACE_SCAN_CAPTURE]: <FaceScan onAnalyze={handleAnalyzeFace} onBack={handleResetToHome} onCapture={handleCaptureImage} onRetake={handleRetakeCapture} capturedImage={state.data.capturedImage} />,
-      [AppState.FACE_SCAN_LOADING]: <Spinner message={t('spinnerPhysiognomy')} />,
-      [AppState.FACE_SCAN_RESULT]: state.data.physiognomyData && state.data.capturedImage && <PhysiognomyResult analysisData={state.data.physiognomyData} imageData={state.data.capturedImage} onReset={() => dispatch({type: 'SET_VIEW', payload: AppState.FACE_SCAN_CAPTURE})} onBackToHome={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />,
-      [AppState.PALM_SCAN_CAPTURE]: <PalmScan onAnalyze={handleAnalyzePalm} onBack={handleResetToHome} onCapture={handleCapturePalmImage} onRetake={handleRetakePalmCapture} capturedImage={state.data.capturedPalmImage} />,
-      [AppState.PALM_SCAN_LOADING]: <Spinner message={t('spinnerPalmReading')} />,
-      [AppState.PALM_SCAN_RESULT]: state.data.palmReadingData && state.data.capturedPalmImage && <PalmReadingResult analysisData={state.data.palmReadingData} imageData={state.data.capturedPalmImage} onReset={() => dispatch({type: 'SET_VIEW', payload: AppState.PALM_SCAN_CAPTURE})} onBackToHome={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />,
-      [AppState.HANDWRITING_ANALYSIS_CAPTURE]: <HandwritingScan onAnalyze={handleAnalyzeHandwriting} onBack={handleResetToHome} onCapture={handleCaptureHandwritingImage} onRetake={handleRetakeHandwritingCapture} capturedImage={state.data.capturedHandwritingImage} />,
-      [AppState.HANDWRITING_ANALYSIS_LOADING]: <Spinner message={t('spinnerHandwriting')} />,
-      [AppState.HANDWRITING_ANALYSIS_RESULT]: state.data.handwritingData && state.data.capturedHandwritingImage && <HandwritingResult analysisData={state.data.handwritingData} imageData={state.data.capturedHandwritingImage} onReset={() => dispatch({type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_CAPTURE})} onBackToHome={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />,
-      [AppState.ZODIAC_HOUR_FINDER]: <ZodiacHourFinder />,
-      [AppState.AUSPICIOUS_DAY_FINDER]: <AuspiciousDayFinder />,
-      [AppState.ICHING_DIVINATION]: <IChingDivination onOpenDonationModal={() => setIsDonationModalOpen(true)} />,
-      [AppState.TAROT_READING]: <TarotReading onOpenDonationModal={() => setIsDonationModalOpen(true)} onBack={handleResetToHome} />,
-      [AppState.SHOP]: <Shop onBack={handleResetToHome} />,
-      [AppState.NUMEROLOGY_FORM]: <NumerologyForm onSubmit={handleGenerateNumerology} initialName={user?.name} />,
-      [AppState.NUMEROLOGY_LOADING]: <Spinner message={t('spinnerNumerology')} />,
-      [AppState.NUMEROLOGY_RESULT]: state.data.numerologyData && <NumerologyChart data={state.data.numerologyData} info={state.data.numerologyInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />,
-      [AppState.FLOW_ASTROLOGY_FORM]: <FlowAstrologyForm onSubmit={handleGenerateFlowAstrology} initialName={user?.name} />,
-      [AppState.FLOW_ASTROLOGY_LOADING]: <Spinner message={t('spinnerFlowAstrology')} />,
-      [AppState.FLOW_ASTROLOGY_RESULT]: state.data.flowAstrologyData && <FlowAstrologyResult data={state.data.flowAstrologyData} info={state.data.flowAstrologyInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />,
-      [AppState.CAREER_ADVISOR_PASSWORD]: <PasswordPrompt onSuccess={handleCareerPasswordSuccess} onBack={handleResetToHome} feature="career" />,
-      [AppState.CAREER_ADVISOR_FORM]: <CareerAdvisorForm onSubmit={handleGenerateCareerAdvice} initialName={user?.name} />,
-      [AppState.CAREER_ADVISOR_LOADING]: <Spinner message={t('spinnerCareerAdvisor')} />,
-      [AppState.CAREER_ADVISOR_RESULT]: state.data.careerAdviceData && <CareerAdvisorResult data={state.data.careerAdviceData} info={state.data.careerInfo!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />,
-      [AppState.TALISMAN_GENERATOR]: <TalismanGeneratorForm onSubmit={handleGenerateTalisman} initialName={user?.name} />,
-      [AppState.TALISMAN_LOADING]: <Spinner message={t('spinnerTalisman')} />,
-      [AppState.TALISMAN_RESULT]: state.data.talismanData && <TalismanResult data={state.data.talismanData} info={state.data.talismanInfo!} onReset={() => dispatch({type: 'SET_VIEW', payload: AppState.TALISMAN_GENERATOR})} onOpenDonationModal={() => setIsDonationModalOpen(true)} />,
-      [AppState.AUSPICIOUS_NAMING_FORM]: <AuspiciousNamingForm onSubmit={handleGenerateAuspiciousName} />,
-      [AppState.AUSPICIOUS_NAMING_LOADING]: <Spinner message={t('spinnerAuspiciousNaming')} />,
-      [AppState.AUSPICIOUS_NAMING_RESULT]: state.data.auspiciousNamingData && <AuspiciousNamingResult data={state.data.auspiciousNamingData} info={state.data.auspiciousNamingInfo!} onReset={handleStartAuspiciousNaming} onOpenDonationModal={() => setIsDonationModalOpen(true)} />,
-      [AppState.BIO_ENERGY_FORM]: <BioEnergyForm onSubmit={(info) => { dispatch({ type: 'SET_DATA', payload: { bioEnergyInfo: info }}); dispatch({type: 'SET_VIEW', payload: AppState.BIO_ENERGY_CAPTURE}); }} initialName={user?.name} />,
-      [AppState.BIO_ENERGY_CAPTURE]: <BioEnergyCapture onCapture={(color) => { dispatch({ type: 'SET_DATA', payload: { capturedEnergyColor: color } }); dispatch({type: 'SET_VIEW', payload: AppState.BIO_ENERGY_CARD_DRAW}); }} onBack={() => dispatch({type: 'SET_VIEW', payload: AppState.BIO_ENERGY_FORM})} />,
-      [AppState.BIO_ENERGY_CARD_DRAW]: <BioEnergyCardDraw onDraw={handleGenerateBioEnergy} onBack={() => dispatch({type: 'SET_VIEW', payload: AppState.BIO_ENERGY_CAPTURE})} energyColor={state.data.capturedEnergyColor!} />,
-      [AppState.BIO_ENERGY_LOADING]: <Spinner message={t('spinnerBioEnergy')} />,
-      [AppState.BIO_ENERGY_RESULT]: state.data.bioEnergyData && <BioEnergyResult data={state.data.bioEnergyData} info={state.data.bioEnergyInfo!} color={state.data.capturedEnergyColor!} card={state.data.drawnBioEnergyCard!} onReset={handleResetToHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />,
-      [AppState.ADMIN_LOGIN]: <AdminLogin onSuccess={() => {logAdminEvent('Admin Signed In', 'Admin'); dispatch({type: 'SET_VIEW', payload: AppState.ADMIN_DASHBOARD});}} onBack={handleResetToHome} />,
-      [AppState.ADMIN_DASHBOARD]: <AdminDashboard visitCount={visitCount} onAdminAction={handleAdminAction} onBack={handleResetToHome} />,
   };
 
   return (
-    <div className={`min-h-screen text-gray-200 background-container ${backgroundClass}`}>
-      <div className="min-h-screen bg-black bg-opacity-70 backdrop-blur-md flex flex-col">
-        <Header onHomeClick={handleResetToHome} />
-        <main className="container mx-auto px-4 py-8 flex-grow">
-          {state.error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-3 rounded-lg relative mb-6 flex items-start justify-between animate-fade-in" role="alert" aria-live="assertive">
-              <div className="flex items-start">
-                <svg className="w-6 h-6 mr-3 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.244
+    <div className="app-container">
+      <Header onHomeClick={handleGoHome} />
+      <main className="app-main container mx-auto px-4 py-8 sm:py-12">
+        <Suspense fallback={<Spinner message={t('processing')} />}>
+            {renderContent()}
+        </Suspense>
+      </main>
+      <ZaloContact />
+      <DonationModal isOpen={isDonationModalOpen} onClose={() => setIsDonationModalOpen(false)} />
+       {modalState && (
+        <ConfirmationModal
+          isOpen={!!modalState}
+          onClose={() => setModalState(null)}
+          onConfirm={confirmModalAction}
+          // FIX: Added explicit checks for title and message as they are now part of the ConfirmationModalState type.
+          title={modalState.title}
+          // FIX: Added explicit checks for title and message as they are now part of the ConfirmationModalState type.
+          message={modalState.message}
+        />
+      )}
+      <Footer visitCount={visitCount} />
+    </div>
+  );
+};
+
+export default App;

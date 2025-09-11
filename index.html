@@ -11,16 +11,30 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --color-background: #0a091b;
+        --color-text-primary: #f0f0f5;
+        --color-text-secondary: #a0a0b5;
+        --color-primary: #f5b82e; /* Richer Gold */
+        --color-primary-light: #ffdead;
+        --color-primary-glow: rgba(245, 184, 46, 0.3);
+        --color-secondary-glow: rgba(147, 112, 219, 0.25); /* Medium Purple */
+        --color-card-bg: rgba(26, 28, 46, 0.75);
+        --color-card-border: rgba(80, 80, 100, 0.5);
+        --border-radius: 1rem; /* 16px */
+      }
+
       html {
         scroll-behavior: smooth;
       }
       body {
         font-family: 'Quicksand', sans-serif;
-        background-color: #0c0a1a;
+        background-color: var(--color-background);
+        color: var(--color-text-primary);
         background-image: 
-          url('data:image/svg+xml,%3Csvg width="100" height="100" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100" height="100" filter="url(%23n)" opacity=".03"/%3E%3C/svg%3E'),
-          radial-gradient(ellipse at top, #1b2735 0%, #090a0f 100%);
-        color: #e5e7eb; /* default text-gray-200 */
+          radial-gradient(ellipse at 10% 20%, var(--color-secondary-glow) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 90%, var(--color-secondary-glow) 0%, transparent 50%);
         background-attachment: fixed;
       }
       .font-serif {
@@ -29,23 +43,26 @@
       a, button {
         transition: all 0.3s ease-in-out;
       }
+
       /* Custom Scrollbar */
       ::-webkit-scrollbar {
-        width: 8px;
-        background-color: #0c0a1a;
+        width: 10px;
+        background-color: var(--color-background);
       }
       ::-webkit-scrollbar-thumb {
-        background-color: #f59e0b; /* amber-500 */
+        background-color: var(--color-primary);
         border-radius: 10px;
-        border: 2px solid #0c0a1a;
+        border: 2px solid var(--color-background);
+        transition: background-color 0.3s ease;
       }
       ::-webkit-scrollbar-thumb:hover {
         background-color: #fbbf24; /* amber-400 */
       }
+
       /* Custom Text Selection */
       ::selection {
-        background-color: #f59e0b;
-        color: #0c0a1a;
+        background-color: var(--color-primary);
+        color: var(--color-background);
       }
 
       /* Pre-React Loading Spinner */
@@ -60,16 +77,26 @@
         display: block;
         width: 48px;
         height: 48px;
-        border: 5px solid rgba(250, 204, 21, 0.2);
-        border-top-color: #facc15; /* Tailwind yellow-400 */
+        border: 5px solid var(--color-primary-glow);
+        border-top-color: var(--color-primary);
         border-radius: 50%;
         animation: spin 1s linear infinite;
       }
       @keyframes spin {
         to { transform: rotate(360deg); }
       }
+
+      /* General button active state */
+      button:not(:disabled) {
+        cursor: pointer;
+      }
+      button:not(:disabled):active {
+          transform: translateY(1px) scale(0.98);
+          filter: brightness(0.95);
+          box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+      }
       
-      /* Animations */
+      /* --- Animations --- */
       @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -80,7 +107,7 @@
       @keyframes slide-in-up {
         from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(25px);
         }
         to {
             opacity: 1;
@@ -101,17 +128,11 @@
         }
       }
       .animate-fade-in-down {
-        animation: fadeInDown 1.2s ease-out forwards;
+        animation: fadeInDown 1s ease-out forwards;
       }
       @keyframes pulse-glow {
-        0%, 100% {
-          transform: scale(1);
-          box-shadow: 0 0 8px rgba(250, 204, 21, 0.2), 0 0 16px rgba(250, 204, 21, 0.1);
-        }
-        50% {
-          transform: scale(1.03);
-          box-shadow: 0 0 20px rgba(250, 204, 21, 0.4), 0 0 40px rgba(250, 204, 21, 0.2);
-        }
+        0%, 100% { box-shadow: 0 0 15px var(--color-primary-glow); }
+        50% { box-shadow: 0 0 30px rgba(245, 184, 46, 0.5); }
       }
       .animate-pulse-button {
         animation: pulse-glow 3.5s infinite ease-in-out;
@@ -125,7 +146,17 @@
         animation: shutter-flash 0.4s ease-out forwards;
       }
 
-      /* Astrology Chart Grid Layout */
+      /* --- App Structure --- */
+      .app-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      .app-main {
+        flex-grow: 1;
+      }
+
+      /* --- Astrology Chart Grid Layout --- */
       #laso-print-area .astrology-grid {
         grid-template-areas: 
             "quan-loc   no-boc   thien-di  tat-ach"
@@ -137,54 +168,6 @@
         grid-area: center;
         grid-column: span 2;
         grid-row: span 2;
-      }
-
-      /* --- Background Themes --- */
-      .background-container::before {
-        content: '';
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        z-index: -2; /* Behind content and blur overlay */
-        background-size: cover;
-        background-position: center center;
-        opacity: 0;
-        transition: opacity 1.5s ease-in-out;
-      }
-
-      @keyframes slow-pan {
-        0% { transform: scale(1.05) translateX(0) translateY(0); }
-        50% { transform: scale(1.15) translateX(-2%) translateY(2%); }
-        100% { transform: scale(1.05) translateX(0) translateY(0); }
-      }
-
-      @keyframes slow-pan-vertical {
-        from { background-position: 50% 0%; transform: scale(1.1); }
-        to { background-position: 50% 100%; transform: scale(1.1); }
-      }
-      
-      .bg-theme-home::before {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'%3e%3cdefs%3e%3cradialGradient id='g_home_nebula' cx='50%25' cy='50%25' r='70%25'%3e%3cstop offset='0%25' stop-color='%233a2a6a' stop-opacity='1'/%3e%3cstop offset='100%25' stop-color='%230c0a1a' stop-opacity='1'/%3e%3c/radialGradient%3e%3cfilter id='f_glow'%3e%3cfeGaussianBlur stdDeviation='1.5'/%3e%3c/filter%3e%3cg id='star'%3e%3ccircle r='1' fill='%23fff' opacity='0.7' filter='url(%23f_glow)'/%3e%3c/g%3e%3cg id='star_bright'%3e%3ccircle r='1.5' fill='%23fff' opacity='0.9' filter='url(%23f_glow)'/%3e%3c/g%3e%3cfilter id='f_nebula_wisps'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.01 0.03' numOctaves='3' seed='5' result='noise'/%3e%3cfeColorMatrix in='noise' type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 10 -2' result='colored_noise'/%3e%3cfeGaussianBlur in='colored_noise' stdDeviation='50'/%3e%3c/filter%3e%3c/defs%3e%3crect width='1600' height='900' fill='url(%23g_home_nebula)'/%3e%3cg opacity='0.5' fill='%23f59e0b' filter='url(%23f_nebula_wisps)'%3e%3crect x='-200' y='-200' width='2000' height='1300'/%3e%3c/g%3e%3cg opacity='0.3' fill='%236d28d9' filter='url(%23f_nebula_wisps)'%3e%3crect x='-200' y='-200' width='2000' height='1300' transform='rotate(15 800 450)'/%3e%3c/g%3e%3cg id='stars'%3e%3cuse href='%23star' x='150' y='120'/%3e%3cuse href='%23star_bright' x='250' y='300'/%3e%3cuse href='%23star' x='400' y='80'/%3e%3cuse href='%23star' x='550' y='450'/%3e%3cuse href='%23star_bright' x='700' y='200'/%3e%3cuse href='%23star' x='850' y='500'/%3e%3cuse href='%23star' x='1000' y='100'/%3e%3cuse href='%23star_bright' x='1150' y='400'/%3e%3cuse href='%23star' x='1300' y='250'/%3e%3cuse href='%23star' x='1450' y='550'/%3e%3cuse href='%23star_bright' x='50' y='500'/%3e%3cuse href='%23star' x='900' y='800'/%3e%3cuse href='%23star_bright' x='1550' y='750'/%3e%3c/g%3e%3c/svg%3e");
-        opacity: 0.5;
-        animation: slow-pan 120s linear infinite;
-      }
-      .bg-theme-astrology::before {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3e%3cdefs%3e%3cradialGradient id='g_astro_bg' cx='50%25' cy='50%25' r='50%25'%3e%3cstop offset='0%25' stop-color='%231e1a33'/%3e%3cstop offset='100%25' stop-color='%230c0a1a'/%3e%3c/radialGradient%3e%3cfilter id='f_glow_astro'%3e%3cfeGaussianBlur stdDeviation='4'/%3e%3c/filter%3e%3cfilter id='f_sun_glow'%3e%3cfeGaussianBlur stdDeviation='10' result='blur'/%3e%3cfeColorMatrix in='blur' type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.8 0' result='glowMatrix'/%3e%3cfeMerge%3e%3cfeMergeNode in='glowMatrix'/%3e%3cfeMergeNode in='SourceGraphic'/%3e%3c/feMerge%3e%3c/filter%3e%3cstyle%3e.ring { animation: rotate 120s linear infinite; transform-origin: center; } .ring2 { animation-duration: 180s; animation-direction: reverse; } @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes pulse_subtle { 0%25, 100%25 { opacity: 0.6; } 50%25 { opacity: 1; } } .planet { animation: pulse_subtle 6s ease-in-out infinite; } .zodiac-sign { font-family: serif; font-size: 28px; fill: %23f0e68c; opacity: 0.4; transition: opacity 0.3s; } .zodiac-sign:hover { opacity: 0.9; }%3c/style%3e%3c/defs%3e%3crect width='800' height='800' fill='url(%23g_astro_bg)'/%3e%3cg transform='translate(400, 400)'%3e%3ccircle cx='0' cy='0' r='50' fill='%23fde68a' filter='url(%23f_sun_glow)'/%3e%3cg class='ring'%3e%3ccircle r='350' fill='none' stroke='%23f0e68c' stroke-width='0.5' opacity='0.3' stroke-dasharray='2 10'/%3e%3cg%3e%3ctext x='0' y='-340' text-anchor='middle' class='zodiac-sign'%3e♈%3c/text%3e%3ctext x='175' y='-294' text-anchor='middle' class='zodiac-sign'%3e♉%3c/text%3e%3ctext x='294' y='-175' text-anchor='middle' class='zodiac-sign'%3e♊%3c/text%3e%3ctext x='340' y='10' text-anchor='middle' class='zodiac-sign'%3e♋%3c/text%3e%3ctext x='294' y='185' text-anchor='middle' class='zodiac-sign'%3e♌%3c/text%3e%3ctext x='175' y='304' text-anchor='middle' class='zodiac-sign'%3e♍%3c/text%3e%3ctext x='0' y='360' text-anchor='middle' class='zodiac-sign'%3e♎%3c/text%3e%3ctext x='-175' y='304' text-anchor='middle' class='zodiac-sign'%3e♏%3c/text%3e%3ctext x='-294' y='185' text-anchor='middle' class='zodiac-sign'%3e♐%3c/text%3e%3ctext x='-350' y='10' text-anchor='middle' class='zodiac-sign'%3e♑%3c/text%3e%3ctext x='-294' y='-175' text-anchor='middle' class='zodiac-sign'%3e♒%3c/text%3e%3ctext x='-175' y='-294' text-anchor='middle' class='zodiac-sign'%3e♓%3c/text%3e%3c/g%3e%3c/g%3e%3cg class='ring2'%3e%3ccircle r='250' fill='none' stroke='%23c7d2fe' stroke-width='0.5' opacity='0.5'/%3e%3ccircle cx='-216' cy='-125' r='8' fill='%23facc15' class='planet' filter='url(%23f_glow_astro)'/%3e%3c/g%3e%3cg class='ring' style='animation-duration: 90s;'%3e%3ccircle r='150' fill='none' stroke='%23c7d2fe' stroke-width='0.5' opacity='0.3' stroke-dasharray='2 8'/%3e%3ccircle cx='0' cy='150' r='5' fill='%23818cf8' class='planet' style='animation-delay: 2s;'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e");
-        opacity: 0.6;
-        transform: scale(1.1);
-      }
-      .bg-theme-personal::before {
-          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3e%3cdefs%3e%3clinearGradient id='g_sky' x1='0' y1='0' x2='0' y2='1'%3e%3cstop offset='0%25' stop-color='%230c0a1a'/%3e%3cstop offset='60%25' stop-color='%231f2937'/%3e%3cstop offset='100%25' stop-color='%23374151'/%3e%3c/linearGradient%3e%3cfilter id='f_mist'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.01 0.05' numOctaves='3' seed='10' result='noise'/%3e%3cfeDisplacementMap in='SourceGraphic' in2='noise' scale='30'/%3e%3cfeGaussianBlur stdDeviation='5'/%3e%3canimate attributeName='baseFrequency' from='0.01 0.05' to='0.015 0.045' dur='15s' repeatCount='indefinite'/%3e%3c/filter%3e%3cfilter id='f_moon_glow'%3e%3cfeGaussianBlur stdDeviation='15'/%3e%3c/filter%3e%3c/defs%3e%3crect width='800' height='800' fill='url(%23g_sky)'/%3e%3ccircle cx='650' cy='150' r='80' fill='%23f1f5f9' opacity='0.1' filter='url(%23f_moon_glow)'/%3e%3ccircle cx='650' cy='150' r='70' fill='%23f1f5f9' opacity='0.8'/%3e%3crect y='550' width='800' height='250' fill='%23374151' opacity='0.3' filter='url(%23f_mist)'/%3e%3crect y='600' width='800' height='200' fill='%231f2937' opacity='0.5' filter='url(%23f_mist)' style='animation-delay: -5s;'/%3e%3c/svg%3e");
-          opacity: 0.4;
-          animation: slow-pan-vertical 120s linear infinite alternate;
-      }
-      .bg-theme-divination::before {
-          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3e%3cdefs%3e%3cfilter id='f_smoke_divine' x='-50%25' y='-50%25' width='200%25' height='200%25'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.01' numOctaves='5' seed='10' result='noise'%3e%3canimate attributeName='baseFrequency' from='0.01' to='0.015' dur='25s' repeatCount='indefinite'/%3e%3canimate attributeName='seed' from='10' to='60' dur='30s' repeatCount='indefinite'/%3e%3c/feTurbulence%3e%3cfeColorMatrix type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 8 -2.5'/%3e%3cfeGaussianBlur stdDeviation='10'/%3e%3c/filter%3e%3clinearGradient id='g_divine_bg' x1='0' y1='0' x2='1' y2='1'%3e%3cstop offset='0%25' stop-color='%231a1a2e'/%3e%3cstop offset='100%25' stop-color='%232a1a3e'/%3e%3c/linearGradient%3e%3cg id='ember'%3e%3ccircle r='2' fill='%23f59e0b'%3e%3canimate attributeName='r' values='1;3;1' dur='3s' repeatCount='indefinite'/%3e%3canimate attributeName='opacity' values='0;1;0' dur='3s' repeatCount='indefinite'/%3e%3c/circle%3e%3c/g%3e%3c/defs%3e%3crect width='800' height='800' fill='url(%23g_divine_bg)'/%3e%3crect width='800' height='800' fill='%23a855f7' opacity='0.1' filter='url(%23f_smoke_divine)'/%3e%3cuse href='%23ember' x='200' y='700' style='animation-delay: -0.5s'/%3e%3cuse href='%23ember' x='600' y='650' style='animation-delay: -1.2s'/%3e%3cuse href='%23ember' x='400' y='500' style='animation-delay: -2.5s'/%3e%3cuse href='%23ember' x='500' y='200' style='animation-delay: -1.8s'/%3e%3c/svg%3e");
-          opacity: 0.8;
-      }
-      .bg-theme-shop::before {
-          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3e%3cdefs%3e%3clinearGradient id='g_shop_bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3e%3cstop offset='0%25' stop-color='%234c1d22'/%3e%3cstop offset='100%25' stop-color='%232c0d12'/%3e%3c/linearGradient%3e%3cfilter id='f_fabric_texture'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.2' numOctaves='2' result='noise'/%3e%3cfeDiffuseLighting in='noise' lighting-color='%235c2d32' surfaceScale='2'%3e%3cfeDistantLight azimuth='45' elevation='60'/%3e%3c/feDiffuseLighting%3e%3c/filter%3e%3cpattern id='p_shop_damask' width='80' height='80' patternUnits='userSpaceOnUse'%3e%3cpath d='M 40 0 C 60 0 80 20 80 40 C 80 60 60 80 40 80 C 20 80 0 60 0 40 C 0 20 20 0 40 0 Z M 40 20 C 50 20 60 30 60 40 C 60 50 50 60 40 60 C 30 60 20 50 20 40 C 20 30 30 20 40 20 Z' fill='none' stroke='%23fde68a' stroke-width='0.75' opacity='0.08'%3e%3canimate attributeName='opacity' values='0.08;0.15;0.08' dur='10s' repeatCount='indefinite'/%3e%3c/path%3e%3c/pattern%3e%3c/defs%3e%3crect width='200' height='200' fill='url(%23g_shop_bg)'/%3e%3crect width='200' height='200' filter='url(%23f_fabric_texture)' opacity='0.3'/%3e%3crect width='200' height='200' fill='url(%23p_shop_damask)'/%3e%3c/svg%3e");
-          opacity: 0.7;
-          animation: slow-pan 200s linear infinite alternate;
       }
     </style>
   <script type="importmap">

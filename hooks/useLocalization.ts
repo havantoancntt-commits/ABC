@@ -1,7 +1,8 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, ReactNode } from 'react';
 import { translations } from '../locales/translations';
 
-export type Language = keyof typeof translations;
+// FIX: Explicitly define Language type to prevent incorrect type inference.
+export type Language = 'vi' | 'en';
 export type TranslationKey = keyof typeof translations.vi;
 
 interface LanguageContextType {
