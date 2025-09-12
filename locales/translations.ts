@@ -402,7 +402,6 @@ export const translations = {
     qualityStrong: 'Mạnh mẽ, Kiên cường',
     qualityPeaceful: 'Bình an, May mắn',
     qualityElegant: 'Thanh tú, Dịu dàng',
-    // FIX: Added missing translation keys
     qualitySuccessful: 'Thành công, Vững chãi',
     qualityKind: 'Nhân ái, Đức hạnh',
     namingFormStep4Title: 'Yêu Cầu Khác (Không bắt buộc)',
@@ -468,6 +467,11 @@ export const translations = {
     // Spinners
     spinnerAuspiciousNaming: 'Đang phân tích Ngũ Hành, Dụng Thần và tìm kiếm những cái tên tốt đẹp nhất cho bé...',
     spinnerBioEnergy: 'Đang tổng hợp năng lượng từ màu sắc, lá bài và ngày sinh để đưa ra luận giải...',
+    spinnerMsg1: 'Đang tham vấn các vì sao cổ xưa...',
+    spinnerMsg2: 'Giải mã những bí ẩn của vũ trụ...',
+    spinnerMsg3: 'Vẽ nên bản đồ định mệnh của bạn...',
+    spinnerMsg4: 'Kết nối với dòng chảy năng lượng vũ trụ...',
+    spinnerMsg5: 'Luận giải các cung sao và huyền cơ...',
 
     // Hero/Shop Page
     shopFeature1Title: 'Vật Phẩm Tuyển Chọn',
@@ -982,6 +986,11 @@ export const translations = {
     // Spinners
     spinnerAuspiciousNaming: 'Analyzing the Five Elements, Useful Gods, and searching for the most beautiful names for the baby...',
     spinnerBioEnergy: 'Synthesizing energy from your color, card, and birth date to provide an interpretation...',
+    spinnerMsg1: 'Consulting the ancient stars...',
+    spinnerMsg2: 'Decoding the mysteries of the cosmos...',
+    spinnerMsg3: 'Charting your map of destiny...',
+    spinnerMsg4: 'Connecting with the universal energy flow...',
+    spinnerMsg5: 'Interpreting the celestial palaces and secrets...',
 
     // Hero/Shop Page
     shopFeature1Title: 'Curated Items',

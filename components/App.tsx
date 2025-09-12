@@ -467,16 +467,12 @@ const App: React.FC = () => {
 
   const handleDeleteItem = (itemToDelete: SavedItem) => {
       const name = itemToDelete.payload.type === 'astrology' ? itemToDelete.payload.birthInfo.name : t(`itemType${itemToDelete.payload.type.charAt(0).toUpperCase() + itemToDelete.payload.type.slice(1)}` as TranslationKey);
-      // FIX: Added missing title and message properties to match the updated ConfirmationModalState type.
       setModalState({ type: 'deleteItem', item: itemToDelete, title: t('confirmDeleteTitle'), message: t('confirmDeleteMessageWithName', { name }) });
   };
   
   const handleAdminAction = (action: 'clear_charts' | 'clear_history') => {
-      // FIX: Corrected translation keys to match those defined in locales/translations.ts.
       const title = action === 'clear_charts' ? t('adminClearChartsConfirmTitle') : t('adminClearHistoryConfirmTitle');
-      // FIX: Corrected translation keys to match those defined in locales/translations.ts.
       const message = action === 'clear_charts' ? t('adminClearChartsConfirmMessage') : t('adminClearHistoryConfirmMessage');
-      // FIX: Added missing title and message properties to match the updated ConfirmationModalState type.
       setModalState({ type: 'adminAction', action, title, message });
   };
 
@@ -591,25 +587,25 @@ const App: React.FC = () => {
       case AppState.ASTROLOGY_FORM:
         return <BirthInfoForm onSubmit={handleGenerateChart} initialName={user?.name} />;
       case AppState.LOADING:
-        return <Spinner message={t('spinnerAstrology')} />;
+        return <Spinner initialMessageKey='spinnerAstrology' />;
       case AppState.RESULT:
         return birthInfo && chartData && <AstrologyChart data={chartData} birthInfo={birthInfo} onTryAgain={handleResetAstrology} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.FACE_SCAN_CAPTURE:
         return <FaceScan onCapture={handleCaptureImage} onAnalyze={handleAnalyzeFace} capturedImage={state.data.capturedImage} onRetake={handleRetakeCapture} onBack={handleGoHome} />;
       case AppState.FACE_SCAN_LOADING:
-        return <Spinner message={t('spinnerPhysiognomy')} />;
+        return <Spinner initialMessageKey='spinnerPhysiognomy' />;
       case AppState.FACE_SCAN_RESULT:
         return state.data.physiognomyData && state.data.capturedImage && <PhysiognomyResult analysisData={state.data.physiognomyData} imageData={state.data.capturedImage} onTryAgain={handleResetPhysiognomy} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.PALM_SCAN_CAPTURE:
         return <PalmScan onCapture={handleCapturePalmImage} onAnalyze={handleAnalyzePalm} capturedImage={state.data.capturedPalmImage} onRetake={handleRetakePalmCapture} onBack={handleGoHome} />;
       case AppState.PALM_SCAN_LOADING:
-        return <Spinner message={t('spinnerPalmReading')} />;
+        return <Spinner initialMessageKey='spinnerPalmReading' />;
       case AppState.PALM_SCAN_RESULT:
         return state.data.palmReadingData && state.data.capturedPalmImage && <PalmReadingResult analysisData={state.data.palmReadingData} imageData={state.data.capturedPalmImage} onTryAgain={handleResetPalmReading} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
        case AppState.HANDWRITING_ANALYSIS_CAPTURE:
         return <HandwritingScan onCapture={handleCaptureHandwritingImage} onAnalyze={handleAnalyzeHandwriting} capturedImage={state.data.capturedHandwritingImage} onRetake={handleRetakeHandwritingCapture} onBack={handleGoHome} />;
       case AppState.HANDWRITING_ANALYSIS_LOADING:
-        return <Spinner message={t('spinnerHandwriting')} />;
+        return <Spinner initialMessageKey='spinnerHandwriting' />;
       case AppState.HANDWRITING_ANALYSIS_RESULT:
         return state.data.handwritingData && state.data.capturedHandwritingImage && <HandwritingResult analysisData={state.data.handwritingData} imageData={state.data.capturedHandwritingImage} onTryAgain={handleResetHandwriting} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.ZODIAC_HOUR_FINDER:
@@ -621,7 +617,7 @@ const App: React.FC = () => {
       case AppState.NUMEROLOGY_FORM:
         return <NumerologyForm onSubmit={handleGenerateNumerology} initialName={user?.name} />;
       case AppState.NUMEROLOGY_LOADING:
-        return <Spinner message={t('spinnerNumerology')} />;
+        return <Spinner initialMessageKey='spinnerNumerology' />;
       case AppState.NUMEROLOGY_RESULT:
         return state.data.numerologyData && state.data.numerologyInfo && <NumerologyChart data={state.data.numerologyData} info={state.data.numerologyInfo} onTryAgain={handleResetNumerology} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.TAROT_READING:
@@ -629,7 +625,7 @@ const App: React.FC = () => {
        case AppState.FLOW_ASTROLOGY_FORM:
         return <FlowAstrologyForm onSubmit={handleGenerateFlowAstrology} initialName={user?.name} />;
       case AppState.FLOW_ASTROLOGY_LOADING:
-        return <Spinner message={t('spinnerFlowAstrology')} />;
+        return <Spinner initialMessageKey='spinnerFlowAstrology' />;
       case AppState.FLOW_ASTROLOGY_RESULT:
         return state.data.flowAstrologyData && state.data.flowAstrologyInfo && <FlowAstrologyResult data={state.data.flowAstrologyData} info={state.data.flowAstrologyInfo} onTryAgain={handleResetFlowAstrology} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.AUSPICIOUS_DAY_FINDER:
@@ -639,20 +635,19 @@ const App: React.FC = () => {
       case AppState.CAREER_ADVISOR_FORM:
         return <CareerAdvisorForm onSubmit={handleGenerateCareerAdvice} initialName={user?.name} />;
       case AppState.CAREER_ADVISOR_LOADING:
-        return <Spinner message={t('spinnerCareerAdvisor')} />;
+        return <Spinner initialMessageKey='spinnerCareerAdvisor' />;
       case AppState.CAREER_ADVISOR_RESULT:
         return state.data.careerAdviceData && state.data.careerInfo && <CareerAdvisorResult data={state.data.careerAdviceData} info={state.data.careerInfo} onTryAgain={handleResetCareerAdvisor} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.TALISMAN_GENERATOR:
         return <TalismanGeneratorForm onSubmit={handleGenerateTalisman} initialName={user?.name} />;
       case AppState.TALISMAN_LOADING:
-        return <Spinner message={t('spinnerTalisman')} />;
+        return <Spinner initialMessageKey='spinnerTalisman' />;
       case AppState.TALISMAN_RESULT:
         return state.data.talismanData && state.data.talismanInfo && <TalismanResult data={state.data.talismanData} info={state.data.talismanInfo} onTryAgain={handleResetTalisman} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.AUSPICIOUS_NAMING_FORM:
         return <AuspiciousNamingForm onSubmit={handleGenerateAuspiciousName} />;
       case AppState.AUSPICIOUS_NAMING_LOADING:
-        {/* FIX: Corrected invalid translation key. */}
-        return <Spinner message={t('spinnerAuspiciousNaming')} />;
+        return <Spinner initialMessageKey='spinnerAuspiciousNaming' />;
       case AppState.AUSPICIOUS_NAMING_RESULT:
         return state.data.auspiciousNamingData && state.data.auspiciousNamingInfo && <AuspiciousNamingResult data={state.data.auspiciousNamingData} info={state.data.auspiciousNamingInfo} onTryAgain={handleResetAuspiciousNaming} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.BIO_ENERGY_FORM:
@@ -662,8 +657,7 @@ const App: React.FC = () => {
       case AppState.BIO_ENERGY_CARD_DRAW:
         return state.data.capturedEnergyColor && <BioEnergyCardDraw onDraw={handleGenerateBioEnergy} onBack={() => dispatch({type: 'SET_VIEW', payload: AppState.BIO_ENERGY_CAPTURE})} energyColor={state.data.capturedEnergyColor} />;
       case AppState.BIO_ENERGY_LOADING:
-        {/* FIX: Corrected invalid translation key. */}
-        return <Spinner message={t('spinnerBioEnergy')} />;
+        return <Spinner initialMessageKey='spinnerBioEnergy' />;
       case AppState.BIO_ENERGY_RESULT:
         return state.data.bioEnergyData && state.data.bioEnergyInfo && state.data.capturedEnergyColor && state.data.drawnBioEnergyCard && <BioEnergyResult data={state.data.bioEnergyData} info={state.data.bioEnergyInfo} color={state.data.capturedEnergyColor} card={state.data.drawnBioEnergyCard} onTryAgain={handleResetBioEnergy} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.ADMIN_LOGIN:
@@ -679,7 +673,7 @@ const App: React.FC = () => {
     <div className="app-container">
       <Header onHomeClick={handleGoHome} />
       <main className="app-main container mx-auto px-4 py-8 sm:py-12">
-        <Suspense fallback={<Spinner message={t('processing')} />}>
+        <Suspense fallback={<Spinner initialMessageKey='processing' />}>
             {renderContent()}
         </Suspense>
       </main>
@@ -690,9 +684,7 @@ const App: React.FC = () => {
           isOpen={!!modalState}
           onClose={() => setModalState(null)}
           onConfirm={confirmModalAction}
-          // FIX: Added explicit checks for title and message as they are now part of the ConfirmationModalState type.
           title={modalState.title}
-          // FIX: Added explicit checks for title and message as they are now part of the ConfirmationModalState type.
           message={modalState.message}
         />
       )}

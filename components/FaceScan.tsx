@@ -172,7 +172,8 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         )}
         
         {isCapturing && <div className="absolute inset-0 bg-white animate-shutter-flash" />}
-        {isStartingCamera && <Spinner message={t('spinnerCamera')} />}
+        {/* FIX: Changed 'message' prop to 'initialMessageKey' and passed the translation key. */}
+        {isStartingCamera && <Spinner initialMessageKey='spinnerCamera' />}
         
         {!isCameraOn && !capturedImage && !isStartingCamera && (
              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 z-10 bg-gray-950/50">

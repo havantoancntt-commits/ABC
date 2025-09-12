@@ -69,7 +69,8 @@ const AuspiciousDayFinder: React.FC = () => {
     };
 
     if (isLoading) {
-        return <Spinner message={t('spinnerAuspiciousDay')} />;
+        // FIX: Changed 'message' prop to 'initialMessageKey' and passed the translation key.
+        return <Spinner initialMessageKey='spinnerAuspiciousDay' />;
     }
 
     if (error) {

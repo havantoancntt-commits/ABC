@@ -117,7 +117,8 @@ const TarotReading: React.FC<Props> = ({ onOpenDonationModal, onBack }) => {
                 <TarotCardDisplay card={drawnCards[2]} isRevealed={isRevealed} position={t('tarotFuture')} />
             </div>
 
-            {isLoading && <Spinner message={t('spinnerTarot')} />}
+            {/* FIX: Changed 'message' prop to 'initialMessageKey' and passed the translation key. */}
+            {isLoading && <Spinner initialMessageKey='spinnerTarot' />}
 
             {error && <Card className="text-center text-red-400">{error}</Card>}
 

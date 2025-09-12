@@ -17,10 +17,10 @@ const Button: React.FC<Props> = ({
   className = '',
   ...props
 }) => {
-  const baseClasses = 'flex items-center justify-center gap-2 font-bold rounded-lg transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-none focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900/50';
+  const baseClasses = 'flex items-center justify-center gap-2 font-bold rounded-lg transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-none focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)]';
 
   const variantClasses: Record<ButtonVariant, string> = {
-    primary: 'bg-gradient-to-br from-yellow-500 to-amber-600 text-gray-900 hover:from-yellow-400 hover:to-amber-500 focus-visible:ring-yellow-400 shadow-lg shadow-yellow-500/30 hover:shadow-xl hover:shadow-yellow-400/40',
+    primary: 'bg-gradient-to-br from-[var(--color-primary)] to-amber-600 text-[var(--color-background)] hover:from-yellow-400 hover:to-amber-500 focus-visible:ring-yellow-400 shadow-lg shadow-yellow-500/20 hover:shadow-xl hover:shadow-yellow-400/30',
     secondary: 'bg-gray-700/80 text-white hover:bg-gray-700 focus-visible:ring-gray-400 shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/40',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-400 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40',
     special: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:brightness-110 focus-visible:ring-purple-400 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40',

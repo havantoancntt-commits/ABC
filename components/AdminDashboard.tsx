@@ -129,7 +129,8 @@ const AdminDashboard: React.FC<Props> = ({ visitCount, onAdminAction, onBack }) 
             )}
             
             {activeTab === 'history' && (
-                <Suspense fallback={<Spinner message={t('processing')} />}>
+                // FIX: Changed 'message' prop to 'initialMessageKey' and passed the translation key.
+                <Suspense fallback={<Spinner initialMessageKey='processing' />}>
                     <AdminHistoryLog />
                 </Suspense>
             )}
