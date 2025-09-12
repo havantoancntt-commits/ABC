@@ -5,6 +5,7 @@ import Button from './Button';
 import Spinner from './Spinner';
 
 const AdminHistoryLog = lazy(() => import('./AdminHistoryLog'));
+const CustomerManagement = lazy(() => import('./CustomerManagement'));
 
 interface Props {
     visitCount: number;
@@ -14,7 +15,7 @@ interface Props {
 
 const AdminDashboard: React.FC<Props> = ({ visitCount, onAdminAction, onBack }) => {
     const { t } = useLocalization();
-    const [activeTab, setActiveTab] = useState<'stats' | 'history'>('stats');
+    const [activeTab, setActiveTab] = useState<'stats' | 'history' | 'customers'>('stats');
     const [featureUsage, setFeatureUsage] = useState<Record<string, number>>({});
     const [isAstrologyUnlocked, setIsAstrologyUnlocked] = useState(false);
     const [isCareerUnlocked, setIsCareerUnlocked] = useState(false);
@@ -52,7 +53,7 @@ const AdminDashboard: React.FC<Props> = ({ visitCount, onAdminAction, onBack }) 
         }
     };
     
-    const TabButton: React.FC<{ tabId: 'stats' | 'history'; children: React.ReactNode }> = ({ tabId, children }) => (
+    const TabButton: React.FC<{ tabId: 'stats' | 'history' | 'customers'; children: React.ReactNode }> = ({ tabId, children }) => (
         <button
             onClick={() => setActiveTab(tabId)}
             className={`px-6 py-3 font-bold text-lg transition-colors duration-300 ${activeTab === tabId ? 'text-yellow-300 border-b-2 border-yellow-300' : 'text-gray-400 hover:text-white'}`}
@@ -70,6 +71,7 @@ const AdminDashboard: React.FC<Props> = ({ visitCount, onAdminAction, onBack }) 
             <div className="border-b border-gray-700/50 mb-8 flex justify-center">
                 <TabButton tabId="stats">{t('adminTabStats')}</TabButton>
                 <TabButton tabId="history">{t('adminTabHistory')}</TabButton>
+                <TabButton tabId="customers">{t('adminTabCustomers')}</TabButton>
             </div>
 
             {activeTab === 'stats' && (
@@ -129,9 +131,14 @@ const AdminDashboard: React.FC<Props> = ({ visitCount, onAdminAction, onBack }) 
             )}
             
             {activeTab === 'history' && (
-                // FIX: Changed 'message' prop to 'initialMessageKey' and passed the translation key.
                 <Suspense fallback={<Spinner initialMessageKey='processing' />}>
                     <AdminHistoryLog />
+                </Suspense>
+            )}
+
+            {activeTab === 'customers' && (
+                <Suspense fallback={<Spinner initialMessageKey='processing' />}>
+                    <CustomerManagement />
                 </Suspense>
             )}
 

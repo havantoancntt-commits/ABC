@@ -420,6 +420,7 @@ export const translations = {
     adminDashboardTitle: 'Bảng Điều Khiển Quản Trị',
     adminTabStats: 'Thống Kê',
     adminTabHistory: 'Lịch Sử Hoạt Động',
+    adminTabCustomers: 'Quản Lý Khách Hàng',
     adminStatsTitle: 'Thống Kê Nền Tảng',
     adminTotalVisits: 'Tổng lượt truy cập',
     adminFeatureUsage: 'Sử dụng tính năng',
@@ -443,6 +444,18 @@ export const translations = {
     adminClearHistoryConfirmTitle: 'Xác Nhận Xóa Lịch Sử',
     adminClearHistoryConfirmMessage: 'Hành động này sẽ xóa vĩnh viễn toàn bộ lịch sử hoạt động của admin. Bạn có chắc chắn không?',
     
+    // Customer Management
+    customerListTitle: 'Danh Sách Khách Hàng',
+    addCustomerTitle: 'Thêm Khách Hàng Mới',
+    customerNameLabel: 'Tên Khách Hàng',
+    customerEmailLabel: 'Email',
+    customerPhoneLabel: 'Số Điện Thoại',
+    saveCustomerButton: 'Lưu Khách Hàng',
+    customerSearchPlaceholder: 'Tìm kiếm khách hàng...',
+    noCustomersFound: 'Không tìm thấy khách hàng nào.',
+    confirmDeleteCustomerTitle: 'Xác Nhận Xóa Khách Hàng',
+    confirmDeleteCustomerMessage: 'Bạn có chắc chắn muốn xóa khách hàng "{{name}}"? Dữ liệu lá số của họ sẽ không bị ảnh hưởng.',
+
     // Password Prompt
     passwordIncorrect: 'Mật khẩu không chính xác. Vui lòng thử lại.',
     passwordPromptTitle: 'Yêu Cầu Mật Khẩu',
@@ -939,6 +952,7 @@ export const translations = {
     adminDashboardTitle: 'Admin Dashboard',
     adminTabStats: 'Statistics',
     adminTabHistory: 'Activity Log',
+    adminTabCustomers: 'Customer Management',
     adminStatsTitle: 'Platform Statistics',
     adminTotalVisits: 'Total Visits',
     adminFeatureUsage: 'Feature Usage',
@@ -961,6 +975,18 @@ export const translations = {
     adminClearChartsConfirmMessage: 'This will permanently delete all saved charts for ALL users. Are you sure?',
     adminClearHistoryConfirmTitle: 'Confirm Log Deletion',
     adminClearHistoryConfirmMessage: 'This will permanently delete the entire admin activity log. Are you sure?',
+    
+    // Customer Management
+    customerListTitle: 'Customer List',
+    addCustomerTitle: 'Add New Customer',
+    customerNameLabel: 'Customer Name',
+    customerEmailLabel: 'Email',
+    customerPhoneLabel: 'Phone Number',
+    saveCustomerButton: 'Save Customer',
+    customerSearchPlaceholder: 'Search customers...',
+    noCustomersFound: 'No customers found.',
+    confirmDeleteCustomerTitle: 'Confirm Customer Deletion',
+    confirmDeleteCustomerMessage: 'Are you sure you want to delete the customer "{{name}}"? Their chart data will not be affected.',
     
     // Password Prompt
     passwordIncorrect: 'Incorrect password. Please try again.',

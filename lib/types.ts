@@ -76,7 +76,6 @@ export interface AppStateStructure {
   postLoginAction: (() => void) | null;
 }
 
-// FIX: Added title and message properties to the ConfirmationModalState type to align with component usage.
 export type ConfirmationModalState = 
     | { type: 'deleteItem'; item: SavedItem; title: string; message: string; } 
     | { type: 'adminAction'; action: 'clear_charts' | 'clear_history'; title: string; message: string; };
@@ -375,6 +374,15 @@ export interface AdminLogEntry {
     user: string;
     action: string;
     details: string;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  createdAt: string; // ISO String
+  userId: string; // Admin user's ID
 }
 
 // --- Saved Item Data Structures ---
