@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, lazy, Suspense, useReducer } from 'react';
+import React, { useState, useCallback, useEffect, lazy, Suspense, useReducer, useRef } from 'react';
 import type { AppStateStructure, ConfirmationModalState, BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload, BioEnergyInfo, BioEnergyCard, BioEnergyData, GoogleUser } from '../types';
 import { AppState } from '../types';
 import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName, generateBioEnergyReading } from '../lib/gemini';
@@ -104,6 +104,8 @@ const App: React.FC = () => {
   
   const { language, t } = useLocalization();
   const { user, authError } = useGoogleAuth();
+  
+  const prevUserRef = useRef<GoogleUser | null>(null);
 
   const getStorageKey = useCallback((userId?: string) => {
     const id = userId || user?.sub;
@@ -157,6 +159,53 @@ const App: React.FC = () => {
       localStorage.removeItem(currentStorageKey);
       localStorage.removeItem(oldStorageKey);
     }
+  }, [user, getStorageKey]);
+  
+  useEffect(() => {
+    // Check for login transition: from guest (null) to a logged-in user
+    if (!prevUserRef.current && user) {
+        const guestStorageKey = 'savedItems_guest';
+        const userStorageKey = getStorageKey(user.sub);
+
+        try {
+            const guestItemsRaw = localStorage.getItem(guestStorageKey);
+            if (guestItemsRaw) {
+                const guestItems: SavedItem[] = JSON.parse(guestItemsRaw);
+                
+                if (guestItems.length > 0) {
+                    const userItemsRaw = localStorage.getItem(userStorageKey);
+                    const userItems: SavedItem[] = userItemsRaw ? JSON.parse(userItemsRaw) : [];
+
+                    // Merge items. Use a Map to handle potential duplicates, preferring the newer item on conflict.
+                    const mergedItemsMap = new Map<string, SavedItem>();
+                    
+                    const allItems = [...userItems, ...guestItems];
+                    
+                    allItems.forEach(item => {
+                        if (!mergedItemsMap.has(item.id) || new Date(item.timestamp) > new Date(mergedItemsMap.get(item.id)!.timestamp)) {
+                            mergedItemsMap.set(item.id, item);
+                        }
+                    });
+                    
+                    const finalItems = Array.from(mergedItemsMap.values());
+                    
+                    finalItems.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+                    setSavedItems(finalItems);
+                    localStorage.setItem(userStorageKey, JSON.stringify(finalItems));
+                    localStorage.removeItem(guestStorageKey);
+
+                    logAdminEvent('Migrate Guest Data', user.email, `${guestItems.length} items migrated.`);
+                }
+            }
+        } catch (e) {
+            console.error("Failed to migrate guest data:", e);
+            localStorage.removeItem(guestStorageKey);
+        }
+    }
+
+    // Update the ref for the next render
+    prevUserRef.current = user;
   }, [user, getStorageKey]);
 
   useEffect(() => {
