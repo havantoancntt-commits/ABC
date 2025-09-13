@@ -52,6 +52,9 @@ export enum AppState {
   FENG_SHUI_CAPTURE,
   FENG_SHUI_LOADING,
   FENG_SHUI_RESULT,
+  HOA_TAY_SCAN_CAPTURE,
+  HOA_TAY_SCAN_LOADING,
+  HOA_TAY_SCAN_RESULT,
 }
 
 export interface AppStateStructure {
@@ -82,9 +85,11 @@ export interface AppStateStructure {
     prayerData: PrayerData | null;
     fengShuiInfo: FengShuiInfo | null;
     fengShuiData: FengShuiData | null;
+    hoaTayData: HoaTayData | null;
     capturedImage: string | null;
     capturedPalmImage: string | null;
     capturedHandwritingImage: string | null;
+    capturedHoaTayImage: string | null;
     capturedEnergyColor: string | null;
     drawnBioEnergyCard: BioEnergyCard | null;
     fengShuiThumbnail: string | null;
@@ -157,6 +162,16 @@ export interface HandwritingData {
     netChu: string;
     chuKy: string;
     loiKhuyen: string;
+}
+
+export interface HoaTayData {
+    leftHandWhorls: number;
+    rightHandWhorls: number;
+    totalWhorls: number;
+    leftHandInterpretation: string;
+    rightHandInterpretation: string;
+    overallInterpretation: string;
+    advice: string;
 }
 
 export interface ZodiacHour {
@@ -461,6 +476,13 @@ export interface SavedHandwritingPayload {
     analysisData: HandwritingData;
 }
 
+export interface SavedHoaTayPayload {
+    type: 'hoaTay';
+    name: string;
+    imageData: string;
+    analysisData: HoaTayData;
+}
+
 export interface SavedNumerologyPayload {
     type: 'numerology';
     info: NumerologyInfo;
@@ -511,7 +533,8 @@ export type SavedItemPayload =
     | SavedPhysiognomyPayload 
     | SavedNumerologyPayload 
     | SavedPalmReadingPayload 
-    | SavedHandwritingPayload 
+    | SavedHandwritingPayload
+    | SavedHoaTayPayload
     | SavedFlowAstrologyPayload 
     | SavedAuspiciousNamingPayload
     | SavedBioEnergyPayload

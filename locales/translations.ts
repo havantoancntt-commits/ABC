@@ -90,6 +90,10 @@ export const translations = {
     viewTitleFENG_SHUI_CAPTURE: 'Quay Video Không Gian',
     viewTitleFENG_SHUI_LOADING: 'Đang Phân Tích Phong Thủy',
     viewTitleFENG_SHUI_RESULT: 'Kết Quả Phong Thủy',
+    // FIX: Add missing translation keys for Hoa Tay feature views
+    viewTitleHOA_TAY_SCAN_CAPTURE: 'Xem Hoa Tay',
+    viewTitleHOA_TAY_SCAN_LOADING: 'Đang Phân Tích Hoa Tay',
+    viewTitleHOA_TAY_SCAN_RESULT: 'Kết Quả Xem Hoa Tay',
 
     // Backend Errors
     errorAiOverloaded: 'Hệ thống AI hiện đang quá tải hoặc đã hết tài nguyên. Vui lòng thử lại sau ít phút.',
@@ -245,6 +249,9 @@ export const translations = {
     itemTypeAuspiciousNaming: 'Tư Vấn Đặt Tên',
     itemTypeBioEnergy: 'Luận Giải Năng Lượng',
     itemTypeGodOfWealth: 'Lộc Thần Tài',
+    itemTypePrayer: 'Văn Khấn Cổ Truyền',
+    // FIX: Add missing translation key for Hoa Tay feature
+    itemTypeHoaTay: 'Phân Tích Hoa Tay',
     itemDescAstrology: 'Lá số cho {{name}}',
     itemDescPhysiognomy: 'Phân tích ngày {{date}}',
     itemDescPalmReading: 'Phân tích ngày {{date}}',
@@ -254,6 +261,10 @@ export const translations = {
     itemDescAuspiciousNaming: 'Gợi ý cho gia đình {{lastName}}',
     itemDescBioEnergy: 'Luận giải cho {{name}}',
     itemDescGodOfWealth: 'Lời chúc phúc cho {{name}}',
+    // FIX: Add missing translation key for Hoa Tay feature
+    itemDescHoaTay: 'Phân tích ngày {{date}}',
+    itemDescPrayer: 'Bài khấn cho dịp {{occasion}}',
+    itemDescFengShui: 'Phân tích cho {{spaceType}}',
 
     // Delete Confirmation
     confirmDeleteTitle: 'Xác Nhận Xóa',
@@ -377,6 +388,22 @@ export const translations = {
     handwritingSection3: 'Đặc Điểm Nét Chữ',
     handwritingSection4: 'Phân Tích Chữ Ký',
     handwritingSection5: 'Lời Khuyên & Định Hướng',
+
+    // FIX: Add missing translation keys for Hoa Tay feature
+    hoaTayTitle: 'Xem Hoa Tay',
+    hoaTayDesc: 'Chụp ảnh các đầu ngón tay để AI phân tích số lượng hoa tay và luận giải về tính cách, vận mệnh.',
+    hoaTayButton: 'Xem Hoa Tay',
+    hoaTayScanTitle: 'Phân Tích Hoa Tay',
+    hoaTayScanSubtitle: 'Chụp ảnh rõ nét hai bàn tay của bạn, để các đầu ngón tay hướng về camera. AI sẽ đếm và phân tích các hoa tay (vân xoáy).',
+    hoaTayScanAnalyze: 'Phân Tích Hoa Tay',
+    hoaTayResultTitle: 'Kết Quả Phân Tích Hoa Tay',
+    hoaTayResultImageTitle: 'Hình Ảnh Phân Tích',
+    hoaTayResultImageAlt: 'Ảnh bàn tay được dùng để phân tích hoa tay',
+    hoaTayTryAgain: 'Thử Lại Với Ảnh Khác',
+    hoaTaySectionLeftHand: 'Luận Giải Bàn Tay Trái ({{count}} Hoa Tay)',
+    hoaTaySectionRightHand: 'Luận Giải Bàn Tay Phải ({{count}} Hoa Tay)',
+    hoaTaySectionOverall: 'Luận Giải Tổng Hợp ({{count}} Hoa Tay)',
+    hoaTaySectionAdvice: 'Lời Khuyên & Định Hướng',
 
     // Zodiac Hour Finder
     zodiacFinderTitle: 'Giờ Hoàng Đạo Trong Ngày',
@@ -573,6 +600,8 @@ export const translations = {
     spinnerAuspiciousNaming: 'Đang phân tích Ngũ Hành, Dụng Thần và tìm kiếm những cái tên tốt đẹp nhất cho bé...',
     spinnerBioEnergy: 'Đang tổng hợp năng lượng từ màu sắc, lá bài và ngày sinh để đưa ra luận giải...',
     spinnerGodOfWealth: 'Đang cầu xin phước lành từ Thần Tài... Xin giữ lòng thành tâm.',
+    // FIX: Add missing translation key for Hoa Tay feature spinner
+    spinnerHoaTay: 'AI is analyzing your fingerprints and interpreting your personality traits...',
     spinnerMsg1: 'Đang tham vấn các vì sao cổ xưa...',
     spinnerMsg2: 'Giải mã những bí ẩn của vũ trụ...',
     spinnerMsg3: 'Vẽ nên bản đồ định mệnh của bạn...',
@@ -766,6 +795,10 @@ export const translations = {
     viewTitleFENG_SHUI_CAPTURE: 'Record Your Space',
     viewTitleFENG_SHUI_LOADING: 'Analyzing Feng Shui',
     viewTitleFENG_SHUI_RESULT: 'Feng Shui Results',
+    // FIX: Add missing translation keys for Hoa Tay feature views
+    viewTitleHOA_TAY_SCAN_CAPTURE: 'Whorl Reading',
+    viewTitleHOA_TAY_SCAN_LOADING: 'Analyzing Whorls',
+    viewTitleHOA_TAY_SCAN_RESULT: 'Whorl Reading Result',
     
     // Backend Errors
     errorAiOverloaded: 'The AI system is currently overloaded or has run out of resources. Please try again in a few minutes.',
@@ -921,6 +954,10 @@ export const translations = {
     itemTypeAuspiciousNaming: 'Naming Consultation',
     itemTypeBioEnergy: 'Bio-Energy Reading',
     itemTypeGodOfWealth: 'God of Wealth Blessing',
+    itemTypePrayer: 'Traditional Prayer',
+    itemTypeFengShui: 'Feng Shui Analysis',
+    // FIX: Add missing translation key for Hoa Tay feature
+    itemTypeHoaTay: 'Whorl Analysis',
     itemDescAstrology: 'Chart for {{name}}',
     itemDescPhysiognomy: 'Analysis from {{date}}',
     itemDescPalmReading: 'Analysis from {{date}}',
@@ -930,6 +967,10 @@ export const translations = {
     itemDescAuspiciousNaming: 'Suggestions for the {{lastName}} family',
     itemDescBioEnergy: 'Reading for {{name}}',
     itemDescGodOfWealth: 'Blessing for {{name}}',
+    // FIX: Add missing translation key for Hoa Tay feature
+    itemDescHoaTay: 'Analysis from {{date}}',
+    itemDescPrayer: 'Prayer for {{occasion}}',
+    itemDescFengShui: 'Analysis for {{spaceType}}',
 
     // Delete Confirmation
     confirmDeleteTitle: 'Confirm Deletion',
@@ -1025,6 +1066,23 @@ export const translations = {
     palmReadingButton: 'Read My Palm',
     palmScanTitle: 'Palm Reading via Photo',
     
+    // FIX: Add missing translation keys for Hoa Tay feature
+    // Whorl Reading (Hoa Tay)
+    hoaTayTitle: 'Whorl Reading',
+    hoaTayDesc: 'Capture an image of your fingertips for AI to analyze the number of whorls and provide insights into your personality and destiny.',
+    hoaTayButton: 'Analyze Whorls',
+    hoaTayScanTitle: 'Whorl Analysis',
+    hoaTayScanSubtitle: 'Take a clear picture of both your hands with fingertips facing the camera. The AI will count and analyze the whorls (spiral fingerprints).',
+    hoaTayScanAnalyze: 'Analyze Whorls',
+    hoaTayResultTitle: 'Whorl Analysis Result',
+    hoaTayResultImageTitle: 'Analyzed Image',
+    hoaTayResultImageAlt: 'Photo of hands used for whorl analysis',
+    hoaTayTryAgain: 'Try With Another Photo',
+    hoaTaySectionLeftHand: 'Left Hand Interpretation ({{count}} Whorls)',
+    hoaTaySectionRightHand: 'Right Hand Interpretation ({{count}} Whorls)',
+    hoaTaySectionOverall: 'Overall Interpretation ({{count}} Whorls)',
+    hoaTaySectionAdvice: 'Advice & Guidance',
+
     // Admin & Password
     passwordIncorrect: 'Incorrect password. Please try again.',
     passwordPromptTitle: 'Advanced Access Required',

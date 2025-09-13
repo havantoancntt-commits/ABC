@@ -46,6 +46,8 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
                 return t('itemDescPalmReading', { date });
             case 'handwriting':
                 return t('itemDescHandwriting', { date });
+            case 'hoaTay':
+                return t('itemDescHoaTay', { date });
             default:
                 return new Intl.DateTimeFormat(t('locale'), { dateStyle: 'full', timeStyle: 'short' }).format(new Date(item.timestamp));
         }
@@ -60,6 +62,7 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
             case 'godOfWealth': return payload.info.name;
             case 'prayer': return payload.info.occasion;
             case 'fengShui': return payload.info.spaceType;
+            case 'hoaTay': return getTitle();
             default: return getTitle();
         }
     }
