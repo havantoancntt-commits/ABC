@@ -33,7 +33,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
         dispatch({ type: 'SET_DATA', payload: { birthInfo: info } });
         dispatch({ type: 'SET_VIEW', payload: AppState.LOADING });
         try {
-        const data = await generateAstrologyChart(info, language);
+        // FIX: Always request Vietnamese for the astrology chart as the component has hardcoded VI palace names.
+        const data = await generateAstrologyChart(info, 'vi');
         dispatch({ type: 'SET_DATA', payload: { chartData: data } });
         saveItem({ type: 'astrology', birthInfo: info, chartData: data });
         dispatch({ type: 'SET_VIEW', payload: AppState.RESULT });

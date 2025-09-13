@@ -122,7 +122,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onTryAgain, onGoHome
         data.cungMenh, data.cungPhuMau, data.cungPhucDuc, data.cungDienTrach,
         data.cungQuanLoc, data.cungNoBoc, data.cungThienDi, data.cungTatAch,
         data.cungTaiBach, data.cungTuTuc, data.cungPhuThe, data.cungHuynhDe
-    ], [data]);
+    ].filter((p): p is Palace => !!p), [data]);
 
     const handleDownloadImage = async () => {
         setIsDownloading(true);
