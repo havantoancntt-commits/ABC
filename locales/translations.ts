@@ -82,6 +82,21 @@ export const translations = {
     fortuneSticksSummary: 'Tổng Kết',
     fortuneSticksTryAgain: 'Gieo Lại Quẻ Khác',
 
+    // God of Wealth
+    godOfWealthTitle: 'Xin Lộc Thần Tài',
+    godOfWealthDesc: 'Thành tâm khấn nguyện để nhận được con số may mắn và lời chúc phúc về tài lộc từ Hoàng Thần Tài.',
+    godOfWealthButton: 'Xin Lộc Ngay',
+    godOfWealthBlessingTitle: 'Cung Thỉnh Hoàng Thần Tài',
+    godOfWealthBlessingSubtitle: 'Hãy thành tâm nhập tên và lời cầu nguyện của bạn để nhận được phước lành về tài lộc và may mắn.',
+    godOfWealthWishLabel: 'Lời Nguyện Cầu (Không bắt buộc)',
+    godOfWealthWishPlaceholder: 'Ví dụ: Cầu cho công việc kinh doanh thuận lợi, buôn may bán đắt...',
+    godOfWealthPrayButton: 'Thành Tâm Cầu Nguyện',
+    godOfWealthResultTitle: 'Phước Lành Của Thần Tài',
+    godOfWealthLuckyNumber: 'Con Số May Mắn Của Bạn',
+    godOfWealthBlessingMessage: 'Lời Chúc Phúc',
+    godOfWealthInterpretation: 'Luận Giải Chi Tiết',
+    godOfWealthTryAgain: 'Cầu Xin Lần Nữa',
+
     // Talisman
     talismanFormTitle: 'Thỉnh Bùa Hộ Mệnh',
     talismanFormSubtitle: 'Hãy nhập thông tin của bạn với lòng thành tâm. AI sẽ dựa trên trường năng lượng của bạn để sáng tạo một lá bùa độc nhất mang lại may mắn và bình an.',
@@ -109,6 +124,7 @@ export const translations = {
     itemTypeFlowAstrology: 'Tử Vi Dòng Chảy Năng Lượng',
     itemTypeAuspiciousNaming: 'Tư Vấn Đặt Tên',
     itemTypeBioEnergy: 'Luận Giải Năng Lượng',
+    itemTypeGodOfWealth: 'Lộc Thần Tài',
     itemDescAstrology: 'Lá số cho {{name}}',
     itemDescPhysiognomy: 'Phân tích ngày {{date}}',
     itemDescPalmReading: 'Phân tích ngày {{date}}',
@@ -117,6 +133,7 @@ export const translations = {
     itemDescFlowAstrology: 'Dự báo cho {{name}}',
     itemDescAuspiciousNaming: 'Gợi ý cho gia đình {{lastName}}',
     itemDescBioEnergy: 'Luận giải cho {{name}}',
+    itemDescGodOfWealth: 'Lời chúc phúc cho {{name}}',
 
     // Delete Confirmation
     confirmDeleteTitle: 'Xác Nhận Xóa',
@@ -435,6 +452,7 @@ export const translations = {
     // Spinners
     spinnerAuspiciousNaming: 'Đang phân tích Ngũ Hành, Dụng Thần và tìm kiếm những cái tên tốt đẹp nhất cho bé...',
     spinnerBioEnergy: 'Đang tổng hợp năng lượng từ màu sắc, lá bài và ngày sinh để đưa ra luận giải...',
+    spinnerGodOfWealth: 'Đang cầu xin phước lành từ Thần Tài... Xin giữ lòng thành tâm.',
     spinnerMsg1: 'Đang tham vấn các vì sao cổ xưa...',
     spinnerMsg2: 'Giải mã những bí ẩn của vũ trụ...',
     spinnerMsg3: 'Vẽ nên bản đồ định mệnh của bạn...',
@@ -620,6 +638,21 @@ export const translations = {
     fortuneSticksSummary: 'Summary',
     fortuneSticksTryAgain: 'Cast Another Stick',
 
+    // God of Wealth
+    godOfWealthTitle: 'God of Wealth Blessing',
+    godOfWealthDesc: 'Pray with a sincere heart to receive a lucky number and a blessing for wealth and prosperity from the God of Wealth.',
+    godOfWealthButton: 'Request Blessing',
+    godOfWealthBlessingTitle: 'Pray to the God of Wealth',
+    godOfWealthBlessingSubtitle: 'Sincerely enter your name and your wish to receive blessings for wealth and good fortune.',
+    godOfWealthWishLabel: 'Your Wish (Optional)',
+    godOfWealthWishPlaceholder: 'e.g., Praying for a successful business, profitable trades...',
+    godOfWealthPrayButton: 'Pray Sincerely',
+    godOfWealthResultTitle: 'The God of Wealth\'s Blessing',
+    godOfWealthLuckyNumber: 'Your Lucky Number',
+    godOfWealthBlessingMessage: 'The Blessing',
+    godOfWealthInterpretation: 'Detailed Interpretation',
+    godOfWealthTryAgain: 'Pray Again',
+
     // Talisman
     talismanFormTitle: 'Request a Guardian Talisman',
     talismanFormSubtitle: 'Enter your information with a sincere heart. The AI will create a unique talisman based on your energy field to bring you luck and peace.',
@@ -647,6 +680,7 @@ export const translations = {
     itemTypeFlowAstrology: 'Flow Astrology',
     itemTypeAuspiciousNaming: 'Naming Consultation',
     itemTypeBioEnergy: 'Bio-Energy Reading',
+    itemTypeGodOfWealth: 'God of Wealth Blessing',
     itemDescAstrology: 'Chart for {{name}}',
     itemDescPhysiognomy: 'Analysis from {{date}}',
     itemDescPalmReading: 'Analysis from {{date}}',
@@ -655,6 +689,7 @@ export const translations = {
     itemDescFlowAstrology: 'Forecast for {{name}}',
     itemDescAuspiciousNaming: 'Suggestions for the {{lastName}} family',
     itemDescBioEnergy: 'Reading for {{name}}',
+    itemDescGodOfWealth: 'Blessing for {{name}}',
 
     // Delete Confirmation
     confirmDeleteTitle: 'Confirm Deletion',
@@ -973,6 +1008,7 @@ export const translations = {
     // Spinners
     spinnerAuspiciousNaming: 'Analyzing the Five Elements, Useful Gods, and searching for the most beautiful names for the baby...',
     spinnerBioEnergy: 'Synthesizing energy from your color, card, and birth date to provide an interpretation...',
+    spinnerGodOfWealth: 'Requesting a blessing from the God of Wealth... Please maintain a sincere heart.',
     spinnerMsg1: 'Consulting the ancient stars...',
     spinnerMsg2: 'Decoding the mysteries of the cosmos...',
     spinnerMsg3: 'Charting your map of destiny...',

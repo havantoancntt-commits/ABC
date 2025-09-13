@@ -20,9 +20,11 @@ interface Props {
     onStartAuspiciousNaming: () => void;
     onStartBioEnergy: () => void;
     onStartFortuneSticks: () => void;
+    onStartGodOfWealth: () => void;
 }
 
-type ButtonVariantForFeature = 'primary' | 'special' | 'secondary' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology' | 'career' | 'talisman' | 'naming' | 'bioenergy' | 'fortune';
+// FIX: Added 'secondary' to the type to allow it to be used as a feature button variant.
+type ButtonVariantForFeature = 'primary' | 'special' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology' | 'career' | 'talisman' | 'naming' | 'bioenergy' | 'fortune' | 'wealth' | 'secondary';
 
 const buttonVariantGradients: Record<ButtonVariantForFeature, string> = {
     primary: 'from-yellow-600 to-purple-600',
@@ -40,6 +42,7 @@ const buttonVariantGradients: Record<ButtonVariantForFeature, string> = {
     naming: 'from-sky-600 to-green-600',
     bioenergy: 'from-cyan-500 to-green-500',
     fortune: 'from-red-600 to-amber-600',
+    wealth: 'from-amber-500 to-yellow-400',
     secondary: 'from-cyan-600 to-blue-600', // Fallback
 };
 
@@ -72,6 +75,7 @@ const Home: React.FC<Props> = (props) => {
 
     const features = [
         { title: t('astrologyTitle'), description: t('astrologyDesc'), buttonText: t('astrologyButton'), onClick: props.onStartAstrology, buttonVariant: 'primary' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24"><defs><radialGradient id="grad1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop offset="0%" style={{stopColor: 'rgb(250, 204, 21)', stopOpacity:1}} /><stop offset="100%" style={{stopColor:'rgb(245, 158, 11)',stopOpacity:1}} /></radialGradient></defs><path fill="url(#grad1)" d="M12 2a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V2.75A.75.75 0 0112 2zM12 17a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0112 17zM2.75 12a.75.75 0 010-1.5h3.5a.75.75 0 010 1.5h-3.5zM17.75 12a.75.75 0 010-1.5h3.5a.75.75 0 010 1.5h-3.5z" opacity="0.6"/><path fill="url(#grad1)" d="M12 7a5 5 0 100 10 5 5 0 000-10zm-7 5a7 7 0 1114 0 7 7 0 01-14 0z" /></svg> },
+        { title: t('godOfWealthTitle'), description: t('godOfWealthDesc'), buttonText: t('godOfWealthButton'), onClick: props.onStartGodOfWealth, buttonVariant: 'wealth' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24"><defs><linearGradient id="gradGold" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#FFFBEB" /><stop offset="100%" stopColor="#FBBF24" /></linearGradient></defs><path fill="url(#gradGold)" d="M4 8h16v10H4z" opacity="0.4" /><path fill="url(#gradGold)" d="M20 6H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2zm-8 12a4 4 0 110-8 4 4 0 010 8z" /><circle cx="12" cy="12" r="2" fill="#A16207"/></svg> },
         { title: t('fortuneSticksTitle'), description: t('fortuneSticksDesc'), buttonText: t('fortuneSticksButton'), onClick: props.onStartFortuneSticks, buttonVariant: 'fortune' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24"><path fill="#fca5a5" d="M15 3H9v2h6V3zm4 4H5v13h14V7zM7 9h2v10H7V9zm4 0h2v10h-2V9zm4 0h2v10h-2V9z" opacity="0.6"/><path fill="#ef4444" d="M19 5H5a2 2 0 00-2 2v13a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2zm-2 15H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V9h10v3zM15 3H9v2h6V3z"/></svg> },
         { title: t('physiognomyTitle'), description: t('physiognomyDesc'), buttonText: t('physiognomyButton'), onClick: props.onStartPhysiognomy, buttonVariant: 'special' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24"><g fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path stroke="#c084fc" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" opacity="0.5"/><path stroke="#a855f7" d="M9.5 9.5a.5.5 0 100-1 .5.5 0 000 1zM14.5 9.5a.5.5 0 100-1 .5.5 0 000 1zM15 14s-1.5 2-3 2-3-2-3-2"/><path stroke="#a855f7" strokeDasharray="2 2" d="M2.5 8h19M2.5 16h19"/></g></svg> },
         { title: t('careerAdvisorTitle'), description: t('careerAdvisorDesc'), buttonText: t('careerAdvisorButton'), onClick: props.onStartCareerAdvisor, buttonVariant: 'career' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24"><path fill="#38bdf8" d="M14.27 20.27L12 22.54l-2.27-2.27a8.5 8.5 0 01-2.27-6.02V5.5a.5.5 0 011 0v8.75a7.5 7.5 0 0013.5 0V5.5a.5.5 0 011 0v8.75a8.5 8.5 0 01-2.27 6.02zM12 13a4 4 0 100-8 4 4 0 000 8z" opacity="0.6"/><path fill="#22d3ee" d="M12 12a3 3 0 100-6 3 3 0 000 6zM12 14a1 1 0 100-2 1 1 0 000 2z"/><path fill="#38bdf8" d="M18.5 14.5a.5.5 0 00-.5.5v2a.5.5 0 001 0v-2a.5.5 0 00-.5-.5zM5.5 14.5a.5.5 0 00-.5.5v2a.5.5 0 001 0v-2a.5.5 0 00-.5-.5zM12 16.5a.5.5 0 00-.5.5v2a.5.5 0 001 0v-2a.5.5 0 00-.5-.5z"/></svg> },

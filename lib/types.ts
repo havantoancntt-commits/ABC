@@ -42,6 +42,9 @@ export enum AppState {
   FORTUNE_STICKS_SHAKE,
   FORTUNE_STICKS_LOADING,
   FORTUNE_STICKS_RESULT,
+  GOD_OF_WEALTH_BLESSING,
+  GOD_OF_WEALTH_LOADING,
+  GOD_OF_WEALTH_RESULT,
 }
 
 export interface AppStateStructure {
@@ -66,6 +69,8 @@ export interface AppStateStructure {
     bioEnergyData: BioEnergyData | null;
     fortuneStickInfo: FortuneStickInfo | null;
     fortuneStickData: FortuneStickData | null;
+    godOfWealthInfo: GodOfWealthInfo | null;
+    godOfWealthData: GodOfWealthData | null;
     capturedImage: string | null;
     capturedPalmImage: string | null;
     capturedHandwritingImage: string | null;
@@ -373,6 +378,17 @@ export interface FortuneStickData {
     summary: string;
 }
 
+export interface GodOfWealthInfo {
+  name: string;
+  wish: string;
+}
+
+export interface GodOfWealthData {
+  luckyNumber: string;
+  blessingMessage: string;
+  interpretation: string;
+}
+
 
 // --- Saved Item Data Structures ---
 
@@ -429,6 +445,12 @@ export interface SavedBioEnergyPayload {
     data: BioEnergyData;
 }
 
+export interface SavedGodOfWealthPayload {
+    type: 'godOfWealth';
+    info: GodOfWealthInfo;
+    data: GodOfWealthData;
+}
+
 export type SavedItemPayload = 
     | SavedAstrologyPayload 
     | SavedPhysiognomyPayload 
@@ -437,7 +459,8 @@ export type SavedItemPayload =
     | SavedHandwritingPayload 
     | SavedFlowAstrologyPayload 
     | SavedAuspiciousNamingPayload
-    | SavedBioEnergyPayload;
+    | SavedBioEnergyPayload
+    | SavedGodOfWealthPayload;
 
 export interface SavedItem {
     id: string;

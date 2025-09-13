@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense, useReducer } from 'react';
-import type { AppStateStructure, ConfirmationModalState, BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload, BioEnergyInfo, BioEnergyCard, BioEnergyData, FortuneStickInfo, FortuneStickData } from '../types';
+import type { AppStateStructure, ConfirmationModalState, BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload, BioEnergyInfo, BioEnergyCard, BioEnergyData, FortuneStickInfo, FortuneStickData, GodOfWealthInfo, GodOfWealthData } from '../types';
 import { AppState } from '../types';
-import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName, generateBioEnergyReading, getFortuneStickInterpretation } from '../lib/gemini';
+import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName, generateBioEnergyReading, getFortuneStickInterpretation, getGodOfWealthBlessing } from '../lib/gemini';
 import Header from './Header';
 import Footer from './Footer';
 import DonationModal from './PaymentModal';
@@ -43,6 +43,9 @@ const BioEnergyCardDraw = lazy(() => import('./BioEnergyCardDraw'));
 const BioEnergyResult = lazy(() => import('./BioEnergyResult'));
 const FortuneSticksShake = lazy(() => import('./FortuneSticksShake'));
 const FortuneSticksResult = lazy(() => import('./FortuneSticksResult'));
+const GodOfWealthBlessing = lazy(() => import('./GodOfWealthBlessing'));
+const GodOfWealthResult = lazy(() => import('./GodOfWealthResult'));
+
 
 // --- State Management with useReducer ---
 
@@ -53,6 +56,7 @@ const initialState: AppStateStructure = {
     palmReadingData: null, handwritingData: null, tarotReadingData: null, flowAstrologyInfo: null, flowAstrologyData: null,
     careerInfo: null, careerAdviceData: null, talismanInfo: null, talismanData: null, auspiciousNamingInfo: null,
     auspiciousNamingData: null, bioEnergyInfo: null, bioEnergyData: null, fortuneStickInfo: null, fortuneStickData: null,
+    godOfWealthInfo: null, godOfWealthData: null,
     capturedImage: null, capturedPalmImage: null, capturedHandwritingImage: null, capturedEnergyColor: null, drawnBioEnergyCard: null,
   },
   error: null,
@@ -181,6 +185,7 @@ const App: React.FC = () => {
         case 'flowAstrology': id = `flow-${createDeterministicId(payload.info.name, payload.info.year, payload.info.month, payload.info.day)}`; isUpdate = true; break;
         case 'auspiciousNaming': id = `naming-${createDeterministicId(payload.info.childLastName, payload.info.childYear, payload.info.childMonth, payload.info.childDay)}`; isUpdate = true; break;
         case 'bioEnergy': id = `bioenergy-${createDeterministicId(payload.info.name, payload.info.year, payload.info.month, payload.info.day)}`; isUpdate = true; break;
+        case 'godOfWealth': id = `godofwealth-${createDeterministicId(payload.info.name)}`; isUpdate = false; break; // Allow multiple wishes
         default: id = `${payload.type}-${crypto.randomUUID()}`; break;
     }
 
@@ -390,6 +395,22 @@ const App: React.FC = () => {
     }
   }, [language, t]);
 
+  const handleGetGodOfWealthBlessing = useCallback(async (info: GodOfWealthInfo) => {
+    trackFeatureUsage('godOfWealth');
+    dispatch({ type: 'SET_DATA', payload: { godOfWealthInfo: info } });
+    dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_LOADING });
+    try {
+        const data = await getGodOfWealthBlessing(info, language);
+        dispatch({ type: 'SET_DATA', payload: { godOfWealthData: data } });
+        saveItem({ type: 'godOfWealth', info, data });
+        dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_RESULT });
+    } catch (err) {
+        console.error(err);
+        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
+        dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_BLESSING });
+    }
+  }, [language, t, saveItem]);
+
   const handleCaptureImage = useCallback((imageDataUrl: string) => { dispatch({ type: 'SET_DATA', payload: { capturedImage: imageDataUrl } }); }, []);
   const handleRetakeCapture = useCallback(() => { dispatch({ type: 'SET_DATA', payload: { capturedImage: null } }); dispatch({type: 'SET_ERROR', payload: null}); }, []);
   const handleCapturePalmImage = useCallback((imageDataUrl: string) => { dispatch({ type: 'SET_DATA', payload: { capturedPalmImage: imageDataUrl } }); }, []);
@@ -450,6 +471,10 @@ const App: React.FC = () => {
             dispatch({ type: 'SET_DATA', payload: { bioEnergyInfo: payload.info, capturedEnergyColor: payload.color, drawnBioEnergyCard: payload.card, bioEnergyData: payload.data } });
             dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_RESULT });
             break;
+        case 'godOfWealth':
+            dispatch({ type: 'SET_DATA', payload: { godOfWealthInfo: payload.info, godOfWealthData: payload.data }});
+            dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_RESULT });
+            break;
         default: break;
     }
   }, []);
@@ -473,6 +498,7 @@ const App: React.FC = () => {
   const handleResetAuspiciousNaming = createResetHandler(AppState.AUSPICIOUS_NAMING_FORM);
   const handleResetBioEnergy = createResetHandler(AppState.BIO_ENERGY_FORM);
   const handleResetFortuneSticks = createResetHandler(AppState.FORTUNE_STICKS_SHAKE);
+  const handleResetGodOfWealth = createResetHandler(AppState.GOD_OF_WEALTH_BLESSING);
 
   const renderContent = () => {
     switch (state.currentView) {
@@ -494,6 +520,7 @@ const App: React.FC = () => {
             onStartAuspiciousNaming={() => dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_FORM })}
             onStartBioEnergy={() => dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_FORM })}
             onStartFortuneSticks={() => dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_SHAKE })}
+            onStartGodOfWealth={() => dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_BLESSING })}
         />;
       case AppState.SAVED_ITEMS:
         return <SavedItems items={savedItems} onView={handleViewItem} onDelete={handleDeleteItem} onCreateNew={handleGoHome} />;
@@ -577,8 +604,14 @@ const App: React.FC = () => {
         return <Spinner initialMessageKey='spinnerFortuneSticks' />;
       case AppState.FORTUNE_STICKS_RESULT:
         return state.data.fortuneStickData && <FortuneSticksResult data={state.data.fortuneStickData} onTryAgain={handleResetFortuneSticks} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.GOD_OF_WEALTH_BLESSING:
+        return <GodOfWealthBlessing onSubmit={handleGetGodOfWealthBlessing} />;
+      case AppState.GOD_OF_WEALTH_LOADING:
+        return <Spinner initialMessageKey='spinnerGodOfWealth' />;
+      case AppState.GOD_OF_WEALTH_RESULT:
+        return state.data.godOfWealthData && state.data.godOfWealthInfo && <GodOfWealthResult data={state.data.godOfWealthData} info={state.data.godOfWealthInfo} onTryAgain={handleResetGodOfWealth} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       default:
-        return <Home onStartAstrology={() => {}} onStartPhysiognomy={() => {}} onStartZodiacFinder={() => {}} onStartIChing={() => {}} onStartShop={() => {}} onStartNumerology={() => {}} onStartPalmReading={() => {}} onStartTarot={() => {}} onStartFlowAstrology={() => {}} onStartAuspiciousDayFinder={() => {}} onStartHandwritingAnalysis={() => {}} onStartCareerAdvisor={() => {}} onStartTalismanGenerator={() => {}} onStartAuspiciousNaming={() => {}} onStartBioEnergy={() => {}} onStartFortuneSticks={() => {}} />;
+        return <Home onStartAstrology={() => {}} onStartPhysiognomy={() => {}} onStartZodiacFinder={() => {}} onStartIChing={() => {}} onStartShop={() => {}} onStartNumerology={() => {}} onStartPalmReading={() => {}} onStartTarot={() => {}} onStartFlowAstrology={() => {}} onStartAuspiciousDayFinder={() => {}} onStartHandwritingAnalysis={() => {}} onStartCareerAdvisor={() => {}} onStartTalismanGenerator={() => {}} onStartAuspiciousNaming={() => {}} onStartBioEnergy={() => {}} onStartFortuneSticks={() => {}} onStartGodOfWealth={() => {}} />;
     }
   };
 
