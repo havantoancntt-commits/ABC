@@ -1,19 +1,70 @@
 import React from 'react';
 import { useLocalization } from '../hooks/useLocalization';
 
-const imageBase64 = "data:image/webp;base64,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";
-
 const MysticalHero: React.FC = () => {
     const { t } = useLocalization();
     return (
         <div className="relative mb-16 max-w-5xl mx-auto group animate-fade-in" style={{ animationDelay: '0.5s' }}>
             <div className="absolute -inset-1 bg-gradient-to-br from-purple-600 via-yellow-500 to-rose-600 rounded-3xl blur-xl opacity-25 group-hover:opacity-50 transition duration-1000"></div>
             <div className="relative aspect-[16/7] w-full bg-black rounded-3xl overflow-hidden shadow-2xl shadow-black/50 border border-gray-800">
-                <img
-                    src={imageBase64}
-                    alt={t('appName')}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+                <svg viewBox="0 0 400 175" xmlns="http://www.w3.org/2000/svg" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" aria-hidden="true">
+                    <defs>
+                        <filter id="hero-glow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="3" result="blur" />
+                            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.7 0" result="glowMatrix" />
+                            <feMerge>
+                                <feMergeNode in="glowMatrix" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                        <radialGradient id="grad-purple-center" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stopColor="var(--color-secondary)" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="var(--color-secondary)" stopOpacity="0" />
+                        </radialGradient>
+                        <radialGradient id="grad-yellow-top" cx="85%" cy="20%" r="60%">
+                             <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0" />
+                        </radialGradient>
+                    </defs>
+                    
+                    {/* Background Gradients */}
+                    <rect width="400" height="175" fill="black" />
+                    <rect x="100" y="-50" width="200" height="200" fill="url(#grad-purple-center)" />
+                    <rect x="0" y="0" width="400" height="175" fill="url(#grad-yellow-top)" />
+
+                    {/* Starfield */}
+                    <g fill="var(--color-text-primary)" opacity="0.6">
+                        <circle cx="50" cy="30" r="1" className="animate-pulse" style={{ animationDelay: '0.5s', animationDuration: '3s' }} />
+                        <circle cx="120" cy="150" r="0.5" className="animate-pulse" style={{ animationDelay: '1s', animationDuration: '4s' }} />
+                        <circle cx="200" cy="80" r="1.2" className="animate-pulse" style={{ animationDuration: '2s' }} />
+                        <circle cx="350" cy="130" r="0.8" className="animate-pulse" style={{ animationDelay: '1.5s', animationDuration: '3.5s' }} />
+                        <circle cx="250" cy="20" r="0.6" />
+                        <circle cx="80" cy="90" r="1" className="animate-pulse" style={{ animationDelay: '0.2s', animationDuration: '2.5s' }} />
+                        <circle cx="380" cy="40" r="1" />
+                        <circle cx="20" cy="130" r="0.7" />
+                        <circle cx="300" cy="160" r="0.5" className="animate-pulse" style={{ animationDelay: '2s', animationDuration: '4s' }} />
+                    </g>
+
+                    {/* Central Astrology Symbol */}
+                    <g transform="translate(200 87.5)" stroke="var(--color-primary)" strokeWidth="1" fill="none" filter="url(#hero-glow)">
+                        <circle r="60" opacity="0.2" />
+                        <circle r="50" strokeDasharray="4 4" opacity="0.4" />
+                        <circle r="40" />
+                        
+                        <g opacity="0.7">
+                            <line x1="0" y1="-40" x2="0" y2="40" />
+                            <line x1="-40" y1="0" x2="40" y2="0" />
+                            <line x1="-28.28" y1="-28.28" x2="28.28" y2="28.28" />
+                            <line x1="-28.28" y1="28.28" x2="28.28" y2="-28.28" />
+                        </g>
+
+                        <circle r="10" fill="var(--color-primary)" fillOpacity="0.1" />
+                    </g>
+                    
+                     <text x="20" y="160" fontFamily="'Playfair Display', serif" fontSize="12" fill="var(--color-text-secondary)" opacity="0.5">
+                        {t('appName')}
+                    </text>
+                </svg>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
             </div>
         </div>
