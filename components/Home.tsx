@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Card from './Card';
 import Button from './Button';
 import { useLocalization } from '../hooks/useLocalization';
-import { useGoogleAuth } from '../hooks/useGoogleAuth';
 
 interface Props {
     onStartAstrology: () => void;
@@ -68,28 +67,11 @@ const FeatureCard: React.FC<{
 
 const Home: React.FC<Props> = (props) => {
     const { t } = useLocalization();
-    const { user, isConfigured, isInitialized } = useGoogleAuth();
-
-    useEffect(() => {
-        if (isInitialized && !user) {
-            const signInButtonContainer = document.getElementById('google-signin-button');
-            if (signInButtonContainer) {
-                // Ensure we don't render the button multiple times on re-renders
-                if (signInButtonContainer.childElementCount === 0) {
-                    window.google.accounts.id.renderButton(
-                        signInButtonContainer,
-                        { theme: "outline", size: "large", type: "standard", shape: "pill" }
-                    );
-                }
-            }
-        }
-    }, [isInitialized, user]);
 
     const features = [
         { title: t('astrologyTitle'), description: t('astrologyDesc'), buttonText: t('astrologyButton'), onClick: props.onStartAstrology, buttonVariant: 'primary' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24"><defs><radialGradient id="grad1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop offset="0%" style={{stopColor: 'rgb(250, 204, 21)', stopOpacity:1}} /><stop offset="100%" style={{stopColor:'rgb(245, 158, 11)',stopOpacity:1}} /></radialGradient></defs><path fill="url(#grad1)" d="M12 2a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V2.75A.75.75 0 0112 2zM12 17a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0112 17zM2.75 12a.75.75 0 010-1.5h3.5a.75.75 0 010 1.5h-3.5zM17.75 12a.75.75 0 010-1.5h3.5a.75.75 0 010 1.5h-3.5z" opacity="0.6"/><path fill="url(#grad1)" d="M12 7a5 5 0 100 10 5 5 0 000-10zm-7 5a7 7 0 1114 0 7 7 0 01-14 0z" /></svg> },
         { title: t('careerAdvisorTitle'), description: t('careerAdvisorDesc'), buttonText: t('careerAdvisorButton'), onClick: props.onStartCareerAdvisor, buttonVariant: 'career' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24"><path fill="#38bdf8" d="M14.27 20.27L12 22.54l-2.27-2.27a8.5 8.5 0 01-2.27-6.02V5.5a.5.5 0 011 0v8.75a7.5 7.5 0 0013.5 0V5.5a.5.5 0 011 0v8.75a8.5 8.5 0 01-2.27 6.02zM12 13a4 4 0 100-8 4 4 0 000 8z" opacity="0.6"/><path fill="#22d3ee" d="M12 12a3 3 0 100-6 3 3 0 000 6zM12 14a1 1 0 100-2 1 1 0 000 2z"/><path fill="#38bdf8" d="M18.5 14.5a.5.5 0 00-.5.5v2a.5.5 0 001 0v-2a.5.5 0 00-.5-.5zM5.5 14.5a.5.5 0 00-.5.5v2a.5.5 0 001 0v-2a.5.5 0 00-.5-.5zM12 16.5a.5.5 0 00-.5.5v2a.5.5 0 001 0v-2a.5.5 0 00-.5-.5z"/></svg> },
         { title: t('auspiciousNamingTitle'), description: t('auspiciousNamingDesc'), buttonText: t('auspiciousNamingButton'), onClick: props.onStartAuspiciousNaming, buttonVariant: 'naming' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24"><path fill="#34d399" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.996.996 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/><path fill="#38bdf8" d="M2 20h20v2H2z" opacity="0.6"/></svg> },
-        // FIX: Corrected invalid translation keys.
         { title: t('bioEnergyTitle'), description: t('bioEnergyDesc'), buttonText: t('bioEnergyButton'), onClick: props.onStartBioEnergy, buttonVariant: 'bioenergy' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24"><defs><radialGradient id="gradBio" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#67e8f9"/><stop offset="100%" stopColor="#22c55e"/></radialGradient></defs><path fill="url(#gradBio)" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16z" opacity="0.5"/><path fill="url(#gradBio)" d="M12 10.5c-2.2 0-4-1.2-4-2.8s1.8-2.8 4-2.8 4 1.2 4 2.8-1.8 2.8-4 2.8zm0 3c2.2 0 4 1.2 4 2.8s-1.8 2.8-4 2.8-4-1.2-4-2.8 1.8-2.8 4-2.8z"/></svg> },
         { title: t('flowAstrologyTitle'), description: t('flowAstrologyDesc'), buttonText: t('flowAstrologyButton'), onClick: props.onStartFlowAstrology, buttonVariant: 'flow' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24"><path fill="#a855f7" d="M2.5 7.5c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5c0 1.9-1.2 3.5-2.9 4.2.3 2.1 1.3 4 2.9 5.3 1.6-1.3 2.6-3.2 2.9-5.3 1.7-.7 2.9-2.3 2.9-4.2 0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5-2 4.5-4.5 4.5c-2.4 0-4.3-1.8-4.5-4 .1 1.7-.6 3.3-1.9 4.5-1.9 1.8-4.9 1.8-6.8 0-1.3-1.2-2-2.8-1.9-4.5-2.2.2-4.1 2.1-4.1 4.5z" opacity="0.5"/><path fill="#38bdf8" d="M12 14c-1.5 0-2.8-1-3.2-2.4.9-.4 1.9-.6 3-.6s2.1.2 3 .6c-.4 1.4-1.7 2.4-3.2 2.4z"/><circle cx="7" cy="7.5" r="2.5" fill="#38bdf8"/><circle cx="17" cy="7.5" r="2.5" fill="#38bdf8"/></svg> },
         { title: t('physiognomyTitle'), description: t('physiognomyDesc'), buttonText: t('physiognomyButton'), onClick: props.onStartPhysiognomy, buttonVariant: 'special' as const, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24"><g fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path stroke="#c084fc" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" opacity="0.5"/><path stroke="#a855f7" d="M9.5 9.5a.5.5 0 100-1 .5.5 0 000 1zM14.5 9.5a.5.5 0 100-1 .5.5 0 000 1zM15 14s-1.5 2-3 2-3-2-3-2"/><path stroke="#a855f7" strokeDasharray="2 2" d="M2.5 8h19M2.5 16h19"/></g></svg> },
@@ -108,21 +90,11 @@ const Home: React.FC<Props> = (props) => {
         <div className="max-w-7xl mx-auto">
             <div className="text-center pt-8 pb-16">
                 <h1 className="text-5xl md:text-6xl font-bold text-gray-100 font-serif leading-tight animate-fade-in-down">
-                    {user ? t('welcomeUser', {name: user.name.split(' ')[0]}) : t('homeTitle')}
+                    {t('homeTitle')}
                 </h1>
                 <p className="mt-6 text-lg text-gray-300 leading-relaxed max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                    {user ? t('homeSubtitleLoggedIn') : t('homeSubtitle')}
+                    {t('homeSubtitle')}
                 </p>
-                {!user && (
-                    <div className="mt-8 animate-fade-in" style={{ animationDelay: '0.6s' }}>
-                        <p className="text-amber-200/80 mb-4">{t('homeAuthPrompt')}</p>
-                        {isConfigured ? (
-                           <div id="google-signin-button" className="flex justify-center"></div>
-                        ) : (
-                           <p className="text-sm text-gray-500 italic">{t('homeAuthUnavailable')}</p>
-                        )}
-                    </div>
-                )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-10">
                 {features.map((feature, index) => (

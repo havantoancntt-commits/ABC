@@ -2,7 +2,6 @@
 export enum AppState {
   HOME,
   SAVED_ITEMS,
-  ASTROLOGY_PASSWORD,
   ASTROLOGY_FORM,
   LOADING,
   RESULT,
@@ -29,7 +28,6 @@ export enum AppState {
   CAREER_ADVISOR_FORM,
   CAREER_ADVISOR_LOADING,
   CAREER_ADVISOR_RESULT,
-  CAREER_ADVISOR_PASSWORD,
   TALISMAN_GENERATOR,
   TALISMAN_LOADING,
   TALISMAN_RESULT,
@@ -41,8 +39,6 @@ export enum AppState {
   BIO_ENERGY_CARD_DRAW,
   BIO_ENERGY_LOADING,
   BIO_ENERGY_RESULT,
-  ADMIN_LOGIN,
-  ADMIN_DASHBOARD,
 }
 
 export interface AppStateStructure {
@@ -73,12 +69,10 @@ export interface AppStateStructure {
     drawnBioEnergyCard: BioEnergyCard | null;
   };
   error: string | null;
-  postLoginAction: (() => void) | null;
 }
 
 export type ConfirmationModalState = 
-    | { type: 'deleteItem'; item: SavedItem; title: string; message: string; } 
-    | { type: 'adminAction'; action: 'clear_charts' | 'clear_history'; title: string; message: string; };
+    | { type: 'deleteItem'; item: SavedItem; title: string; message: string; };
 
 
 // --- Feature-Specific Types ---
@@ -362,29 +356,6 @@ export interface BioEnergyData {
     synthesizedPrediction: string;
 }
 
-export interface GoogleUser {
-    sub: string;
-    name: string;
-    picture: string;
-    email: string;
-}
-
-export interface AdminLogEntry {
-    timestamp: string;
-    user: string;
-    action: string;
-    details: string;
-}
-
-export interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  createdAt: string; // ISO String
-  userId: string; // Admin user's ID
-}
-
 // --- Saved Item Data Structures ---
 
 export interface SavedAstrologyPayload {
@@ -454,4 +425,32 @@ export interface SavedItem {
     id: string;
     timestamp: string; // ISO string for sorting
     payload: SavedItemPayload;
+}
+
+// --- Admin & User Management Types ---
+
+export interface AdminLogEntry {
+    timestamp: string;
+    user: string;
+    action: string;
+    details: string;
+}
+
+export interface GoogleUser {
+  email: string;
+  email_verified: boolean;
+  name: string;
+  picture: string;
+  given_name: string;
+  family_name: string;
+  sub: string; // User ID
+}
+
+export interface Customer {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    createdAt: string;
+    userId: string;
 }

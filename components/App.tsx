@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect, lazy, Suspense, useReducer, useRef } from 'react';
-import type { AppStateStructure, ConfirmationModalState, BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload, BioEnergyInfo, BioEnergyCard, BioEnergyData, GoogleUser } from '../types';
+import React, { useState, useCallback, useEffect, lazy, Suspense, useReducer } from 'react';
+import type { AppStateStructure, ConfirmationModalState, BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload, BioEnergyInfo, BioEnergyCard, BioEnergyData } from '../types';
 import { AppState } from '../types';
 import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName, generateBioEnergyReading } from '../lib/gemini';
 import Header from './Header';
@@ -9,14 +9,11 @@ import Spinner from './Spinner';
 import ZaloContact from './ZaloContact';
 import ConfirmationModal from './ConfirmationModal';
 import { useLocalization } from '../hooks/useLocalization';
-import { useGoogleAuth } from '../hooks/useGoogleAuth';
-import { logAdminEvent } from '../lib/logger';
 import type { TranslationKey } from '../hooks/useLocalization';
 
 // --- Lazy Load Components for Performance ---
 const Home = lazy(() => import('./Home'));
 const SavedItems = lazy(() => import('./SavedItems'));
-const PasswordPrompt = lazy(() => import('./PasswordPrompt'));
 const BirthInfoForm = lazy(() => import('./BirthInfoForm'));
 const AstrologyChart = lazy(() => import('./AstrologyChart'));
 const FaceScan = lazy(() => import('./FaceScan'));
@@ -44,8 +41,6 @@ const BioEnergyForm = lazy(() => import('./BioEnergyForm'));
 const BioEnergyCapture = lazy(() => import('./BioEnergyCapture'));
 const BioEnergyCardDraw = lazy(() => import('./BioEnergyCardDraw'));
 const BioEnergyResult = lazy(() => import('./BioEnergyResult'));
-const AdminLogin = lazy(() => import('./AdminLogin'));
-const AdminDashboard = lazy(() => import('./AdminDashboard'));
 
 // --- State Management with useReducer ---
 
@@ -59,15 +54,13 @@ const initialState: AppStateStructure = {
     capturedHandwritingImage: null, capturedEnergyColor: null, drawnBioEnergyCard: null,
   },
   error: null,
-  postLoginAction: null,
 };
 
 type AppAction =
   | { type: 'SET_VIEW'; payload: AppState }
   | { type: 'SET_DATA'; payload: Partial<AppStateStructure['data']> }
   | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'SET_POST_LOGIN_ACTION'; payload: (() => void) | null }
-  | { type: 'RESET_VIEW'; payload: { user: GoogleUser | null, savedItems: SavedItem[] } }
+  | { type: 'RESET_VIEW'; payload: { savedItems: SavedItem[] } }
   | { type: 'RESET_FEATURE_DATA' };
 
 function appReducer(state: AppStateStructure, action: AppAction): AppStateStructure {
@@ -78,16 +71,11 @@ function appReducer(state: AppStateStructure, action: AppAction): AppStateStruct
       return { ...state, data: { ...state.data, ...action.payload } };
     case 'SET_ERROR':
       return { ...state, error: action.payload };
-    case 'SET_POST_LOGIN_ACTION':
-      return { ...state, postLoginAction: action.payload };
     case 'RESET_FEATURE_DATA':
         return {...state, data: initialState.data, error: null };
     case 'RESET_VIEW': {
-      const { user, savedItems } = action.payload;
-      const isAdmin = sessionStorage.getItem('admin_auth') === 'true';
-      let nextView = AppState.HOME;
-      if (isAdmin) nextView = AppState.ADMIN_DASHBOARD;
-      else if (user && savedItems.length > 0) nextView = AppState.SAVED_ITEMS;
+      const { savedItems } = action.payload;
+      const nextView = savedItems.length > 0 ? AppState.SAVED_ITEMS : AppState.HOME;
       return { ...initialState, currentView: nextView };
     }
     default:
@@ -103,24 +91,12 @@ const App: React.FC = () => {
   const [visitCount, setVisitCount] = useState<number>(0);
   
   const { language, t } = useLocalization();
-  const { user, authError } = useGoogleAuth();
   
-  const prevUserRef = useRef<GoogleUser | null>(null);
-
-  const getStorageKey = useCallback((userId?: string) => {
-    const id = userId || user?.sub;
-    return id ? `savedItems_${id}` : 'savedItems_guest';
-  }, [user]);
-
-  useEffect(() => {
-    if (authError) {
-      dispatch({ type: 'SET_ERROR', payload: t('googleSignInError') });
-    }
-  }, [authError, t]);
+  const getStorageKey = useCallback(() => 'savedItems_guest', []);
 
   useEffect(() => {
     const currentStorageKey = getStorageKey();
-    const oldStorageKey = user ? `astrologyCharts_${user.sub}` : 'astrologyCharts_guest';
+    const oldStorageKey = 'astrologyCharts_guest';
     
     try {
       const storedItems = localStorage.getItem(currentStorageKey);
@@ -130,7 +106,7 @@ const App: React.FC = () => {
         const parsedItems = JSON.parse(storedItems);
         if (Array.isArray(parsedItems)) { // Basic validation
             setSavedItems(parsedItems);
-             if (user && parsedItems.length > 0 && sessionStorage.getItem('admin_auth') !== 'true') {
+             if (parsedItems.length > 0) {
                dispatch({ type: 'SET_VIEW', payload: AppState.SAVED_ITEMS });
             }
         }
@@ -147,74 +123,26 @@ const App: React.FC = () => {
             setSavedItems(migratedItems);
             localStorage.setItem(currentStorageKey, JSON.stringify(migratedItems));
             localStorage.removeItem(oldStorageKey);
-            if (user && migratedItems.length > 0 && sessionStorage.getItem('admin_auth') !== 'true') {
+            if (migratedItems.length > 0) {
                dispatch({ type: 'SET_VIEW', payload: AppState.SAVED_ITEMS });
             }
         }
       } else {
-        setSavedItems([]); // Clear items if nothing is in storage for the user
+        setSavedItems([]); // Clear items if nothing is in storage
       }
     } catch (e) {
       console.error("Could not load items from localStorage", e);
       localStorage.removeItem(currentStorageKey);
       localStorage.removeItem(oldStorageKey);
     }
-  }, [user, getStorageKey]);
+  }, [getStorageKey]);
   
-  useEffect(() => {
-    // Check for login transition: from guest (null) to a logged-in user
-    if (!prevUserRef.current && user) {
-        const guestStorageKey = 'savedItems_guest';
-        const userStorageKey = getStorageKey(user.sub);
-
-        try {
-            const guestItemsRaw = localStorage.getItem(guestStorageKey);
-            if (guestItemsRaw) {
-                const guestItems: SavedItem[] = JSON.parse(guestItemsRaw);
-                
-                if (guestItems.length > 0) {
-                    const userItemsRaw = localStorage.getItem(userStorageKey);
-                    const userItems: SavedItem[] = userItemsRaw ? JSON.parse(userItemsRaw) : [];
-
-                    // Merge items. Use a Map to handle potential duplicates, preferring the newer item on conflict.
-                    const mergedItemsMap = new Map<string, SavedItem>();
-                    
-                    const allItems = [...userItems, ...guestItems];
-                    
-                    allItems.forEach(item => {
-                        if (!mergedItemsMap.has(item.id) || new Date(item.timestamp) > new Date(mergedItemsMap.get(item.id)!.timestamp)) {
-                            mergedItemsMap.set(item.id, item);
-                        }
-                    });
-                    
-                    const finalItems = Array.from(mergedItemsMap.values());
-                    
-                    finalItems.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-                    setSavedItems(finalItems);
-                    localStorage.setItem(userStorageKey, JSON.stringify(finalItems));
-                    localStorage.removeItem(guestStorageKey);
-
-                    logAdminEvent('Migrate Guest Data', user.email, `${guestItems.length} items migrated.`);
-                }
-            }
-        } catch (e) {
-            console.error("Failed to migrate guest data:", e);
-            localStorage.removeItem(guestStorageKey);
-        }
-    }
-
-    // Update the ref for the next render
-    prevUserRef.current = user;
-  }, [user, getStorageKey]);
-
   useEffect(() => {
     if (sessionStorage.getItem('visit_logged') !== 'true') {
         let currentCount = parseInt(localStorage.getItem('visitCount') || '0', 10);
         currentCount++;
         localStorage.setItem('visitCount', currentCount.toString());
         setVisitCount(currentCount);
-        logAdminEvent('App Visit', 'Guest', `Total Visits: ${currentCount}`);
         sessionStorage.setItem('visit_logged', 'true');
     } else {
         setVisitCount(parseInt(localStorage.getItem('visitCount') || '0', 10));
@@ -266,7 +194,6 @@ const App: React.FC = () => {
 
   const handleGenerateChart = useCallback(async (info: BirthInfo) => {
     trackFeatureUsage('astrologyChart');
-    logAdminEvent('Generate Astrology Chart', user?.email || 'Guest', `For: ${info.name}`);
     dispatch({ type: 'SET_DATA', payload: { birthInfo: info } });
     dispatch({ type: 'SET_VIEW', payload: AppState.LOADING });
     try {
@@ -276,16 +203,15 @@ const App: React.FC = () => {
       dispatch({ type: 'SET_VIEW', payload: AppState.RESULT });
     } catch (err) {
       console.error(err);
-      dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : t('errorUnknown') });
+      dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
       dispatch({ type: 'SET_VIEW', payload: AppState.ASTROLOGY_FORM });
     }
-  }, [language, t, user, saveItem]);
+  }, [language, t, saveItem]);
   
   const handleAnalyzeFace = useCallback(async () => {
     const { capturedImage } = state.data;
     if (!capturedImage) return;
     trackFeatureUsage('physiognomy');
-    logAdminEvent('Analyze Physiognomy', user?.email || 'Guest');
     dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_LOADING });
     const base64Data = capturedImage.split(',')[1];
     if(!base64Data) {
@@ -300,16 +226,15 @@ const App: React.FC = () => {
       dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_RESULT });
     } catch (err) {
        console.error(err);
-       dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : t('errorUnknown') });
+       dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
        dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_CAPTURE });
     }
-  }, [state.data.capturedImage, language, t, user, saveItem]);
+  }, [state.data.capturedImage, language, t, saveItem]);
 
   const handleAnalyzePalm = useCallback(async () => {
     const { capturedPalmImage } = state.data;
     if (!capturedPalmImage) return;
     trackFeatureUsage('palmReading');
-    logAdminEvent('Analyze Palm', user?.email || 'Guest');
     dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_LOADING });
     const base64Data = capturedPalmImage.split(',')[1];
     if(!base64Data) {
@@ -324,16 +249,15 @@ const App: React.FC = () => {
       dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_RESULT });
     } catch (err) {
        console.error(err);
-       dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : t('errorUnknown') });
+       dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
        dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_CAPTURE });
     }
-  }, [state.data.capturedPalmImage, language, t, user, saveItem]);
+  }, [state.data.capturedPalmImage, language, t, saveItem]);
 
   const handleAnalyzeHandwriting = useCallback(async () => {
     const { capturedHandwritingImage } = state.data;
     if (!capturedHandwritingImage) return;
     trackFeatureUsage('handwriting');
-    logAdminEvent('Analyze Handwriting', user?.email || 'Guest');
     dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_LOADING });
     const base64Data = capturedHandwritingImage.split(',')[1];
     if(!base64Data) {
@@ -348,14 +272,13 @@ const App: React.FC = () => {
       dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_RESULT });
     } catch (err) {
        console.error(err);
-       dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : t('errorUnknown') });
+       dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
        dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_CAPTURE });
     }
-  }, [state.data.capturedHandwritingImage, language, t, user, saveItem]);
+  }, [state.data.capturedHandwritingImage, language, t, saveItem]);
 
   const handleGenerateNumerology = useCallback(async (info: NumerologyInfo) => {
     trackFeatureUsage('numerology');
-    logAdminEvent('Generate Numerology', user?.email || 'Guest', `For: ${info.fullName}`);
     dispatch({ type: 'SET_DATA', payload: { numerologyInfo: info } });
     dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_LOADING });
     try {
@@ -365,14 +288,13 @@ const App: React.FC = () => {
         dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_RESULT });
     } catch (err) {
         console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : t('errorUnknown') });
+        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
         dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_FORM });
     }
-  }, [language, t, user, saveItem]);
+  }, [language, t, saveItem]);
 
   const handleGenerateFlowAstrology = useCallback(async (info: FlowAstrologyInfo) => {
     trackFeatureUsage('flowAstrology');
-    logAdminEvent('Generate Flow Astrology', user?.email || 'Guest', `For: ${info.name}`);
     dispatch({ type: 'SET_DATA', payload: { flowAstrologyInfo: info } });
     dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_LOADING });
     try {
@@ -382,14 +304,13 @@ const App: React.FC = () => {
         dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_RESULT });
     } catch (err) {
         console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : t('errorUnknown') });
+        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
         dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_FORM });
     }
-  }, [language, t, user, saveItem]);
+  }, [language, t, saveItem]);
 
     const handleGenerateCareerAdvice = useCallback(async (info: CareerInfo) => {
     trackFeatureUsage('careerAdvisor');
-    logAdminEvent('Get Career Advice', user?.email || 'Guest', `For: ${info.name}`);
     dispatch({ type: 'SET_DATA', payload: { careerInfo: info } });
     dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_LOADING });
     try {
@@ -398,14 +319,13 @@ const App: React.FC = () => {
         dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_RESULT });
     } catch (err) {
         console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : t('errorUnknown') });
+        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
         dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_FORM });
     }
-  }, [language, t, user]);
+  }, [language, t]);
 
   const handleGenerateTalisman = useCallback(async (info: TalismanInfo) => {
     trackFeatureUsage('talisman');
-    logAdminEvent('Generate Talisman', user?.email || 'Guest', `For: ${info.name}`);
     dispatch({ type: 'SET_DATA', payload: { talismanInfo: info } });
     dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_LOADING });
     try {
@@ -414,14 +334,13 @@ const App: React.FC = () => {
         dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_RESULT });
     } catch (err) {
         console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : t('errorUnknown') });
+        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
         dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_GENERATOR });
     }
-  }, [language, t, user]);
+  }, [language, t]);
 
   const handleGenerateAuspiciousName = useCallback(async (info: AuspiciousNamingInfo) => {
     trackFeatureUsage('auspiciousNaming');
-    logAdminEvent('Generate Auspicious Name', user?.email || 'Guest', `For family: ${info.childLastName}`);
     dispatch({ type: 'SET_DATA', payload: { auspiciousNamingInfo: info } });
     dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_LOADING });
     try {
@@ -431,16 +350,15 @@ const App: React.FC = () => {
         dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_RESULT });
     } catch (err) {
         console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : t('errorUnknown') });
+        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
         dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_FORM });
     }
-  }, [language, t, user, saveItem]);
+  }, [language, t, saveItem]);
   
   const handleGenerateBioEnergy = useCallback(async (card: BioEnergyCard) => {
     const { bioEnergyInfo, capturedEnergyColor } = state.data;
     if (!bioEnergyInfo || !capturedEnergyColor) return;
     trackFeatureUsage('bioEnergyReading');
-    logAdminEvent('Generate Bio-Energy Reading', user?.email || 'Guest', `For: ${bioEnergyInfo.name}`);
     dispatch({ type: 'SET_DATA', payload: { drawnBioEnergyCard: card } });
     dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_LOADING });
     try {
@@ -450,10 +368,10 @@ const App: React.FC = () => {
       dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_RESULT });
     } catch (err) {
       console.error(err);
-      dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : t('errorUnknown') });
+      dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
       dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_FORM });
     }
-  }, [state.data, language, t, user, saveItem]);
+  }, [state.data, language, t, saveItem]);
 
   const handleCaptureImage = useCallback((imageDataUrl: string) => { dispatch({ type: 'SET_DATA', payload: { capturedImage: imageDataUrl } }); }, []);
   const handleRetakeCapture = useCallback(() => { dispatch({ type: 'SET_DATA', payload: { capturedImage: null } }); dispatch({type: 'SET_ERROR', payload: null}); }, []);
@@ -470,31 +388,13 @@ const App: React.FC = () => {
       setModalState({ type: 'deleteItem', item: itemToDelete, title: t('confirmDeleteTitle'), message: t('confirmDeleteMessageWithName', { name }) });
   };
   
-  const handleAdminAction = (action: 'clear_charts' | 'clear_history') => {
-      const title = action === 'clear_charts' ? t('adminClearChartsConfirmTitle') : t('adminClearHistoryConfirmTitle');
-      const message = action === 'clear_charts' ? t('adminClearChartsConfirmMessage') : t('adminClearHistoryConfirmMessage');
-      setModalState({ type: 'adminAction', action, title, message });
-  };
-
   const confirmModalAction = () => {
-    if (!modalState) return;
-    if (modalState.type === 'deleteItem') {
-      const itemToDelete = modalState.item;
-      logAdminEvent('Delete Item', user?.email || 'Guest', `ID: ${itemToDelete.id}, Type: ${itemToDelete.payload.type}`);
-      const newItems = savedItems.filter(item => item.id !== itemToDelete.id);
-      setSavedItems(newItems);
-      localStorage.setItem(getStorageKey(), JSON.stringify(newItems));
-    } else if (modalState.type === 'adminAction') {
-        if (modalState.action === 'clear_charts') {
-            logAdminEvent('Admin Action', user?.email || 'Admin', 'Cleared all charts');
-            // This is a bit brute-force, but effective for cleaning up all users.
-            Object.keys(localStorage).filter(key => key.startsWith('savedItems_')).forEach(key => localStorage.removeItem(key));
-            setSavedItems([]);
-        } else if (modalState.action === 'clear_history') {
-             logAdminEvent('Admin Action', user?.email || 'Admin', 'Cleared activity log');
-            localStorage.removeItem('adminHistoryLog');
-        }
-    }
+    if (!modalState || modalState.type !== 'deleteItem') return;
+    
+    const itemToDelete = modalState.item;
+    const newItems = savedItems.filter(item => item.id !== itemToDelete.id);
+    setSavedItems(newItems);
+    localStorage.setItem(getStorageKey(), JSON.stringify(newItems));
     setModalState(null);
   };
   
@@ -539,7 +439,7 @@ const App: React.FC = () => {
 
   const { birthInfo, chartData } = state.data;
   
-  const handleGoHome = useCallback(() => { dispatch({ type: 'RESET_VIEW', payload: { user, savedItems } }); }, [user, savedItems]);
+  const handleGoHome = useCallback(() => { dispatch({ type: 'RESET_VIEW', payload: { savedItems } }); }, [savedItems]);
   const createResetHandler = (view: AppState) => useCallback(() => {
       dispatch({ type: 'RESET_FEATURE_DATA' });
       dispatch({ type: 'SET_VIEW', payload: view });
@@ -555,7 +455,6 @@ const App: React.FC = () => {
   const handleResetTalisman = createResetHandler(AppState.TALISMAN_GENERATOR);
   const handleResetAuspiciousNaming = createResetHandler(AppState.AUSPICIOUS_NAMING_FORM);
   const handleResetBioEnergy = createResetHandler(AppState.BIO_ENERGY_FORM);
-  const handleResetTarot = useCallback(() => { dispatch({ type: 'SET_VIEW', payload: AppState.TAROT_READING }); }, []);
 
   const renderContent = () => {
     switch (state.currentView) {
@@ -572,20 +471,15 @@ const App: React.FC = () => {
             onStartFlowAstrology={() => dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_FORM })}
             onStartAuspiciousDayFinder={() => dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_DAY_FINDER })}
             onStartHandwritingAnalysis={() => dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_CAPTURE })}
-            onStartCareerAdvisor={() => {
-                const isUnlocked = sessionStorage.getItem('career_unlocked') === 'true';
-                dispatch({ type: 'SET_VIEW', payload: isUnlocked ? AppState.CAREER_ADVISOR_FORM : AppState.CAREER_ADVISOR_PASSWORD });
-            }}
+            onStartCareerAdvisor={() => dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_FORM })}
             onStartTalismanGenerator={() => dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_GENERATOR })}
             onStartAuspiciousNaming={() => dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_FORM })}
             onStartBioEnergy={() => dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_FORM })}
         />;
       case AppState.SAVED_ITEMS:
         return <SavedItems items={savedItems} onView={handleViewItem} onDelete={handleDeleteItem} onCreateNew={handleGoHome} />;
-      case AppState.ASTROLOGY_PASSWORD:
-        return <PasswordPrompt feature="astrology" onSuccess={() => dispatch({ type: 'SET_VIEW', payload: AppState.ASTROLOGY_FORM })} onBack={handleGoHome} />;
       case AppState.ASTROLOGY_FORM:
-        return <BirthInfoForm onSubmit={handleGenerateChart} initialName={user?.name} />;
+        return <BirthInfoForm onSubmit={handleGenerateChart} />;
       case AppState.LOADING:
         return <Spinner initialMessageKey='spinnerAstrology' />;
       case AppState.RESULT:
@@ -615,7 +509,7 @@ const App: React.FC = () => {
       case AppState.SHOP:
         return <Shop onBack={handleGoHome} />;
       case AppState.NUMEROLOGY_FORM:
-        return <NumerologyForm onSubmit={handleGenerateNumerology} initialName={user?.name} />;
+        return <NumerologyForm onSubmit={handleGenerateNumerology} />;
       case AppState.NUMEROLOGY_LOADING:
         return <Spinner initialMessageKey='spinnerNumerology' />;
       case AppState.NUMEROLOGY_RESULT:
@@ -623,23 +517,21 @@ const App: React.FC = () => {
       case AppState.TAROT_READING:
         return <TarotReading onOpenDonationModal={() => setIsDonationModalOpen(true)} onBack={handleGoHome} />;
        case AppState.FLOW_ASTROLOGY_FORM:
-        return <FlowAstrologyForm onSubmit={handleGenerateFlowAstrology} initialName={user?.name} />;
+        return <FlowAstrologyForm onSubmit={handleGenerateFlowAstrology} />;
       case AppState.FLOW_ASTROLOGY_LOADING:
         return <Spinner initialMessageKey='spinnerFlowAstrology' />;
       case AppState.FLOW_ASTROLOGY_RESULT:
         return state.data.flowAstrologyData && state.data.flowAstrologyInfo && <FlowAstrologyResult data={state.data.flowAstrologyData} info={state.data.flowAstrologyInfo} onTryAgain={handleResetFlowAstrology} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.AUSPICIOUS_DAY_FINDER:
         return <AuspiciousDayFinder />;
-      case AppState.CAREER_ADVISOR_PASSWORD:
-        return <PasswordPrompt feature="career" onSuccess={() => dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_FORM })} onBack={handleGoHome} />;
       case AppState.CAREER_ADVISOR_FORM:
-        return <CareerAdvisorForm onSubmit={handleGenerateCareerAdvice} initialName={user?.name} />;
+        return <CareerAdvisorForm onSubmit={handleGenerateCareerAdvice} />;
       case AppState.CAREER_ADVISOR_LOADING:
         return <Spinner initialMessageKey='spinnerCareerAdvisor' />;
       case AppState.CAREER_ADVISOR_RESULT:
         return state.data.careerAdviceData && state.data.careerInfo && <CareerAdvisorResult data={state.data.careerAdviceData} info={state.data.careerInfo} onTryAgain={handleResetCareerAdvisor} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.TALISMAN_GENERATOR:
-        return <TalismanGeneratorForm onSubmit={handleGenerateTalisman} initialName={user?.name} />;
+        return <TalismanGeneratorForm onSubmit={handleGenerateTalisman} />;
       case AppState.TALISMAN_LOADING:
         return <Spinner initialMessageKey='spinnerTalisman' />;
       case AppState.TALISMAN_RESULT:
@@ -651,7 +543,7 @@ const App: React.FC = () => {
       case AppState.AUSPICIOUS_NAMING_RESULT:
         return state.data.auspiciousNamingData && state.data.auspiciousNamingInfo && <AuspiciousNamingResult data={state.data.auspiciousNamingData} info={state.data.auspiciousNamingInfo} onTryAgain={handleResetAuspiciousNaming} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.BIO_ENERGY_FORM:
-        return <BioEnergyForm onSubmit={handleStartBioEnergy} initialName={user?.name} />;
+        return <BioEnergyForm onSubmit={handleStartBioEnergy} />;
       case AppState.BIO_ENERGY_CAPTURE:
         return <BioEnergyCapture onCapture={handleCaptureEnergy} onBack={() => dispatch({type: 'SET_VIEW', payload: AppState.BIO_ENERGY_FORM})} />;
       case AppState.BIO_ENERGY_CARD_DRAW:
@@ -660,10 +552,6 @@ const App: React.FC = () => {
         return <Spinner initialMessageKey='spinnerBioEnergy' />;
       case AppState.BIO_ENERGY_RESULT:
         return state.data.bioEnergyData && state.data.bioEnergyInfo && state.data.capturedEnergyColor && state.data.drawnBioEnergyCard && <BioEnergyResult data={state.data.bioEnergyData} info={state.data.bioEnergyInfo} color={state.data.capturedEnergyColor} card={state.data.drawnBioEnergyCard} onTryAgain={handleResetBioEnergy} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
-      case AppState.ADMIN_LOGIN:
-          return <AdminLogin onSuccess={() => dispatch({type: 'SET_VIEW', payload: AppState.ADMIN_DASHBOARD})} onBack={handleGoHome} />;
-      case AppState.ADMIN_DASHBOARD:
-          return <AdminDashboard visitCount={visitCount} onAdminAction={handleAdminAction} onBack={handleGoHome} />;
       default:
         return <Home onStartAstrology={() => {}} onStartPhysiognomy={() => {}} onStartZodiacFinder={() => {}} onStartIChing={() => {}} onStartShop={() => {}} onStartNumerology={() => {}} onStartPalmReading={() => {}} onStartTarot={() => {}} onStartFlowAstrology={() => {}} onStartAuspiciousDayFinder={() => {}} onStartHandwritingAnalysis={() => {}} onStartCareerAdvisor={() => {}} onStartTalismanGenerator={() => {}} onStartAuspiciousNaming={() => {}} onStartBioEnergy={() => {}} />;
     }
