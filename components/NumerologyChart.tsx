@@ -3,6 +3,7 @@ import type { NumerologyData, NumerologyInfo, NumerologyNumber, BirthdayChartDat
 import Button from './Button';
 import Card from './Card';
 import { useLocalization } from '../hooks/useLocalization';
+import AnalysisSection from './AnalysisSection';
 
 interface Props {
   data: NumerologyData;
@@ -127,16 +128,6 @@ const NumerologyChart: React.FC<Props> = ({ data, info, onTryAgain, onGoHome, on
     const { t } = useLocalization();
     const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
     
-    const InterpretationSection: React.FC<{ title: string; number: number; content: string; icon: React.ReactNode }> = React.memo(({ title, number, content, icon }) => (
-        <Card className="p-6">
-            <h3 className="text-2xl font-bold text-cyan-300 font-serif mb-4 flex items-center gap-3">
-                {icon}
-                {t('numerologyCoreNumber', {title, number})}
-            </h3>
-            <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{content}</p>
-        </Card>
-    ));
-
     const handleDownloadPdf = async () => {
         setIsDownloadingPdf(true);
         try {
@@ -211,17 +202,21 @@ const NumerologyChart: React.FC<Props> = ({ data, info, onTryAgain, onGoHome, on
                 <div className="mt-8 space-y-8">
                     {coreNumbers.map((item, index) => (
                         <div key={index} className="animate-slide-in-up" style={{ animationDelay: `${(index + 5) * 100}ms` }}>
-                            <InterpretationSection title={item.title} number={item.data.number} content={item.data.interpretation} icon={icons[index]} />
+                            <AnalysisSection 
+                                title={t('numerologyCoreNumber', {title: item.title, number: item.data.number})}
+                                content={item.data.interpretation}
+                                icon={icons[index]}
+                                colorClass="text-cyan-300"
+                            />
                         </div>
                     ))}
                     <div className="animate-slide-in-up" style={{ animationDelay: '1000ms' }}>
-                        <Card className="p-6">
-                            <h3 className="text-2xl font-bold text-cyan-300 font-serif mb-4 flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                {t('numerologySummary')}
-                            </h3>
-                            <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{data.summary}</p>
-                        </Card>
+                        <AnalysisSection
+                            title={t('numerologySummary')}
+                            content={data.summary}
+                            icon={<svg xmlns="http://www.w3.org/2000/svg" className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                            colorClass="text-cyan-300"
+                        />
                     </div>
                 </div>
             </div>

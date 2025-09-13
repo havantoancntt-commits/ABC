@@ -6,6 +6,7 @@ import type { TarotCard, TarotReadingData } from '../lib/types';
 import Card from './Card';
 import Button from './Button';
 import Spinner from './Spinner';
+import AnalysisSection from './AnalysisSection';
 
 interface Props {
   onOpenDonationModal: () => void;
@@ -123,10 +124,10 @@ const TarotReading: React.FC<Props> = ({ onOpenDonationModal, onBack }) => {
 
             {interpretation && (
                 <div className="space-y-6 animate-fade-in">
-                    <AnalysisSection title={t('tarotPast')} content={interpretation.past} />
-                    <AnalysisSection title={t('tarotPresent')} content={interpretation.present} />
-                    <AnalysisSection title={t('tarotFuture')} content={interpretation.future} />
-                    <AnalysisSection title={t('tarotSummary')} content={interpretation.summary} />
+                    <AnalysisSection title={t('tarotPast')} content={interpretation.past} icon={<></>} colorClass="text-purple-300" />
+                    <AnalysisSection title={t('tarotPresent')} content={interpretation.present} icon={<></>} colorClass="text-purple-300" />
+                    <AnalysisSection title={t('tarotFuture')} content={interpretation.future} icon={<></>} colorClass="text-purple-300" />
+                    <AnalysisSection title={t('tarotSummary')} content={interpretation.summary} icon={<></>} colorClass="text-purple-300" />
                 </div>
             )}
             
@@ -148,12 +149,5 @@ const TarotReading: React.FC<Props> = ({ onOpenDonationModal, onBack }) => {
         </div>
     );
 };
-
-const AnalysisSection: React.FC<{ title: string; content: string }> = React.memo(({ title, content }) => (
-    <Card>
-        <h3 className="text-xl font-bold text-purple-300 font-serif mb-3">{title}</h3>
-        <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{content}</p>
-    </Card>
-));
 
 export default TarotReading;

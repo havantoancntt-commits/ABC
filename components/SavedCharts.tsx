@@ -32,12 +32,22 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
                 return t('itemDescFlowAstrology', { name: payload.info.name });
             case 'auspiciousNaming':
                 return t('itemDescAuspiciousNaming', { lastName: payload.info.childLastName });
+            case 'bioEnergy':
+                return t('itemDescBioEnergy', { name: payload.info.name });
+            case 'godOfWealth':
+                return t('itemDescGodOfWealth', { name: payload.info.name });
+            case 'prayer':
+                return t('itemDescPrayer', { occasion: payload.info.occasion });
+            case 'fengShui':
+                return t('itemDescFengShui', { spaceType: payload.info.spaceType });
             case 'physiognomy':
                 return t('itemDescPhysiognomy', { date });
             case 'palmReading':
                 return t('itemDescPalmReading', { date });
             case 'handwriting':
                 return t('itemDescHandwriting', { date });
+            case 'hoaTay':
+                return t('itemDescHoaTay', { count: payload.analysisData.totalWhorls });
             default:
                 return new Intl.DateTimeFormat(t('locale'), { dateStyle: 'full', timeStyle: 'short' }).format(new Date(item.timestamp));
         }
@@ -48,6 +58,11 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
             case 'astrology': return payload.birthInfo.name;
             case 'numerology': return payload.info.fullName;
             case 'flowAstrology': return payload.info.name;
+            case 'bioEnergy': return payload.info.name;
+            case 'godOfWealth': return payload.info.name;
+            case 'prayer': return payload.info.occasion;
+            case 'fengShui': return payload.info.spaceType;
+            case 'hoaTay': return getTitle();
             default: return getTitle();
         }
     }
@@ -74,7 +89,7 @@ const SavedItems: React.FC<Props> = ({ items, onView, onDelete, onCreateNew }) =
             return (
                 <div 
                   key={item.id} 
-                  className="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg border border-gray-700/50 transition-all hover:shadow-lg hover:border-yellow-500/50 hover:bg-gray-900/80 hover:-translate-y-1 animate-fade-in"
+                  className="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg border border-gray-700/50 transition-all duration-300 hover:shadow-lg hover:border-yellow-500/50 hover:bg-gray-900/80 hover:scale-[1.02] animate-fade-in"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <ItemDetails item={item} />

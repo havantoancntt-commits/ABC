@@ -3,6 +3,7 @@ import type { PalmReadingData } from '../lib/types';
 import Button from './Button';
 import Card from './Card';
 import { useLocalization } from '../hooks/useLocalization';
+import AnalysisSection from './AnalysisSection';
 
 interface Props {
   analysisData: PalmReadingData;
@@ -20,16 +21,6 @@ const ICONS = {
     duongSinhDao: <svg xmlns="http://www.w3.org/2000/svg" className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
     loiKhuyen: <svg xmlns="http://www.w3.org/2000/svg" className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>,
 };
-
-const AnalysisSection: React.FC<{ title: string; content: string; icon: React.ReactNode }> = React.memo(({ title, content, icon }) => (
-    <Card className="p-6">
-        <h3 className="text-xl font-bold text-rose-400 font-serif mb-4 flex items-center gap-3">
-            {icon}
-            {title}
-        </h3>
-        <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{content}</p>
-    </Card>
-));
 
 const PalmReadingResult: React.FC<Props> = ({ analysisData, imageData, onTryAgain, onGoHome, onOpenDonationModal }) => {
   const { t } = useLocalization();
@@ -58,7 +49,7 @@ const PalmReadingResult: React.FC<Props> = ({ analysisData, imageData, onTryAgai
         <div className="lg:col-span-2 space-y-8">
             {analysisSections.map((section, index) => (
                 <div key={index} className="animate-slide-in-up" style={{ animationDelay: `${index * 150}ms`, opacity: 0 }}>
-                    <AnalysisSection title={section.title} content={section.content} icon={section.icon} />
+                    <AnalysisSection title={section.title} content={section.content} icon={section.icon} colorClass="text-rose-400" />
                 </div>
             ))}
         </div>

@@ -3,6 +3,7 @@ import type { HoaTayData } from '../lib/types';
 import Button from './Button';
 import Card from './Card';
 import { useLocalization } from '../hooks/useLocalization';
+import AnalysisSection from './AnalysisSection';
 
 interface Props {
   analysisData: HoaTayData;
@@ -18,16 +19,6 @@ const ICONS = {
     rightHand: <svg xmlns="http://www.w3.org/2000/svg" className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.5 8.5l1.5 1.5a2.5 2.5 0 003.5 0l.5-.5 1.5 1.5a2.5 2.5 0 003.5 0l1.5-1.5M5 5l1.5 1.5a2.5 2.5 0 003.5 0l.5-.5 1.5 1.5a2.5 2.5 0 003.5 0L19 5m-14 8.5a2.5 2.5 0 003.5 3.5l1.5-1.5 1 1a2.5 2.5 0 003.5 0l1.5-1.5 1 1a2.5 2.5 0 003.5 0l1.5-1.5" /></svg>,
     loiKhuyen: <svg xmlns="http://www.w3.org/2000/svg" className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>,
 };
-
-const AnalysisSection: React.FC<{ title: string; content: string; icon: React.ReactNode }> = React.memo(({ title, content, icon }) => (
-    <Card className="p-6">
-        <h3 className="text-xl font-bold text-rose-400 font-serif mb-4 flex items-center gap-3">
-            {icon}
-            {title}
-        </h3>
-        <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{content}</p>
-    </Card>
-));
 
 const HoaTayResult: React.FC<Props> = ({ analysisData, onTryAgain, onGoHome, onOpenDonationModal }) => {
   const { t } = useLocalization();
@@ -47,7 +38,7 @@ const HoaTayResult: React.FC<Props> = ({ analysisData, onTryAgain, onGoHome, onO
       <div className="space-y-8">
           {analysisSections.map((section, index) => (
               <div key={index} className="animate-slide-in-up" style={{ animationDelay: `${index * 150}ms`, opacity: 0 }}>
-                  <AnalysisSection title={section.title} content={section.content} icon={section.icon} />
+                  <AnalysisSection title={section.title} content={section.content} icon={section.icon} colorClass="text-rose-400" />
               </div>
           ))}
       </div>

@@ -6,6 +6,7 @@ import { getIChingInterpretation } from '../lib/gemini';
 import Card from './Card';
 import Button from './Button';
 import Spinner from './Spinner';
+import AnalysisSection from './AnalysisSection';
 
 interface Props {
   onOpenDonationModal: () => void;
@@ -181,9 +182,9 @@ const IChingDivination: React.FC<Props> = ({ onOpenDonationModal }) => {
                 <div className="md:col-span-3 space-y-6">
                     {interpretation && (
                         <>
-                        <AnalysisSection title={t('iChingSectionOverall')} content={interpretation.tongQuan} />
-                        <AnalysisSection title={t('iChingSectionJudgment')} content={interpretation.thoanTu} />
-                        <AnalysisSection title={t('iChingSectionImage')} content={interpretation.hinhTuong} />
+                        <AnalysisSection title={t('iChingSectionOverall')} content={interpretation.tongQuan} icon={<></>} colorClass="text-yellow-400" />
+                        <AnalysisSection title={t('iChingSectionJudgment')} content={interpretation.thoanTu} icon={<></>} colorClass="text-yellow-400" />
+                        <AnalysisSection title={t('iChingSectionImage')} content={interpretation.hinhTuong} icon={<></>} colorClass="text-yellow-400" />
                         {interpretation.haoDong.length > 0 && (
                              <Card>
                                 <h3 className="text-xl font-bold text-yellow-400 font-serif mb-4">{t('iChingSectionChangingLines')}</h3>
@@ -197,7 +198,7 @@ const IChingDivination: React.FC<Props> = ({ onOpenDonationModal }) => {
                                 </div>
                             </Card>
                         )}
-                        {interpretation.queBienDoi && <AnalysisSection title={t('iChingSectionTransformed')} content={interpretation.queBienDoi} />}
+                        {interpretation.queBienDoi && <AnalysisSection title={t('iChingSectionTransformed')} content={interpretation.queBienDoi} icon={<></>} colorClass="text-yellow-400" />}
                         </>
                     )}
                 </div>
@@ -244,13 +245,5 @@ const IChingDivination: React.FC<Props> = ({ onOpenDonationModal }) => {
         </div>
     );
 };
-
-const AnalysisSection: React.FC<{ title: string; content: string }> = React.memo(({ title, content }) => (
-    <Card>
-        <h3 className="text-xl font-bold text-yellow-400 font-serif mb-3">{title}</h3>
-        <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify" style={{lineHeight: 1.8}}>{content}</p>
-    </Card>
-));
-
 
 export default IChingDivination;
