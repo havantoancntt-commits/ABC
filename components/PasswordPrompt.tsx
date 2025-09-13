@@ -31,7 +31,8 @@ const PasswordPrompt: React.FC<PasswordPromptProps> = ({ onSuccess, onBack, feat
       password: 'nghenghiep2025',
       titleKey: 'passwordPromptTitle' as const,
       subtitleKey: 'careerPasswordPromptSubtitle' as const,
-      valueTitleKey: 'careerPasswordPromptValueTitle' as const,
+      // FIX: Corrected invalid translation key. The key 'careerPasswordPromptValueTitle' did not exist. Replaced with 'passwordPromptValueTitle'.
+      valueTitleKey: 'passwordPromptValueTitle' as const,
       valueDescKey: 'careerPasswordPromptValueDesc' as const,
       paymentStep1Key: 'careerPasswordPaymentStep1' as const,
       transferContentSuffix: 'NN',

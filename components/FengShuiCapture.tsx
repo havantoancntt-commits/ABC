@@ -54,7 +54,7 @@ const FengShuiCapture: React.FC<Props> = ({ onAnalyze, onBack }) => {
         if (err instanceof Error) {
             if (err.name === 'NotAllowedError') message = t('errorCameraPermission');
             else if (err.name === 'NotFoundError') message = t('errorCameraNotFound');
-            else message = t('errorCameraInUse');
+            else if (err.name === 'errorCameraInUse') message = t('errorCameraInUse');
         }
         setError(message);
         setStatus('idle');
@@ -160,7 +160,7 @@ const FengShuiCapture: React.FC<Props> = ({ onAnalyze, onBack }) => {
   }, [onAnalyze, recordedVideoUrl, t]);
   
   return (
-    <Card className="max-w-xl mx-auto flex flex-col items-center">
+    <Card className="max-w-4xl mx-auto flex flex-col items-center">
       <h2 className="text-3xl font-bold text-center mb-4 text-green-300 font-serif">{t('fengShuiCaptureTitle')}</h2>
       <p className="text-center text-gray-400 mb-6 max-w-lg">{t('fengShuiCaptureSubtitle')}</p>
       
@@ -170,7 +170,7 @@ const FengShuiCapture: React.FC<Props> = ({ onAnalyze, onBack }) => {
         </div>
       )}
       
-      <div className="relative w-full max-w-md aspect-video rounded-2xl overflow-hidden bg-gray-950/80 border-2 border-dashed border-gray-600 flex items-center justify-center text-gray-400 group">
+      <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-gray-950/80 border-2 border-dashed border-gray-600 flex items-center justify-center text-gray-400 group">
         <canvas ref={canvasRef} className="hidden" />
         <video ref={videoRef} autoPlay playsInline muted src={recordedVideoUrl || ''}
             className={`w-full h-full object-cover transition-opacity duration-500 ${(status === 'ready' || status === 'recording' || status === 'preview') ? 'opacity-100' : 'opacity-0'}`} />
