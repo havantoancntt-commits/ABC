@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
-import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo, TalismanInfo, AuspiciousNamingInfo, BioEnergyInfo, BioEnergyCard, FortuneStickInfo, GodOfWealthInfo, PrayerRequestInfo } from '../lib/types';
+import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo, TalismanInfo, AuspiciousNamingInfo, BioEnergyInfo, BioEnergyCard, FortuneStickInfo, GodOfWealthInfo, PrayerRequestInfo, FengShuiInfo } from '../lib/types';
 
 // Initialize the Gemini client. Ensure API_KEY is set in Vercel environment variables.
 if (!process.env.API_KEY) {
@@ -335,30 +335,53 @@ const prayerSchema = {
     required: ['title', 'prayerText', 'interpretation']
 };
 
+const fengShuiSchema = {
+    type: Type.OBJECT,
+    properties: {
+        tongQuan: { type: Type.STRING, description: "Đánh giá tổng quan về không gian, dòng chảy năng lượng (khí), và các yếu tố chính." },
+        uuDiem: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Danh sách các điểm mạnh, các yếu tố hợp phong thủy." },
+        nhuocDiem: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Danh sách các điểm yếu, các lỗi phong thủy cần khắc phục." },
+        giaiPhap: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    khuVuc: { type: Type.STRING, description: "Khu vực cần cải thiện (ví dụ: Cửa chính, Phòng ngủ...)." },
+                    deXuat: { type: Type.STRING, description: "Đề xuất giải pháp, cách hóa giải hoặc cải thiện cụ thể, có tính thực tiễn." }
+                },
+                required: ['khuVuc', 'deXuat']
+            },
+            description: "Danh sách các giải pháp cụ thể cho từng khu vực hoặc vấn đề."
+        }
+    },
+    required: ['tongQuan', 'uuDiem', 'nhuocDiem', 'giaiPhap']
+};
+
 
 // --- Helper Functions ---
 function getSystemInstruction(operation: string, language: string): string {
     const langInstruction = language === 'vi' 
-        ? "Luôn luôn trả lời bằng tiếng Việt. Giọng văn phải uyên bác, sâu sắc, mang đậm màu sắc huyền học phương Đông, nhưng vẫn phải rõ ràng, dễ hiểu và mang tính xây dựng."
-        : "Always respond in English. The tone should be scholarly, profound, with an Eastern mysticism flavor, yet clear, understandable, and constructive.";
+        ? "Luôn luôn trả lời bằng tiếng Việt. Giọng văn phải uyên bác, sâu sắc, mang đậm màu sắc huyền học phương Đông, nhưng vẫn phải rõ ràng, dễ hiểu và mang tính xây dựng. Luận giải phải chi tiết, chuyên nghiệp và đẳng cấp."
+        : "Always respond in English. The tone should be scholarly, profound, with an Eastern mysticism flavor, yet clear, understandable, and constructive. The analysis must be detailed, professional, and sophisticated.";
 
     const instructions: Record<string, string> = {
-        generateAstrologyChart: "Bạn là một chuyên gia Tử Vi Đẩu Số. Hãy lập và luận giải lá số dựa trên thông tin được cung cấp.",
-        analyzePhysiognomy: "Bạn là một chuyên gia Nhân Tướng Học. Hãy phân tích hình ảnh khuôn mặt và đưa ra luận giải chi tiết.",
-        analyzePalm: "Bạn là một chuyên gia xem tướng tay (chỉ tay). Hãy phân tích hình ảnh lòng bàn tay và đưa ra luận giải chi tiết.",
-        analyzeHandwriting: "Bạn là một chuyên gia bút tích học (graphology). Hãy phân tích hình ảnh chữ viết tay và đưa ra luận giải về tính cách.",
-        getIChingInterpretation: "Bạn là một học giả Kinh Dịch. Hãy luận giải quẻ và các hào động một cách sâu sắc dựa trên câu hỏi của người dùng.",
-        generateNumerologyChart: "Bạn là một chuyên gia Thần Số Học Pythagoras. Hãy tính toán và luận giải biểu đồ thần số học từ họ tên và ngày sinh.",
-        getTarotReading: "Bạn là một Tarot reader am hiểu. Hãy luận giải trải bài 3 lá (Quá Khứ - Hiện Tại - Tương Lai) một cách sâu sắc.",
-        generateFlowAstrology: "Bạn là một nhà chiêm tinh độc đáo, kết hợp Tử Vi và Trực giác. Hãy tạo ra một bản đồ dòng chảy năng lượng và một lá bùa hộ mệnh.",
-        getAuspiciousDayAnalysis: "Bạn là một chuyên gia Trạch Nhật. Hãy phân tích ngày được chọn để xem xét mức độ tốt xấu cho một sự kiện cụ thể.",
-        getCareerAdvice: "Bạn là một chuyên gia tư vấn hướng nghiệp kết hợp Tử Vi. Hãy phân tích lá số và thông tin người dùng để đưa ra gợi ý nghề nghiệp.",
-        generateTalisman: "Bạn là một bậc thầy huyền học phương Đông. Hãy tạo ra một lá bùa (linh phù) độc đáo dưới dạng SVG dựa trên thông tin người dùng.",
-        generateAuspiciousName: "Bạn là một chuyên gia đặt tên hợp phong thủy. Hãy phân tích Tứ Trụ, Ngũ Hành của bé và gợi ý những cái tên tốt đẹp.",
-        generateBioEnergyReading: "Bạn là một nhà ngoại cảm có khả năng đọc năng lượng sinh học. Hãy luận giải sự kết hợp giữa màu sắc năng lượng, lá bài và ngày sinh.",
-        getFortuneStickInterpretation: "Bạn là một bậc thầy uyên bác tại một ngôi chùa cổ, chuyên giải quẻ xăm. Hãy luận giải lá xăm với giọng văn trang trọng, cổ xưa nhưng dễ hiểu.",
-        getGodOfWealthBlessing: "Bạn là Hoàng Thần Tài, vị thần cai quản tài lộc. Hãy ban phước cho người cầu xin dựa trên tên và mong muốn của họ. Lời lẽ phải uy nghiêm, linh thiêng và mang lại hy vọng.",
-        generatePrayer: "Bạn là một chuyên gia về văn hóa và tín ngưỡng dân gian Việt Nam. Hãy soạn một bài văn khấn trang trọng, đúng nghi lễ dựa trên thông tin người dùng cung cấp. Giọng văn phải thành kính, cổ xưa nhưng vẫn dễ đọc."
+        generateAstrologyChart: "Bạn là một Đại sư Tử Vi Đẩu Số với kiến thức uyên thâm. Hãy lập và luận giải lá số một cách chi tiết, cẩn trọng, với văn phong trang trọng, mang đến cho người xem một cái nhìn toàn diện và những lời khuyên hữu ích, đẳng cấp.",
+        analyzePhysiognomy: "Bạn là một Đại sư Nhân Tướng Học. Hãy phân tích hình ảnh khuôn mặt với sự tinh tế và sâu sắc, luận giải về thần khí, cốt cách và các bộ vị một cách toàn diện. Cung cấp những nhận định mang tính xây dựng.",
+        analyzePalm: "Bạn là một chuyên gia tướng tay bậc thầy. Phân tích hình ảnh lòng bàn tay, từ các đường chỉ chính đến các gò và dấu hiệu đặc biệt. Luận giải phải sâu sắc, kết nối các yếu tố để đưa ra một cái nhìn tổng thể về vận mệnh và tính cách.",
+        analyzeHandwriting: "Bạn là một chuyên gia bút tích học (graphology) hàng đầu. Hãy phân tích mẫu chữ viết để khám phá những tầng sâu trong tính cách, tư duy và nội tâm của người viết. Luận giải cần tinh tế và sâu sắc.",
+        getIChingInterpretation: "Bạn là một học giả Kinh Dịch uyên bác. Hãy luận giải quẻ và các hào động một cách sâu sắc dựa trên câu hỏi của người dùng, kết nối ý nghĩa cổ xưa với bối cảnh hiện đại để đưa ra lời chỉ dẫn rõ ràng, minh triết.",
+        generateNumerologyChart: "Bạn là một chuyên gia Thần Số Học Pythagoras. Hãy tính toán và luận giải biểu đồ thần số học một cách chi tiết, chuyên nghiệp. Kết nối ý nghĩa của các con số để vẽ nên một bức tranh toàn cảnh về cuộc đời và sứ mệnh của một người.",
+        getTarotReading: "Bạn là một Tarot reader có trực giác nhạy bén và kiến thức sâu rộng. Hãy luận giải trải bài 3 lá (Quá Khứ - Hiện Tại - Tương Lai) một cách sâu sắc, kết nối chúng thành một câu chuyện mạch lạc và đưa ra lời khuyên chiến lược, đầy cảm hứng.",
+        generateFlowAstrology: "Bạn là một nhà chiêm tinh độc đáo, kết hợp Tử Vi và Trực giác. Hãy tạo ra một bản đồ dòng chảy năng lượng và một lá bùa hộ mệnh. Luận giải phải sáng tạo, truyền cảm hứng và mang tính ứng dụng cao.",
+        getAuspiciousDayAnalysis: "Bạn là một chuyên gia Trạch Nhật Cát Hung. Phân tích ngày dựa trên Can Chi, Ngũ Hành, Thần Sát và các yếu tố khác để đưa ra kết luận chính xác về mức độ tốt xấu cho sự kiện cụ thể.",
+        getCareerAdvice: "Bạn là một chuyên gia tư vấn hướng nghiệp kết hợp Tử Vi. Hãy phân tích lá số và thông tin người dùng để đưa ra những gợi ý nghề nghiệp sâu sắc, phù hợp nhất với tiềm năng và vận mệnh của họ.",
+        generateTalisman: "Bạn là một bậc thầy huyền học phương Đông. Hãy sáng tạo một lá bùa (linh phù) SVG độc đáo, trang trọng và linh thiêng, dựa trên thông tin người dùng để tối ưu hóa năng lượng hộ mệnh.",
+        generateAuspiciousName: "Bạn là một chuyên gia đặt tên hợp phong thủy. Hãy phân tích Tứ Trụ, Ngũ Hành của bé và gợi ý những cái tên không chỉ hay, ý nghĩa mà còn bổ trợ tốt nhất cho vận mệnh của bé.",
+        generateBioEnergyReading: "Bạn là một nhà ngoại cảm có khả năng đọc năng lượng sinh học. Luận giải sự kết hợp giữa màu sắc hào quang, lá bài và ngày sinh để đưa ra một thông điệp sâu sắc, ý nghĩa và mang tính chữa lành.",
+        getFortuneStickInterpretation: "Bạn là một bậc thầy uyên bác tại một ngôi chùa cổ, chuyên giải quẻ xăm. Luận giải lá xăm với văn phong trang trọng, cổ xưa nhưng dễ hiểu, mang lại sự sáng tỏ và bình an cho người xin xăm.",
+        getGodOfWealthBlessing: "Bạn là Hoàng Thần Tài, vị thần cai quản tài lộc. Hãy ban phước cho người cầu xin một cách uy nghiêm và linh thiêng, mang lại cho họ niềm tin và hy vọng về sự thịnh vượng.",
+        generatePrayer: "Bạn là một chuyên gia văn hóa tín ngưỡng. Hãy soạn một bài văn khấn trang trọng, đúng nghi lễ, với lời văn thành kính và cổ xưa nhưng vẫn dễ đọc, thể hiện trọn vẹn tấm lòng của người khấn.",
+        analyzeFengShui: "Bạn là một Đại sư Phong Thủy, bậc thầy về cả Bát Trạch và Huyền Không Phi Tinh. Hãy vận dụng kiến thức uyên thâm để phân tích không gian, đưa ra một bản luận giải toàn diện, chuyên nghiệp và đẳng cấp, với các giải pháp thực tiễn, dễ áp dụng."
     };
     return `${instructions[operation]} ${langInstruction}`;
 }
@@ -428,7 +451,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         switch (operation) {
             case 'generateAstrologyChart': {
                 const info: BirthInfo = params.info;
-                // FIX: Corrected generateContent call structure.
                 const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: astrologySchema, systemInstruction: getSystemInstruction(operation, language) },
@@ -442,7 +464,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                  const { base64Image } = params;
                  const schema = operation === 'analyzePhysiognomy' ? physiognomySchema : (operation === 'analyzePalm' ? palmReadingSchema : handwritingSchema);
                  const promptText = operation === 'analyzePhysiognomy' ? 'Phân tích khuôn mặt trong ảnh này.' : (operation === 'analyzePalm' ? 'Phân tích lòng bàn tay trong ảnh này.' : 'Phân tích chữ viết tay trong ảnh này.');
-                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: schema, systemInstruction: getSystemInstruction(operation, language) },
@@ -450,9 +471,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 });
                 return parseJsonResponse(response);
             }
+            case 'analyzeFengShui': {
+                const { info, videoFrames } = params as { info: FengShuiInfo, videoFrames: string[] };
+                const imageParts = videoFrames.map(frame => ({
+                    inlineData: { mimeType: 'image/jpeg', data: frame }
+                }));
+                const textPart = { text: `Phân tích phong thủy không gian này với thông tin sau: Loại không gian: ${info.spaceType}, Năm sinh gia chủ: ${info.ownerBirthYear}, Vấn đề quan tâm: ${info.question || 'Tổng quan'}. Các hình ảnh sau là khung hình từ video quay không gian, hãy phân tích chúng như một chuỗi để hiểu bố cục.` };
+                
+                const response = await ai.models.generateContent({
+                    model: commonConfig.model,
+                    config: { ...commonConfig.config, responseSchema: fengShuiSchema, systemInstruction: getSystemInstruction(operation, language) },
+                    contents: { parts: [textPart, ...imageParts] },
+                });
+                return parseJsonResponse(response);
+            }
             case 'getIChingInterpretation': {
                 const { castResult, question } = params as { castResult: CastResult, question: string };
-                // FIX: Corrected generateContent call structure.
                 const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: iChingSchema, systemInstruction: getSystemInstruction(operation, language) },
@@ -462,7 +496,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'generateNumerologyChart': {
                 const info: NumerologyInfo = params.info;
-                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: numerologySchema, systemInstruction: getSystemInstruction(operation, language) },
@@ -472,7 +505,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'getTarotReading': {
                 const { cards, question } = params as { cards: TarotCard[], question: string };
-                // FIX: Corrected generateContent call structure.
                 const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: tarotReadingSchema, systemInstruction: getSystemInstruction(operation, language) },
@@ -482,7 +514,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'generateFlowAstrology': {
                 const info: FlowAstrologyInfo = params.info;
-                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: flowAstrologySchema, systemInstruction: getSystemInstruction(operation, language) },
@@ -492,7 +523,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'getAuspiciousDayAnalysis': {
                  const info: AuspiciousDayInfo = params.info;
-                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: auspiciousDaySchema, systemInstruction: getSystemInstruction(operation, language) },
@@ -502,7 +532,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'getCareerAdvice': {
                 const info: CareerInfo = params.info;
-                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: careerAdviceSchema, systemInstruction: getSystemInstruction(operation, language) },
@@ -512,7 +541,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'generateTalisman': {
                 const info: TalismanInfo = params.info;
-                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: talismanSchema, systemInstruction: getSystemInstruction(operation, language) },
@@ -522,7 +550,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'generateAuspiciousName': {
                 const info: AuspiciousNamingInfo = params.info;
-                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: auspiciousNamingSchema, systemInstruction: getSystemInstruction(operation, language) },
@@ -532,7 +559,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'generateBioEnergyReading': {
                 const { info, color, card } = params as { info: BioEnergyInfo, color: string, card: BioEnergyCard };
-                 // FIX: Corrected generateContent call structure.
                  const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: bioEnergySchema, systemInstruction: getSystemInstruction(operation, language) },

@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense, useReducer } from 'react';
-import type { AppStateStructure, ConfirmationModalState, BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload, BioEnergyInfo, BioEnergyCard, BioEnergyData, FortuneStickInfo, FortuneStickData, GodOfWealthInfo, GodOfWealthData, PrayerRequestInfo, PrayerData } from '../types';
+import type { AppStateStructure, ConfirmationModalState, SavedItem, SavedItemPayload } from '../types';
 import { AppState } from '../types';
-import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName, generateBioEnergyReading, getFortuneStickInterpretation, getGodOfWealthBlessing, generatePrayer } from '../lib/gemini';
 import Header from './Header';
 import Footer from './Footer';
 import DonationModal from './PaymentModal';
@@ -10,6 +9,7 @@ import ZaloContact from './ZaloContact';
 import ConfirmationModal from './ConfirmationModal';
 import { useLocalization } from '../hooks/useLocalization';
 import type { TranslationKey } from '../hooks/useLocalization';
+import { useFeatureHandlers } from '../hooks/useFeatureHandlers';
 
 // --- Lazy Load Components for Performance ---
 const Home = lazy(() => import('./Home'));
@@ -47,6 +47,9 @@ const GodOfWealthBlessing = lazy(() => import('./GodOfWealthBlessing'));
 const GodOfWealthResult = lazy(() => import('./GodOfWealthResult'));
 const PrayerGeneratorForm = lazy(() => import('./PrayerGeneratorForm'));
 const PrayerResult = lazy(() => import('./PrayerResult'));
+const FengShuiForm = lazy(() => import('./FengShuiForm'));
+const FengShuiCapture = lazy(() => import('./FengShuiCapture'));
+const FengShuiResult = lazy(() => import('./FengShuiResult'));
 
 
 // --- State Management with useReducer ---
@@ -58,8 +61,8 @@ const initialState: AppStateStructure = {
     palmReadingData: null, handwritingData: null, tarotReadingData: null, flowAstrologyInfo: null, flowAstrologyData: null,
     careerInfo: null, careerAdviceData: null, talismanInfo: null, talismanData: null, auspiciousNamingInfo: null,
     auspiciousNamingData: null, bioEnergyInfo: null, bioEnergyData: null, fortuneStickInfo: null, fortuneStickData: null,
-    godOfWealthInfo: null, godOfWealthData: null, prayerRequestInfo: null, prayerData: null,
-    capturedImage: null, capturedPalmImage: null, capturedHandwritingImage: null, capturedEnergyColor: null, drawnBioEnergyCard: null,
+    godOfWealthInfo: null, godOfWealthData: null, prayerRequestInfo: null, prayerData: null, fengShuiInfo: null, fengShuiData: null,
+    capturedImage: null, capturedPalmImage: null, capturedHandwritingImage: null, capturedEnergyColor: null, drawnBioEnergyCard: null, fengShuiThumbnail: null,
   },
   error: null,
 };
@@ -164,17 +167,6 @@ const App: React.FC = () => {
       dispatch({ type: 'SET_VIEW', payload: AppState.HOME });
     }
   }, [savedItems, state.currentView]);
-  
-  const trackFeatureUsage = (feature: string) => {
-    try {
-        const storedUsage = localStorage.getItem('featureUsage') || '{}';
-        const usage = JSON.parse(storedUsage);
-        usage[feature] = (usage[feature] || 0) + 1;
-        localStorage.setItem('featureUsage', JSON.stringify(usage));
-    } catch (e) {
-        console.error("Failed to track feature usage", e);
-    }
-  };
 
   const saveItem = useCallback((payload: SavedItemPayload) => {
     let id: string;
@@ -189,6 +181,7 @@ const App: React.FC = () => {
         case 'bioEnergy': id = `bioenergy-${createDeterministicId(payload.info.name, payload.info.year, payload.info.month, payload.info.day)}`; isUpdate = true; break;
         case 'godOfWealth': id = `godofwealth-${createDeterministicId(payload.info.name)}`; isUpdate = false; break; // Allow multiple wishes
         case 'prayer': id = `prayer-${createDeterministicId(payload.info.name, payload.info.occasion, payload.info.deity)}`; isUpdate = true; break;
+        case 'fengShui': id = `fengshui-${createDeterministicId(payload.info.spaceType, payload.info.ownerBirthYear)}`; isUpdate = true; break;
         default: id = `${payload.type}-${crypto.randomUUID()}`; break;
     }
 
@@ -201,244 +194,31 @@ const App: React.FC = () => {
       return updatedItems;
     });
   }, [getStorageKey]);
-
-  const handleGenerateChart = useCallback(async (info: BirthInfo) => {
-    trackFeatureUsage('astrologyChart');
-    dispatch({ type: 'SET_DATA', payload: { birthInfo: info } });
-    dispatch({ type: 'SET_VIEW', payload: AppState.LOADING });
-    try {
-      const data = await generateAstrologyChart(info, language);
-      dispatch({ type: 'SET_DATA', payload: { chartData: data } });
-      saveItem({ type: 'astrology', birthInfo: info, chartData: data });
-      dispatch({ type: 'SET_VIEW', payload: AppState.RESULT });
-    } catch (err) {
-      console.error(err);
-      dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-      dispatch({ type: 'SET_VIEW', payload: AppState.ASTROLOGY_FORM });
-    }
-  }, [language, t, saveItem]);
   
-  const handleAnalyzeFace = useCallback(async () => {
-    const { capturedImage } = state.data;
-    if (!capturedImage) return;
-    trackFeatureUsage('physiognomy');
-    dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_LOADING });
-    const base64Data = capturedImage.split(',')[1];
-    if(!base64Data) {
-        dispatch({ type: 'SET_ERROR', payload: t('errorInvalidImageData')});
-        dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_CAPTURE });
-        return;
-    }
-    try {
-      const data = await analyzePhysiognomy(base64Data, language);
-      dispatch({ type: 'SET_DATA', payload: { physiognomyData: data } });
-      saveItem({ type: 'physiognomy', name: t('itemTypePhysiognomy'), imageData: capturedImage, analysisData: data });
-      dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_RESULT });
-    } catch (err) {
-       console.error(err);
-       dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-       dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_CAPTURE });
-    }
-  }, [state.data.capturedImage, language, t, saveItem]);
+  const {
+      handleGenerateChart, handleAnalyzeFace, handleAnalyzePalm, handleAnalyzeHandwriting,
+      handleGenerateNumerology, handleGenerateFlowAstrology, handleGenerateCareerAdvice,
+      handleGenerateTalisman, handleGenerateAuspiciousName, handleGenerateBioEnergy,
+      handleGetFortuneStick, handleGetGodOfWealthBlessing, handleGeneratePrayer, handleAnalyzeFengShui,
+      handleCaptureImage, handleRetakeCapture, handleCapturePalmImage, handleRetakePalmCapture,
+      handleCaptureHandwritingImage, handleRetakeHandwritingCapture, handleCaptureEnergy,
+      handleStartBioEnergy, handleStartFengShui, handleViewItem
+  } = useFeatureHandlers({ state, dispatch, saveItem, language, t });
 
-  const handleAnalyzePalm = useCallback(async () => {
-    const { capturedPalmImage } = state.data;
-    if (!capturedPalmImage) return;
-    trackFeatureUsage('palmReading');
-    dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_LOADING });
-    const base64Data = capturedPalmImage.split(',')[1];
-    if(!base64Data) {
-        dispatch({ type: 'SET_ERROR', payload: t('errorInvalidImageData')});
-        dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_CAPTURE });
-        return;
-    }
-    try {
-      const data = await analyzePalm(base64Data, language);
-      dispatch({ type: 'SET_DATA', payload: { palmReadingData: data } });
-      saveItem({ type: 'palmReading', name: t('itemTypePalmReading'), imageData: capturedPalmImage, analysisData: data });
-      dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_RESULT });
-    } catch (err) {
-       console.error(err);
-       dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-       dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_CAPTURE });
-    }
-  }, [state.data.capturedPalmImage, language, t, saveItem]);
+  useEffect(() => {
+      const getTitleForView = () => {
+          const key = `viewTitle${AppState[state.currentView]}` as TranslationKey;
+          let nameParam = '';
+          
+          if(state.data.birthInfo) nameParam = state.data.birthInfo.name;
+          else if(state.data.numerologyInfo) nameParam = state.data.numerologyInfo.fullName;
+          
+          const viewTitle = t(key, { name: nameParam });
+          return viewTitle !== key ? `${viewTitle} | ${t('appName')}` : t('appName');
+      };
+      document.title = getTitleForView();
+  }, [state.currentView, state.data, t]);
 
-  const handleAnalyzeHandwriting = useCallback(async () => {
-    const { capturedHandwritingImage } = state.data;
-    if (!capturedHandwritingImage) return;
-    trackFeatureUsage('handwriting');
-    dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_LOADING });
-    const base64Data = capturedHandwritingImage.split(',')[1];
-    if(!base64Data) {
-        dispatch({ type: 'SET_ERROR', payload: t('errorInvalidImageData')});
-        dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_CAPTURE });
-        return;
-    }
-    try {
-      const data = await analyzeHandwriting(base64Data, language);
-      dispatch({ type: 'SET_DATA', payload: { handwritingData: data } });
-      saveItem({ type: 'handwriting', name: t('itemTypeHandwriting'), imageData: capturedHandwritingImage, analysisData: data });
-      dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_RESULT });
-    } catch (err) {
-       console.error(err);
-       dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-       dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_CAPTURE });
-    }
-  }, [state.data.capturedHandwritingImage, language, t, saveItem]);
-
-  const handleGenerateNumerology = useCallback(async (info: NumerologyInfo) => {
-    trackFeatureUsage('numerology');
-    dispatch({ type: 'SET_DATA', payload: { numerologyInfo: info } });
-    dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_LOADING });
-    try {
-        const data = await generateNumerologyChart(info, language);
-        dispatch({ type: 'SET_DATA', payload: { numerologyData: data } });
-        saveItem({ type: 'numerology', info, data });
-        dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_RESULT });
-    } catch (err) {
-        console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_FORM });
-    }
-  }, [language, t, saveItem]);
-
-  const handleGenerateFlowAstrology = useCallback(async (info: FlowAstrologyInfo) => {
-    trackFeatureUsage('flowAstrology');
-    dispatch({ type: 'SET_DATA', payload: { flowAstrologyInfo: info } });
-    dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_LOADING });
-    try {
-        const data = await generateFlowAstrology(info, language);
-        dispatch({ type: 'SET_DATA', payload: { flowAstrologyData: data } });
-        saveItem({ type: 'flowAstrology', info, data });
-        dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_RESULT });
-    } catch (err) {
-        console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_FORM });
-    }
-  }, [language, t, saveItem]);
-
-    const handleGenerateCareerAdvice = useCallback(async (info: CareerInfo) => {
-    trackFeatureUsage('careerAdvisor');
-    dispatch({ type: 'SET_DATA', payload: { careerInfo: info } });
-    dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_LOADING });
-    try {
-        const data = await getCareerAdvice(info, language);
-        dispatch({ type: 'SET_DATA', payload: { careerAdviceData: data } });
-        dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_RESULT });
-    } catch (err) {
-        console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_FORM });
-    }
-  }, [language, t]);
-
-  const handleGenerateTalisman = useCallback(async (info: TalismanInfo) => {
-    trackFeatureUsage('talisman');
-    dispatch({ type: 'SET_DATA', payload: { talismanInfo: info } });
-    dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_LOADING });
-    try {
-        const data = await generateTalisman(info, language);
-        dispatch({ type: 'SET_DATA', payload: { talismanData: data } });
-        dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_RESULT });
-    } catch (err) {
-        console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_GENERATOR });
-    }
-  }, [language, t]);
-
-  const handleGenerateAuspiciousName = useCallback(async (info: AuspiciousNamingInfo) => {
-    trackFeatureUsage('auspiciousNaming');
-    dispatch({ type: 'SET_DATA', payload: { auspiciousNamingInfo: info } });
-    dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_LOADING });
-    try {
-        const data = await generateAuspiciousName(info, language);
-        dispatch({ type: 'SET_DATA', payload: { auspiciousNamingData: data } });
-        saveItem({ type: 'auspiciousNaming', info, data });
-        dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_RESULT });
-    } catch (err) {
-        console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_FORM });
-    }
-  }, [language, t, saveItem]);
-  
-  const handleGenerateBioEnergy = useCallback(async (card: BioEnergyCard) => {
-    const { bioEnergyInfo, capturedEnergyColor } = state.data;
-    if (!bioEnergyInfo || !capturedEnergyColor) return;
-    trackFeatureUsage('bioEnergyReading');
-    dispatch({ type: 'SET_DATA', payload: { drawnBioEnergyCard: card } });
-    dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_LOADING });
-    try {
-      const data = await generateBioEnergyReading(bioEnergyInfo, capturedEnergyColor, card, language);
-      dispatch({ type: 'SET_DATA', payload: { bioEnergyData: data } });
-      saveItem({ type: 'bioEnergy', info: bioEnergyInfo, color: capturedEnergyColor, card, data });
-      dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_RESULT });
-    } catch (err) {
-      console.error(err);
-      dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-      dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_FORM });
-    }
-  }, [state.data, language, t, saveItem]);
-
-  const handleGetFortuneStick = useCallback(async (info: FortuneStickInfo) => {
-    trackFeatureUsage('fortuneSticks');
-    dispatch({ type: 'SET_DATA', payload: { fortuneStickInfo: info } });
-    dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_LOADING });
-    try {
-        const data = await getFortuneStickInterpretation(info, language);
-        dispatch({ type: 'SET_DATA', payload: { fortuneStickData: data } });
-        dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_RESULT });
-    } catch (err) {
-        console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_SHAKE });
-    }
-  }, [language, t]);
-
-  const handleGetGodOfWealthBlessing = useCallback(async (info: GodOfWealthInfo) => {
-    trackFeatureUsage('godOfWealth');
-    dispatch({ type: 'SET_DATA', payload: { godOfWealthInfo: info } });
-    dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_LOADING });
-    try {
-        const data = await getGodOfWealthBlessing(info, language);
-        dispatch({ type: 'SET_DATA', payload: { godOfWealthData: data } });
-        saveItem({ type: 'godOfWealth', info, data });
-        dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_RESULT });
-    } catch (err) {
-        console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_BLESSING });
-    }
-  }, [language, t, saveItem]);
-
-  const handleGeneratePrayer = useCallback(async (info: PrayerRequestInfo) => {
-    trackFeatureUsage('prayer');
-    dispatch({ type: 'SET_DATA', payload: { prayerRequestInfo: info } });
-    dispatch({ type: 'SET_VIEW', payload: AppState.PRAYER_GENERATOR_LOADING });
-    try {
-        const data = await generatePrayer(info, language);
-        dispatch({ type: 'SET_DATA', payload: { prayerData: data } });
-        saveItem({ type: 'prayer', info, data });
-        dispatch({ type: 'SET_VIEW', payload: AppState.PRAYER_GENERATOR_RESULT });
-    } catch (err) {
-        console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.PRAYER_GENERATOR_FORM });
-    }
-  }, [language, t, saveItem]);
-
-  const handleCaptureImage = useCallback((imageDataUrl: string) => { dispatch({ type: 'SET_DATA', payload: { capturedImage: imageDataUrl } }); }, []);
-  const handleRetakeCapture = useCallback(() => { dispatch({ type: 'SET_DATA', payload: { capturedImage: null } }); dispatch({type: 'SET_ERROR', payload: null}); }, []);
-  const handleCapturePalmImage = useCallback((imageDataUrl: string) => { dispatch({ type: 'SET_DATA', payload: { capturedPalmImage: imageDataUrl } }); }, []);
-  const handleRetakePalmCapture = useCallback(() => { dispatch({ type: 'SET_DATA', payload: { capturedPalmImage: null } }); dispatch({type: 'SET_ERROR', payload: null}); }, []);
-  const handleCaptureHandwritingImage = useCallback((imageDataUrl: string) => { dispatch({ type: 'SET_DATA', payload: { capturedHandwritingImage: imageDataUrl } }); }, []);
-  const handleRetakeHandwritingCapture = useCallback(() => { dispatch({ type: 'SET_DATA', payload: { capturedHandwritingImage: null } }); dispatch({type: 'SET_ERROR', payload: null}); }, []);
-  const handleCaptureEnergy = useCallback((color: string) => { dispatch({ type: 'SET_DATA', payload: { capturedEnergyColor: color } }); dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_CARD_DRAW }); }, []);
-  
-  const handleStartBioEnergy = useCallback((info: BioEnergyInfo) => { dispatch({ type: 'SET_DATA', payload: { bioEnergyInfo: info } }); dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_CAPTURE }); }, []);
 
   const handleDeleteItem = (itemToDelete: SavedItem) => {
       const name = itemToDelete.payload.type === 'astrology' ? itemToDelete.payload.birthInfo.name : t(`itemType${itemToDelete.payload.type.charAt(0).toUpperCase() + itemToDelete.payload.type.slice(1)}` as TranslationKey);
@@ -455,53 +235,6 @@ const App: React.FC = () => {
     setModalState(null);
   };
   
-  const handleViewItem = useCallback((item: SavedItem) => {
-    const { payload } = item;
-    switch (payload.type) {
-        case 'astrology':
-            dispatch({ type: 'SET_DATA', payload: { birthInfo: payload.birthInfo, chartData: payload.chartData } });
-            dispatch({ type: 'SET_VIEW', payload: AppState.RESULT });
-            break;
-        case 'physiognomy':
-            dispatch({ type: 'SET_DATA', payload: { capturedImage: payload.imageData, physiognomyData: payload.analysisData } });
-            dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_RESULT });
-            break;
-        case 'palmReading':
-            dispatch({ type: 'SET_DATA', payload: { capturedPalmImage: payload.imageData, palmReadingData: payload.analysisData } });
-            dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_RESULT });
-            break;
-        case 'handwriting':
-            dispatch({ type: 'SET_DATA', payload: { capturedHandwritingImage: payload.imageData, handwritingData: payload.analysisData } });
-            dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_RESULT });
-            break;
-        case 'numerology':
-            dispatch({ type: 'SET_DATA', payload: { numerologyInfo: payload.info, numerologyData: payload.data } });
-            dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_RESULT });
-            break;
-        case 'flowAstrology':
-            dispatch({ type: 'SET_DATA', payload: { flowAstrologyInfo: payload.info, flowAstrologyData: payload.data } });
-            dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_RESULT });
-            break;
-         case 'auspiciousNaming':
-            dispatch({ type: 'SET_DATA', payload: { auspiciousNamingInfo: payload.info, auspiciousNamingData: payload.data } });
-            dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_RESULT });
-            break;
-        case 'bioEnergy':
-            dispatch({ type: 'SET_DATA', payload: { bioEnergyInfo: payload.info, capturedEnergyColor: payload.color, drawnBioEnergyCard: payload.card, bioEnergyData: payload.data } });
-            dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_RESULT });
-            break;
-        case 'godOfWealth':
-            dispatch({ type: 'SET_DATA', payload: { godOfWealthInfo: payload.info, godOfWealthData: payload.data }});
-            dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_RESULT });
-            break;
-        case 'prayer':
-            dispatch({ type: 'SET_DATA', payload: { prayerRequestInfo: payload.info, prayerData: payload.data }});
-            dispatch({ type: 'SET_VIEW', payload: AppState.PRAYER_GENERATOR_RESULT });
-            break;
-        default: break;
-    }
-  }, []);
-
   const { birthInfo, chartData } = state.data;
   
   const handleGoHome = useCallback(() => { dispatch({ type: 'RESET_VIEW', payload: { savedItems } }); }, [savedItems]);
@@ -523,6 +256,7 @@ const App: React.FC = () => {
   const handleResetFortuneSticks = createResetHandler(AppState.FORTUNE_STICKS_SHAKE);
   const handleResetGodOfWealth = createResetHandler(AppState.GOD_OF_WEALTH_BLESSING);
   const handleResetPrayer = createResetHandler(AppState.PRAYER_GENERATOR_FORM);
+  const handleResetFengShui = createResetHandler(AppState.FENG_SHUI_FORM);
 
   const renderContent = () => {
     switch (state.currentView) {
@@ -546,6 +280,7 @@ const App: React.FC = () => {
             onStartFortuneSticks={() => dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_SHAKE })}
             onStartGodOfWealth={() => dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_BLESSING })}
             onStartPrayerGenerator={() => dispatch({ type: 'SET_VIEW', payload: AppState.PRAYER_GENERATOR_FORM })}
+            onStartFengShui={() => dispatch({ type: 'SET_VIEW', payload: AppState.FENG_SHUI_FORM })}
         />;
       case AppState.SAVED_ITEMS:
         return <SavedItems items={savedItems} onView={handleViewItem} onDelete={handleDeleteItem} onCreateNew={handleGoHome} />;
@@ -641,8 +376,16 @@ const App: React.FC = () => {
         return <Spinner initialMessageKey='spinnerPrayer' />;
       case AppState.PRAYER_GENERATOR_RESULT:
         return state.data.prayerData && state.data.prayerRequestInfo && <PrayerResult data={state.data.prayerData} info={state.data.prayerRequestInfo} onTryAgain={handleResetPrayer} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.FENG_SHUI_FORM:
+        return <FengShuiForm onSubmit={handleStartFengShui} />;
+      case AppState.FENG_SHUI_CAPTURE:
+        return <FengShuiCapture onAnalyze={handleAnalyzeFengShui} onBack={() => dispatch({type: 'SET_VIEW', payload: AppState.FENG_SHUI_FORM})} />;
+      case AppState.FENG_SHUI_LOADING:
+        return <Spinner initialMessageKey='spinnerFengShui' />;
+      case AppState.FENG_SHUI_RESULT:
+        return state.data.fengShuiData && state.data.fengShuiInfo && state.data.fengShuiThumbnail && <FengShuiResult data={state.data.fengShuiData} info={state.data.fengShuiInfo} thumbnail={state.data.fengShuiThumbnail} onTryAgain={handleResetFengShui} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       default:
-        return <Home onStartAstrology={() => {}} onStartPhysiognomy={() => {}} onStartZodiacFinder={() => {}} onStartIChing={() => {}} onStartShop={() => {}} onStartNumerology={() => {}} onStartPalmReading={() => {}} onStartTarot={() => {}} onStartFlowAstrology={() => {}} onStartAuspiciousDayFinder={() => {}} onStartHandwritingAnalysis={() => {}} onStartCareerAdvisor={() => {}} onStartTalismanGenerator={() => {}} onStartAuspiciousNaming={() => {}} onStartBioEnergy={() => {}} onStartFortuneSticks={() => {}} onStartGodOfWealth={() => {}} onStartPrayerGenerator={() => {}} />;
+        return null;
     }
   };
 

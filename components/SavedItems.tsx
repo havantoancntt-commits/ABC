@@ -38,6 +38,8 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
                 return t('itemDescGodOfWealth', { name: payload.info.name });
             case 'prayer':
                 return t('itemDescPrayer', { occasion: payload.info.occasion });
+            case 'fengShui':
+                return t('itemDescFengShui', { spaceType: payload.info.spaceType });
             case 'physiognomy':
                 return t('itemDescPhysiognomy', { date });
             case 'palmReading':
@@ -57,6 +59,7 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
             case 'bioEnergy': return payload.info.name;
             case 'godOfWealth': return payload.info.name;
             case 'prayer': return payload.info.occasion;
+            case 'fengShui': return payload.info.spaceType;
             default: return getTitle();
         }
     }
@@ -70,7 +73,7 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
 };
 
 
-const SavedItems: React.FC<Props> = ({ items, onView, onDelete, onCreateNew }) => {
+const SavedItems: React.FC<Props> = ({ items, onDelete, onView, onCreateNew }) => {
   const { t } = useLocalization();
   
   return (
@@ -83,7 +86,7 @@ const SavedItems: React.FC<Props> = ({ items, onView, onDelete, onCreateNew }) =
             return (
                 <div 
                   key={item.id} 
-                  className="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg border border-gray-700/50 transition-all hover:shadow-lg hover:border-yellow-500/50 hover:bg-gray-900/80 hover:-translate-y-1 animate-fade-in"
+                  className="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg border border-gray-700/50 transition-all duration-300 hover:shadow-lg hover:border-yellow-500/50 hover:bg-gray-900/80 hover:scale-[1.02] animate-fade-in"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <ItemDetails item={item} />

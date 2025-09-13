@@ -1,6 +1,6 @@
 import React from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'special' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology' | 'career' | 'talisman' | 'naming' | 'bioenergy' | 'fortune' | 'wealth' | 'prayer';
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'special' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology' | 'career' | 'talisman' | 'naming' | 'bioenergy' | 'fortune' | 'wealth' | 'prayer' | 'fengshui';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -17,10 +17,10 @@ const Button: React.FC<Props> = ({
   className = '',
   ...props
 }) => {
-  const baseClasses = 'flex items-center justify-center gap-2 font-bold rounded-lg transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-none focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)]';
+  const baseClasses = 'flex items-center justify-center gap-2 font-bold rounded-lg transition-all duration-300 transform hover:scale-[1.03] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)]';
 
   const variantClasses: Record<ButtonVariant, string> = {
-    primary: 'bg-gradient-to-br from-[var(--color-primary)] to-amber-600 text-[var(--color-background)] hover:from-yellow-400 hover:to-amber-500 focus-visible:ring-yellow-400 shadow-lg shadow-yellow-500/20 hover:shadow-xl hover:shadow-yellow-400/30',
+    primary: 'bg-gradient-to-br from-[var(--color-primary)] to-amber-600 text-[var(--color-background)] hover:brightness-110 focus-visible:ring-yellow-400 shadow-lg shadow-yellow-500/20 hover:shadow-xl hover:shadow-yellow-400/30',
     secondary: 'bg-gray-700/80 text-white hover:bg-gray-700 focus-visible:ring-gray-400 shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/40',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-400 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40',
     special: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:brightness-110 focus-visible:ring-purple-400 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40',
@@ -39,6 +39,7 @@ const Button: React.FC<Props> = ({
     fortune: 'bg-gradient-to-r from-red-600 to-amber-500 text-white hover:brightness-110 focus-visible:ring-red-400 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40',
     wealth: 'bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 hover:brightness-110 focus-visible:ring-amber-400 shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40',
     prayer: 'bg-gradient-to-r from-emerald-600 to-yellow-600 text-white hover:brightness-110 focus-visible:ring-emerald-400 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40',
+    fengshui: 'bg-gradient-to-r from-green-600 to-emerald-700 text-white hover:brightness-110 focus-visible:ring-green-400 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40',
   };
 
   const sizeClasses: Record<ButtonSize, string> = {

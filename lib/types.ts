@@ -48,6 +48,10 @@ export enum AppState {
   PRAYER_GENERATOR_FORM,
   PRAYER_GENERATOR_LOADING,
   PRAYER_GENERATOR_RESULT,
+  FENG_SHUI_FORM,
+  FENG_SHUI_CAPTURE,
+  FENG_SHUI_LOADING,
+  FENG_SHUI_RESULT,
 }
 
 export interface AppStateStructure {
@@ -76,11 +80,14 @@ export interface AppStateStructure {
     godOfWealthData: GodOfWealthData | null;
     prayerRequestInfo: PrayerRequestInfo | null;
     prayerData: PrayerData | null;
+    fengShuiInfo: FengShuiInfo | null;
+    fengShuiData: FengShuiData | null;
     capturedImage: string | null;
     capturedPalmImage: string | null;
     capturedHandwritingImage: string | null;
     capturedEnergyColor: string | null;
     drawnBioEnergyCard: BioEnergyCard | null;
+    fengShuiThumbnail: string | null;
   };
   currentView: AppState;
   error: string | null;
@@ -406,6 +413,24 @@ export interface PrayerData {
     interpretation: string;
 }
 
+export interface FengShuiInfo {
+    spaceType: string;
+    ownerBirthYear: number;
+    question: string;
+}
+
+export interface FengShuiRecommendation {
+    khuVuc: string;
+    deXuat: string;
+}
+
+export interface FengShuiData {
+    tongQuan: string;
+    uuDiem: string[];
+    nhuocDiem: string[];
+    giaiPhap: FengShuiRecommendation[];
+}
+
 
 // --- Saved Item Data Structures ---
 
@@ -474,6 +499,13 @@ export interface SavedPrayerPayload {
     data: PrayerData;
 }
 
+export interface SavedFengShuiPayload {
+    type: 'fengShui';
+    info: FengShuiInfo;
+    data: FengShuiData;
+    thumbnail: string;
+}
+
 export type SavedItemPayload = 
     | SavedAstrologyPayload 
     | SavedPhysiognomyPayload 
@@ -484,7 +516,8 @@ export type SavedItemPayload =
     | SavedAuspiciousNamingPayload
     | SavedBioEnergyPayload
     | SavedGodOfWealthPayload
-    | SavedPrayerPayload;
+    | SavedPrayerPayload
+    | SavedFengShuiPayload;
 
 export interface SavedItem {
     id: string;
