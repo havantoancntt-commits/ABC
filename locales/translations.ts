@@ -67,6 +67,21 @@ export const translations = {
     talismanDesc: 'Thỉnh một lá bùa được cá nhân hóa dựa trên thông tin của bạn để thu hút tài lộc, may mắn và bình an, được tạo ra bởi AI.',
     talismanButton: 'Thỉnh Bùa Ngay',
 
+    // Fortune Sticks
+    fortuneSticksTitle: 'Xin Xăm Quan Âm',
+    fortuneSticksDesc: 'Thành tâm cầu nguyện và gieo một quẻ xăm để nhận được lời chỉ dẫn cho những vướng mắc trong cuộc sống của bạn.',
+    fortuneSticksButton: 'Xin Xăm Ngay',
+    fortuneSticksShakeTitle: 'Thành Tâm Xin Xăm',
+    fortuneSticksShakeSubtitle: 'Hãy giữ tâm thanh tịnh, tập trung vào câu hỏi hoặc vấn đề bạn đang quan tâm, sau đó nhấn nút để gieo xăm.',
+    fortuneSticksQuestionPlaceholder: 'Nhập câu hỏi hoặc vấn đề bạn muốn xin chỉ dẫn (không bắt buộc)...',
+    fortuneSticksShakeButton: 'Bắt Đầu Gieo Xăm',
+    spinnerFortuneSticks: 'Đang cảm ứng với lời cầu nguyện của bạn để chọn ra quẻ xăm linh ứng nhất...',
+    fortuneSticksResultTitle: 'Kết Quả Gieo Xăm',
+    fortuneSticksPoem: 'Thơ Xăm',
+    fortuneSticksInterpretation: 'Luận Giải',
+    fortuneSticksSummary: 'Tổng Kết',
+    fortuneSticksTryAgain: 'Gieo Lại Quẻ Khác',
+
     // Talisman
     talismanFormTitle: 'Thỉnh Bùa Hộ Mệnh',
     talismanFormSubtitle: 'Hãy nhập thông tin của bạn với lòng thành tâm. AI sẽ dựa trên trường năng lượng của bạn để sáng tạo một lá bùa độc nhất mang lại may mắn và bình an.',
@@ -589,6 +604,21 @@ export const translations = {
     talismanTitle: 'Request a Lucky Talisman',
     talismanDesc: 'Receive a personalized talisman based on your information to attract wealth, luck, and peace, created by AI.',
     talismanButton: 'Request Talisman',
+
+    // Fortune Sticks
+    fortuneSticksTitle: 'Fortune Sticks',
+    fortuneSticksDesc: 'Pray with a sincere heart and cast a fortune stick to receive guidance for the challenges in your life.',
+    fortuneSticksButton: 'Cast a Stick',
+    fortuneSticksShakeTitle: 'Sincerely Request a Fortune',
+    fortuneSticksShakeSubtitle: 'Quiet your mind, focus on your question or the issue you are concerned about, then press the button to cast a stick.',
+    fortuneSticksQuestionPlaceholder: 'Enter the question or issue for which you seek guidance (optional)...',
+    fortuneSticksShakeButton: 'Start Casting',
+    spinnerFortuneSticks: 'Connecting with your prayer to select the most resonant fortune stick...',
+    fortuneSticksResultTitle: 'Fortune Stick Result',
+    fortuneSticksPoem: 'The Poem',
+    fortuneSticksInterpretation: 'Interpretation',
+    fortuneSticksSummary: 'Summary',
+    fortuneSticksTryAgain: 'Cast Another Stick',
 
     // Talisman
     talismanFormTitle: 'Request a Guardian Talisman',

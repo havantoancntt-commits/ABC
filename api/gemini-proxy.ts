@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
-import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo, TalismanInfo, AuspiciousNamingInfo, BioEnergyInfo, BioEnergyCard } from '../lib/types';
+import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo, TalismanInfo, AuspiciousNamingInfo, BioEnergyInfo, BioEnergyCard, FortuneStickInfo } from '../lib/types';
 
 // Initialize the Gemini client. Ensure API_KEY is set in Vercel environment variables.
 if (!process.env.API_KEY) {
@@ -304,6 +304,17 @@ const bioEnergySchema = {
     required: ['colorAnalysis', 'cardAnalysis', 'synthesizedPrediction']
 };
 
+const fortuneStickSchema = {
+    type: Type.OBJECT,
+    properties: {
+        stickNumber: { type: Type.INTEGER, description: "Số của quẻ xăm được gieo." },
+        poem: { type: Type.STRING, description: "Một bài thơ cổ (lục bát hoặc song thất lục bát) chứa đựng ý nghĩa của quẻ xăm." },
+        interpretation: { type: Type.STRING, description: "Luận giải chi tiết ý nghĩa của bài thơ và quẻ xăm, áp dụng vào các khía cạnh: Gia đạo, Công danh, Tình duyên, Sức khỏe." },
+        summary: { type: Type.STRING, description: "Một câu tổng kết ngắn gọn, súc tích về điềm báo của quẻ xăm (Cát, Hung, Bình)." }
+    },
+    required: ['stickNumber', 'poem', 'interpretation', 'summary']
+};
+
 
 // --- Helper Functions ---
 function getSystemInstruction(operation: string, language: string): string {
@@ -324,7 +335,8 @@ function getSystemInstruction(operation: string, language: string): string {
         getCareerAdvice: "Bạn là một chuyên gia tư vấn hướng nghiệp kết hợp Tử Vi. Hãy phân tích lá số và thông tin người dùng để đưa ra gợi ý nghề nghiệp.",
         generateTalisman: "Bạn là một bậc thầy huyền học phương Đông. Hãy tạo ra một lá bùa (linh phù) độc đáo dưới dạng SVG dựa trên thông tin người dùng.",
         generateAuspiciousName: "Bạn là một chuyên gia đặt tên hợp phong thủy. Hãy phân tích Tứ Trụ, Ngũ Hành của bé và gợi ý những cái tên tốt đẹp.",
-        generateBioEnergyReading: "Bạn là một nhà ngoại cảm có khả năng đọc năng lượng sinh học. Hãy luận giải sự kết hợp giữa màu sắc năng lượng, lá bài và ngày sinh."
+        generateBioEnergyReading: "Bạn là một nhà ngoại cảm có khả năng đọc năng lượng sinh học. Hãy luận giải sự kết hợp giữa màu sắc năng lượng, lá bài và ngày sinh.",
+        getFortuneStickInterpretation: "Bạn là một bậc thầy uyên bác tại một ngôi chùa cổ, chuyên giải quẻ xăm. Hãy luận giải lá xăm với giọng văn trang trọng, cổ xưa nhưng dễ hiểu."
     };
     return `${instructions[operation]} ${langInstruction}`;
 }
@@ -503,6 +515,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: bioEnergySchema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: `Luận giải năng lượng cho người có thông tin: ${JSON.stringify(info)}. Màu năng lượng đo được: ${color}. Lá bài rút được: ${card.name.vi}.`,
+                });
+                return parseJsonResponse(response);
+            }
+            case 'getFortuneStickInterpretation': {
+                const { info } = params as { info: FortuneStickInfo };
+                const response = await ai.models.generateContent({
+                    model: commonConfig.model,
+                    config: { ...commonConfig.config, responseSchema: fortuneStickSchema, systemInstruction: getSystemInstruction(operation, language) },
+                    contents: `Hãy luận giải lá xăm số ${info.stickNumber} cho câu hỏi: "${info.question || 'Vấn đề chung'}".`,
                 });
                 return parseJsonResponse(response);
             }

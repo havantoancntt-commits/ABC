@@ -39,10 +39,12 @@ export enum AppState {
   BIO_ENERGY_CARD_DRAW,
   BIO_ENERGY_LOADING,
   BIO_ENERGY_RESULT,
+  FORTUNE_STICKS_SHAKE,
+  FORTUNE_STICKS_LOADING,
+  FORTUNE_STICKS_RESULT,
 }
 
 export interface AppStateStructure {
-  currentView: AppState;
   data: {
     birthInfo: BirthInfo | null;
     chartData: AstrologyChartData | null;
@@ -62,12 +64,15 @@ export interface AppStateStructure {
     auspiciousNamingData: AuspiciousNamingData | null;
     bioEnergyInfo: BioEnergyInfo | null;
     bioEnergyData: BioEnergyData | null;
+    fortuneStickInfo: FortuneStickInfo | null;
+    fortuneStickData: FortuneStickData | null;
     capturedImage: string | null;
     capturedPalmImage: string | null;
     capturedHandwritingImage: string | null;
     capturedEnergyColor: string | null;
     drawnBioEnergyCard: BioEnergyCard | null;
   };
+  currentView: AppState;
   error: string | null;
 }
 
@@ -355,6 +360,19 @@ export interface BioEnergyData {
     cardAnalysis: string;
     synthesizedPrediction: string;
 }
+
+export interface FortuneStickInfo {
+    stickNumber: number;
+    question: string;
+}
+
+export interface FortuneStickData {
+    stickNumber: number;
+    poem: string;
+    interpretation: string;
+    summary: string;
+}
+
 
 // --- Saved Item Data Structures ---
 

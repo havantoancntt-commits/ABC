@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense, useReducer } from 'react';
-import type { AppStateStructure, ConfirmationModalState, BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload, BioEnergyInfo, BioEnergyCard, BioEnergyData } from '../types';
+import type { AppStateStructure, ConfirmationModalState, BirthInfo, AstrologyChartData, SavedItem, PhysiognomyData, NumerologyInfo, NumerologyData, PalmReadingData, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, SavedItemPayload, BioEnergyInfo, BioEnergyCard, BioEnergyData, FortuneStickInfo, FortuneStickData } from '../types';
 import { AppState } from '../types';
-import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName, generateBioEnergyReading } from '../lib/gemini';
+import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName, generateBioEnergyReading, getFortuneStickInterpretation } from '../lib/gemini';
 import Header from './Header';
 import Footer from './Footer';
 import DonationModal from './PaymentModal';
@@ -41,6 +41,8 @@ const BioEnergyForm = lazy(() => import('./BioEnergyForm'));
 const BioEnergyCapture = lazy(() => import('./BioEnergyCapture'));
 const BioEnergyCardDraw = lazy(() => import('./BioEnergyCardDraw'));
 const BioEnergyResult = lazy(() => import('./BioEnergyResult'));
+const FortuneSticksShake = lazy(() => import('./FortuneSticksShake'));
+const FortuneSticksResult = lazy(() => import('./FortuneSticksResult'));
 
 // --- State Management with useReducer ---
 
@@ -50,8 +52,8 @@ const initialState: AppStateStructure = {
     birthInfo: null, chartData: null, physiognomyData: null, numerologyInfo: null, numerologyData: null,
     palmReadingData: null, handwritingData: null, tarotReadingData: null, flowAstrologyInfo: null, flowAstrologyData: null,
     careerInfo: null, careerAdviceData: null, talismanInfo: null, talismanData: null, auspiciousNamingInfo: null,
-    auspiciousNamingData: null, bioEnergyInfo: null, bioEnergyData: null, capturedImage: null, capturedPalmImage: null,
-    capturedHandwritingImage: null, capturedEnergyColor: null, drawnBioEnergyCard: null,
+    auspiciousNamingData: null, bioEnergyInfo: null, bioEnergyData: null, fortuneStickInfo: null, fortuneStickData: null,
+    capturedImage: null, capturedPalmImage: null, capturedHandwritingImage: null, capturedEnergyColor: null, drawnBioEnergyCard: null,
   },
   error: null,
 };
@@ -373,6 +375,21 @@ const App: React.FC = () => {
     }
   }, [state.data, language, t, saveItem]);
 
+  const handleGetFortuneStick = useCallback(async (info: FortuneStickInfo) => {
+    trackFeatureUsage('fortuneSticks');
+    dispatch({ type: 'SET_DATA', payload: { fortuneStickInfo: info } });
+    dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_LOADING });
+    try {
+        const data = await getFortuneStickInterpretation(info, language);
+        dispatch({ type: 'SET_DATA', payload: { fortuneStickData: data } });
+        dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_RESULT });
+    } catch (err) {
+        console.error(err);
+        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey, { ns: 'errors' }) || t('errorUnknown') : t('errorUnknown') });
+        dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_SHAKE });
+    }
+  }, [language, t]);
+
   const handleCaptureImage = useCallback((imageDataUrl: string) => { dispatch({ type: 'SET_DATA', payload: { capturedImage: imageDataUrl } }); }, []);
   const handleRetakeCapture = useCallback(() => { dispatch({ type: 'SET_DATA', payload: { capturedImage: null } }); dispatch({type: 'SET_ERROR', payload: null}); }, []);
   const handleCapturePalmImage = useCallback((imageDataUrl: string) => { dispatch({ type: 'SET_DATA', payload: { capturedPalmImage: imageDataUrl } }); }, []);
@@ -455,6 +472,7 @@ const App: React.FC = () => {
   const handleResetTalisman = createResetHandler(AppState.TALISMAN_GENERATOR);
   const handleResetAuspiciousNaming = createResetHandler(AppState.AUSPICIOUS_NAMING_FORM);
   const handleResetBioEnergy = createResetHandler(AppState.BIO_ENERGY_FORM);
+  const handleResetFortuneSticks = createResetHandler(AppState.FORTUNE_STICKS_SHAKE);
 
   const renderContent = () => {
     switch (state.currentView) {
@@ -475,6 +493,7 @@ const App: React.FC = () => {
             onStartTalismanGenerator={() => dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_GENERATOR })}
             onStartAuspiciousNaming={() => dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_FORM })}
             onStartBioEnergy={() => dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_FORM })}
+            onStartFortuneSticks={() => dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_SHAKE })}
         />;
       case AppState.SAVED_ITEMS:
         return <SavedItems items={savedItems} onView={handleViewItem} onDelete={handleDeleteItem} onCreateNew={handleGoHome} />;
@@ -552,8 +571,14 @@ const App: React.FC = () => {
         return <Spinner initialMessageKey='spinnerBioEnergy' />;
       case AppState.BIO_ENERGY_RESULT:
         return state.data.bioEnergyData && state.data.bioEnergyInfo && state.data.capturedEnergyColor && state.data.drawnBioEnergyCard && <BioEnergyResult data={state.data.bioEnergyData} info={state.data.bioEnergyInfo} color={state.data.capturedEnergyColor} card={state.data.drawnBioEnergyCard} onTryAgain={handleResetBioEnergy} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+      case AppState.FORTUNE_STICKS_SHAKE:
+        return <FortuneSticksShake onSubmit={handleGetFortuneStick} />;
+      case AppState.FORTUNE_STICKS_LOADING:
+        return <Spinner initialMessageKey='spinnerFortuneSticks' />;
+      case AppState.FORTUNE_STICKS_RESULT:
+        return state.data.fortuneStickData && <FortuneSticksResult data={state.data.fortuneStickData} onTryAgain={handleResetFortuneSticks} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       default:
-        return <Home onStartAstrology={() => {}} onStartPhysiognomy={() => {}} onStartZodiacFinder={() => {}} onStartIChing={() => {}} onStartShop={() => {}} onStartNumerology={() => {}} onStartPalmReading={() => {}} onStartTarot={() => {}} onStartFlowAstrology={() => {}} onStartAuspiciousDayFinder={() => {}} onStartHandwritingAnalysis={() => {}} onStartCareerAdvisor={() => {}} onStartTalismanGenerator={() => {}} onStartAuspiciousNaming={() => {}} onStartBioEnergy={() => {}} />;
+        return <Home onStartAstrology={() => {}} onStartPhysiognomy={() => {}} onStartZodiacFinder={() => {}} onStartIChing={() => {}} onStartShop={() => {}} onStartNumerology={() => {}} onStartPalmReading={() => {}} onStartTarot={() => {}} onStartFlowAstrology={() => {}} onStartAuspiciousDayFinder={() => {}} onStartHandwritingAnalysis={() => {}} onStartCareerAdvisor={() => {}} onStartTalismanGenerator={() => {}} onStartAuspiciousNaming={() => {}} onStartBioEnergy={() => {}} onStartFortuneSticks={() => {}} />;
     }
   };
 
