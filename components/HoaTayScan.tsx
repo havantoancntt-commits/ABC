@@ -1,178 +1,182 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import Card from './Card';
 import Button from './Button';
+import Spinner from './Spinner';
 import { useLocalization } from '../hooks/useLocalization';
 import type { TranslationKey } from '../hooks/useLocalization';
+import { analyzeFingerprint } from '../lib/gemini';
 
 interface Props {
   onAnalyze: (counts: { leftHandWhorls: number, rightHandWhorls: number }) => void;
   onBack: () => void;
 }
 
-const FINGER_DATA: { hand: 'left' | 'right'; nameKey: TranslationKey; position: React.CSSProperties }[] = [
-    { hand: 'left', nameKey: 'fingerLeftThumb', position: { top: '55%', left: '75%' } },
-    { hand: 'left', nameKey: 'fingerLeftIndex', position: { top: '25%', left: '58%' } },
-    { hand: 'left', nameKey: 'fingerLeftMiddle', position: { top: '15%', left: '40%' } },
-    { hand: 'left', nameKey: 'fingerLeftRing', position: { top: '25%', left: '22%' } },
-    { hand: 'left', nameKey: 'fingerLeftPinky', position: { top: '45%', left: '8%' } },
-    { hand: 'right', nameKey: 'fingerRightThumb', position: { top: '55%', right: '75%' } },
-    { hand: 'right', nameKey: 'fingerRightIndex', position: { top: '25%', right: '58%' } },
-    { hand: 'right', nameKey: 'fingerRightMiddle', position: { top: '15%', right: '40%' } },
-    { hand: 'right', nameKey: 'fingerRightRing', position: { top: '25%', right: '22%' } },
-    { hand: 'right', nameKey: 'fingerRightPinky', position: { top: '45%', right: '8%' } },
+const FINGER_DATA: { hand: 'left' | 'right'; nameKey: TranslationKey }[] = [
+    { hand: 'left', nameKey: 'fingerLeftThumb' }, { hand: 'left', nameKey: 'fingerLeftIndex' },
+    { hand: 'left', nameKey: 'fingerLeftMiddle' }, { hand: 'left', nameKey: 'fingerLeftRing' },
+    { hand: 'left', nameKey: 'fingerLeftPinky' }, { hand: 'right', nameKey: 'fingerRightThumb' },
+    { hand: 'right', nameKey: 'fingerRightIndex' }, { hand: 'right', nameKey: 'fingerRightMiddle' },
+    { hand: 'right', nameKey: 'fingerRightRing' }, { hand: 'right', nameKey: 'fingerRightPinky' },
 ];
 
-const HandSVG: React.FC<{ side: 'left' | 'right' }> = React.memo(({ side }) => (
-    <svg viewBox={"0 0 110 160"} className={`w-full h-full text-rose-400/20 transition-opacity duration-500`}>
-        <path 
-            transform={side === 'right' ? 'scale(-1, 1) translate(-110, 0)' : ''}
-            stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"
-            d="M 60,100 C 60,120 50,150 40,155 C 30,160 10,140 10,120 L 10,80 C 10,60 15,50 25,50 C 35,50 40,60 40,70 L 40,60 C 40,50 45,40 55,40 C 65,40 70,50 70,60 L 70,55 C 70,45 75,35 85,35 C 95,35 100,45 100,55 L 100,80 C 100,90 95,100 85,100 L 60,100"
-        />
-    </svg>
-));
+const HandSVG: React.FC<{ side: 'left' | 'right', fingerprints: ('whorl' | 'loop' | null)[], currentIndex: number }> = React.memo(({ side, fingerprints, currentIndex }) => {
+    const startIndex = side === 'left' ? 0 : 5;
+    const fingerPositions = [
+        { cx: "85", cy: "60" }, { cx: "65", cy: "35" }, { cx: "45", cy: "30" }, { cx: "25", cy: "45" }, { cx: "15", cy: "75" }
+    ];
 
-const ProgressBar: React.FC<{ current: number, total: number }> = ({ current, total }) => (
-    <div className="w-full bg-gray-700/50 rounded-full h-2.5 mb-6">
-        <div 
-            className="bg-gradient-to-r from-pink-500 to-rose-500 h-2.5 rounded-full transition-all duration-500" 
-            style={{ width: `${(current / total) * 100}%` }}>
-        </div>
-    </div>
-);
+    return (
+        <svg viewBox={side === 'left' ? "0 0 100 120" : "-10 0 110 120"} className="w-full h-auto text-rose-400/20 drop-shadow-lg">
+            <path transform={side === 'right' ? 'scale(-1, 1) translate(-100, 0)' : ''} stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" d="M 70,60 C 70,90 60,115 50,118 C 40,121 20,110 20,90 L 20,60 C 20,45 25,38 35,38 C 45,38 50,48 50,58 L 50,48 C 50,38 55,28 65,28 C 75,28 80,38 80,48 L 80,65 C 80,75 75,80 70,80 L 70,60" />
+            {fingerPositions.map((pos, i) => {
+                const index = startIndex + i;
+                const isActive = currentIndex === index;
+                const pattern = fingerprints[index];
+                return (
+                    <g key={index} transform={side === 'right' ? `translate(${pos.cx}, ${pos.cy}) scale(-1, 1)` : `translate(${pos.cx}, ${pos.cy})`}>
+                        <circle r="12" fill={isActive ? "rgba(251, 113, 133, 0.2)" : "rgba(31, 41, 55, 0.5)"} stroke={isActive ? "#fb7185" : "#4b5563"} strokeWidth="2" className={`transition-all duration-300 ${isActive ? 'animate-pulse' : ''}`} />
+                        {pattern && <text fontSize="18" textAnchor="middle" dominantBaseline="central" fill="#fff">{pattern === 'whorl' ? '🌀' : '💧'}</text>}
+                    </g>
+                );
+            })}
+        </svg>
+    );
+});
 
 
 const HoaTayScan: React.FC<Props> = ({ onAnalyze, onBack }) => {
-    const { t } = useLocalization();
+    const { t, language } = useLocalization();
     const [fingerprints, setFingerprints] = useState<( 'whorl' | 'loop' | null)[]>(Array(10).fill(null));
     const [currentFingerIndex, setCurrentFingerIndex] = useState(0);
-    const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'scanned'>('idle');
-    const scanTimeout = useRef<number | null>(null);
+    const [status, setStatus] = useState<'idle'|'camera_starting'|'ready'|'scanning'|'analyzing'|'error'>('idle');
+    const [errorMessage, setErrorMessage] = useState('');
+    
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const streamRef = useRef<MediaStream | null>(null);
 
     const leftHandWhorls = useMemo(() => fingerprints.slice(0, 5).filter(f => f === 'whorl').length, [fingerprints]);
     const rightHandWhorls = useMemo(() => fingerprints.slice(5, 10).filter(f => f === 'whorl').length, [fingerprints]);
-
-    useEffect(() => {
-        return () => {
-            if (scanTimeout.current) clearTimeout(scanTimeout.current);
-        };
+    const isComplete = currentFingerIndex >= 10;
+    
+    const stopCamera = useCallback(() => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
     }, []);
 
-    const handleScanStart = () => {
-        if (scanStatus !== 'idle') return;
-        setScanStatus('scanning');
-        scanTimeout.current = window.setTimeout(() => {
-            setScanStatus('scanned');
-        }, 1500);
-    };
-
-    const handleSelect = (type: 'whorl' | 'loop') => {
-        const newFingerprints = [...fingerprints];
-        newFingerprints[currentFingerIndex] = type;
-        setFingerprints(newFingerprints);
-        
-        if (currentFingerIndex < 9) {
-            setCurrentFingerIndex(i => i + 1);
-            setScanStatus('idle');
-        } else {
-            setCurrentFingerIndex(10);
+    const startCamera = useCallback(async () => {
+        if (streamRef.current) stopCamera();
+        setStatus('camera_starting');
+        setErrorMessage('');
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+            });
+            streamRef.current = stream;
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                await videoRef.current.play();
+            }
+            setStatus('ready');
+        } catch (err) {
+            console.error("Camera error:", err);
+            setStatus('error');
+            setErrorMessage(t('errorCameraPermission'));
         }
-    };
+    }, [stopCamera, t]);
 
-    const handleAnalyzeClick = () => {
-        onAnalyze({ leftHandWhorls, rightHandWhorls });
-    };
+    useEffect(() => {
+        startCamera();
+        return () => stopCamera();
+    }, [startCamera, stopCamera]);
 
+
+    const handleScan = useCallback(async () => {
+        if (!videoRef.current || !canvasRef.current) return;
+        setStatus('scanning');
+        
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
+        
+        setTimeout(async () => { // Allow shutter animation to play
+            if (context) {
+                canvas.width = video.videoWidth / 2;
+                canvas.height = video.videoHeight / 2;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const base64Image = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+                
+                setStatus('analyzing');
+                try {
+                    const result = await analyzeFingerprint(base64Image, language);
+                    const newFingerprints = [...fingerprints];
+                    newFingerprints[currentFingerIndex] = result.pattern;
+                    setFingerprints(newFingerprints);
+                    setCurrentFingerIndex(i => i + 1);
+                    setStatus('ready');
+                } catch (err) {
+                    console.error("Analysis error:", err);
+                    setStatus('error');
+                    setErrorMessage(t('hoaTayScanError'));
+                }
+            }
+        }, 300);
+    }, [currentFingerIndex, fingerprints, language, t]);
+    
     const handleReset = () => {
         setFingerprints(Array(10).fill(null));
         setCurrentFingerIndex(0);
-        setScanStatus('idle');
+        setStatus('ready');
+        setErrorMessage('');
     };
-    
-    const currentFingerData = FINGER_DATA[currentFingerIndex];
-    
+
+    const currentFingerName = isComplete ? '' : t(FINGER_DATA[currentFingerIndex].nameKey);
+
     return (
         <Card className="max-w-4xl mx-auto flex flex-col items-center">
-            <h2 className="text-3xl font-bold text-center mb-2 text-rose-400 font-serif">{t('hoaTayScanTitle')}</h2>
-            <p className="text-center text-gray-400 mb-6 max-w-lg">{currentFingerIndex < 10 ? t('hoaTayScanSubtitle') : t('processing')}</p>
-            
-            {currentFingerIndex < 10 && <ProgressBar current={currentFingerIndex} total={10} />}
+            <h2 className="text-3xl font-bold text-center mb-2 text-rose-400 font-serif">{t('hoaTayScanAutoTitle')}</h2>
+            <p className="text-center text-gray-400 mb-6 max-w-lg min-h-[48px]">
+                {isComplete ? t('hoaTayAllFingersScanned') : t('hoaTayPlaceFingerPrompt', { fingerName: currentFingerName })}
+                {status === 'ready' && !isComplete && <span className="block text-sm">{t('hoaTayHoldSteady')}</span>}
+            </p>
 
-            <div className="w-full flex justify-center items-center gap-8 sm:gap-16 my-4 h-48 sm:h-64">
-                {/* Left Hand */}
-                <div className={`relative w-32 sm:w-40 h-full transition-all duration-500 ${currentFingerIndex < 5 ? 'opacity-100 scale-105' : 'opacity-50 scale-95'}`}>
-                    <HandSVG side="left" />
-                     {FINGER_DATA.slice(0,5).map((finger, i) => {
-                         const isActive = currentFingerIndex === i;
-                         return (
-                            <div key={i} className={`absolute w-8 h-8 rounded-full flex items-center justify-center -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${isActive ? 'finger-marker-active bg-yellow-400/30 border-2 border-yellow-400' : 'bg-gray-800/50'}`} style={finger.position}>
-                                {fingerprints[i] === 'whorl' && <span className="text-2xl">🌀</span>}
-                                {fingerprints[i] === 'loop' && <span className="text-2xl">💧</span>}
-                            </div>
-                         );
-                     })}
+            <div className="w-full relative aspect-video max-w-xl bg-gray-950 rounded-lg overflow-hidden border-2 border-gray-700 mb-6">
+                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                <canvas ref={canvasRef} className="hidden" />
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-32 h-48 border-4 border-white/50 rounded-2xl" style={{boxShadow: '0 0 0 2000px rgba(0,0,0,0.7)'}}></div>
                 </div>
-                 {/* Right Hand */}
-                <div className={`relative w-32 sm:w-40 h-full transition-all duration-500 ${currentFingerIndex >= 5 && currentFingerIndex < 10 ? 'opacity-100 scale-105' : 'opacity-50 scale-95'}`}>
-                    <HandSVG side="right" />
-                     {FINGER_DATA.slice(5,10).map((finger, i) => {
-                         const fullIndex = i + 5;
-                         const isActive = currentFingerIndex === fullIndex;
-                         return (
-                            <div key={fullIndex} className={`absolute w-8 h-8 rounded-full flex items-center justify-center -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${isActive ? 'finger-marker-active bg-yellow-400/30 border-2 border-yellow-400' : 'bg-gray-800/50'}`} style={finger.position}>
-                                {fingerprints[fullIndex] === 'whorl' && <span className="text-2xl">🌀</span>}
-                                {fingerprints[fullIndex] === 'loop' && <span className="text-2xl">💧</span>}
-                            </div>
-                         );
-                     })}
-                </div>
-            </div>
-
-            <div className="w-full min-h-[220px] flex flex-col justify-center items-center mt-6">
-                {currentFingerIndex < 10 && (
-                     <>
-                        <p className="text-lg text-center text-white mb-4 h-14">
-                           {scanStatus === 'idle' && t('hoaTayPlaceFinger', { fingerName: t(currentFingerData.nameKey) })}
-                           {scanStatus === 'scanning' && t('hoaTayScanning')}
-                           {scanStatus === 'scanned' && t('hoaTaySelectType')}
-                        </p>
-                        
-                        {scanStatus === 'idle' && (
-                            <button onClick={handleScanStart} className="relative w-40 h-40 rounded-full bg-gray-900 border-4 border-rose-500/50 animate-pulse-glow flex items-center justify-center text-rose-300/50 transition-transform hover:scale-105 active:scale-95">
-                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-                            </button>
-                        )}
-                        {scanStatus === 'scanning' && (
-                            <div className="relative w-40 h-40 rounded-full bg-gray-900 border-4 border-rose-500/50 flex items-center justify-center overflow-hidden">
-                                <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-rose-400/50 to-transparent scanner-line-animation"></div>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-20 h-20 text-rose-300/80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-                            </div>
-                        )}
-                        {scanStatus === 'scanned' && (
-                             <div className="flex gap-4 animate-fade-in">
-                                <Button onClick={() => handleSelect('whorl')} variant="primary" size="lg">🌀 {t('hoaTayTypeWhorl')}</Button>
-                                <Button onClick={() => handleSelect('loop')} variant="secondary" size="lg">💧 {t('hoaTayTypeLoop')}</Button>
-                            </div>
-                        )}
-                     </>
-                )}
-
-                {currentFingerIndex >= 10 && (
-                    <div className="text-center animate-fade-in">
-                        <h3 className="text-2xl font-bold font-serif text-rose-300 mb-4">{t('hoaTayResultSummary', { leftCount: leftHandWhorls, rightCount: rightHandWhorls, totalCount: leftHandWhorls + rightHandWhorls })}</h3>
-                        <Button onClick={handleAnalyzeClick} variant="hoatay" size="lg" className="animate-pulse-button">
-                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                            {t('hoaTayScanAnalyze')}
-                        </Button>
+                {status === 'scanning' && <div className="absolute inset-0 bg-white animate-shutter-flash" />}
+                {(status === 'camera_starting' || status === 'analyzing') && (
+                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+                        <Spinner initialMessageKey={status === 'analyzing' ? 'hoaTayAnalyzingFinger' : 'spinnerCamera'}/>
                     </div>
                 )}
+                 {status === 'error' && (
+                     <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-4">
+                        <p className="text-red-400 text-center font-semibold mb-4">{errorMessage}</p>
+                        <Button onClick={startCamera} variant="secondary">{t('hoaTayRedo')}</Button>
+                    </div>
+                 )}
+            </div>
+
+            <div className="w-full flex justify-center items-start gap-4 sm:gap-8 mb-6 h-32 sm:h-40">
+                <div className="w-32 sm:w-40"><HandSVG side="left" fingerprints={fingerprints} currentIndex={currentFingerIndex} /></div>
+                <div className="w-32 sm:w-40"><HandSVG side="right" fingerprints={fingerprints} currentIndex={currentFingerIndex} /></div>
             </div>
             
-            <div className="mt-8 w-full flex justify-between items-center">
-                 <Button onClick={onBack} variant="secondary">{t('back')}</Button>
-                 {(currentFingerIndex > 0) && 
-                    <Button onClick={handleReset} variant="secondary">{t('hoaTayReset')}</Button>
-                 }
+            <div className="w-full max-w-md">
+                {isComplete ? (
+                    <Button onClick={() => onAnalyze({ leftHandWhorls, rightHandWhorls })} variant="hoatay" size="lg" className="w-full animate-pulse-button">{t('hoaTayAnalyzePersonalityButton')}</Button>
+                ) : (
+                    <Button onClick={handleScan} variant="primary" size="lg" className="w-full" disabled={status !== 'ready'}>{t('hoaTayScanButton')}</Button>
+                )}
+                <div className="mt-4 flex justify-between">
+                     <Button onClick={onBack} variant="secondary">{t('back')}</Button>
+                     <Button onClick={handleReset} variant="secondary">{t('hoaTayReset')}</Button>
+                </div>
             </div>
         </Card>
     );

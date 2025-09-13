@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, BioEnergyInfo, BioEnergyCard, BioEnergyData, FortuneStickInfo, FortuneStickData, GodOfWealthInfo, GodOfWealthData, PrayerRequestInfo, PrayerData, FengShuiInfo, FengShuiData, HoaTayData } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, BioEnergyInfo, BioEnergyCard, BioEnergyData, FortuneStickInfo, FortuneStickData, GodOfWealthInfo, GodOfWealthData, PrayerRequestInfo, PrayerData, FengShuiInfo, FengShuiData, HoaTayData, FingerprintAnalysisData } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -94,4 +94,8 @@ export const analyzeFengShui = (info: FengShuiInfo, videoFrames: string[], langu
 
 export const analyzeHoaTay = (counts: { leftHandWhorls: number, rightHandWhorls: number }, language: string): Promise<HoaTayData> => {
     return callProxy('analyzeHoaTay', { counts, language });
+};
+
+export const analyzeFingerprint = (base64Image: string, language: string): Promise<FingerprintAnalysisData> => {
+    return callProxy('analyzeFingerprint', { base64Image, language });
 };

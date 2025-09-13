@@ -173,6 +173,12 @@ export interface HoaTayData {
     advice: string;
 }
 
+export interface FingerprintAnalysisData {
+    pattern: 'whorl' | 'loop';
+    confidence: number;
+}
+
+
 export interface ZodiacHour {
     name: string;
     timeRange: string;

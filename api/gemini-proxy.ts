@@ -104,6 +104,23 @@ const hoaTaySchema = {
     required: ['leftHandWhorls', 'rightHandWhorls', 'totalWhorls', 'leftHandInterpretation', 'rightHandInterpretation', 'overallInterpretation', 'advice']
 };
 
+const fingerprintSchema = {
+    type: Type.OBJECT,
+    properties: {
+        pattern: {
+            type: Type.STRING,
+            enum: ['whorl', 'loop'],
+            description: "The classified fingerprint pattern. 'whorl' for vân xoáy, 'loop' for vân móc/lưu vân."
+        },
+        confidence: {
+            type: Type.NUMBER,
+            description: "Confidence score of the classification from 0.0 to 1.0."
+        },
+    },
+    required: ['pattern', 'confidence']
+};
+
+
 const iChingSchema = {
     type: Type.OBJECT,
     properties: {
@@ -384,6 +401,7 @@ function getSystemInstruction(operation: string, language: string): string {
         analyzePalm: "Bạn là một chuyên gia tướng tay bậc thầy. Phân tích hình ảnh lòng bàn tay, từ các đường chỉ chính đến các gò và dấu hiệu đặc biệt. Luận giải phải sâu sắc, kết nối các yếu tố để đưa ra một cái nhìn tổng thể về vận mệnh và tính cách.",
         analyzeHandwriting: "Bạn là một chuyên gia bút tích học (graphology) hàng đầu. Hãy phân tích mẫu chữ viết để khám phá những tầng sâu trong tính cách, tư duy và nội tâm của người viết. Luận giải cần tinh tế và sâu sắc.",
         analyzeHoaTay: "Bạn là một chuyên gia xem hoa tay bậc thầy với kiến thức uyên bác. Dựa vào số lượng hoa tay trên mỗi bàn tay được cung cấp, hãy luận giải một cách chi tiết, sâu sắc và đẳng cấp về tính cách, vận mệnh, tình duyên và sự nghiệp. Giọng văn phải chuyên nghiệp, mang tính xây dựng.",
+        analyzeFingerprint: "You are an expert fingerprint analyst. Your task is to classify a close-up image of a fingertip. Determine if the primary pattern is a 'whorl' (vân xoáy, a circular or spiral pattern) or a 'loop' (vân móc, lines enter from one side, curve, and exit on the same side). Respond ONLY with the JSON schema. Be precise.",
         getIChingInterpretation: "Bạn là một học giả Kinh Dịch uyên bác. Hãy luận giải quẻ và các hào động một cách sâu sắc dựa trên câu hỏi của người dùng, kết nối ý nghĩa cổ xưa với bối cảnh hiện đại để đưa ra lời chỉ dẫn rõ ràng, minh triết.",
         generateNumerologyChart: "Bạn là một chuyên gia Thần Số Học Pythagoras. Hãy tính toán và luận giải biểu đồ thần số học một cách chi tiết, chuyên nghiệp. Kết nối ý nghĩa của các con số để vẽ nên một bức tranh toàn cảnh về cuộc đời và sứ mệnh của một người.",
         getTarotReading: "Bạn là một Tarot reader có trực giác nhạy bén và kiến thức sâu rộng. Hãy luận giải trải bài 3 lá (Quá Khứ - Hiện Tại - Tương Lai) một cách sâu sắc, kết nối chúng thành một câu chuyện mạch lạc và đưa ra lời khuyên chiến lược, đầy cảm hứng.",
@@ -498,6 +516,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: schema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: { parts: [{ inlineData: { mimeType: 'image/jpeg', data: base64Image } }, { text: promptText }] },
+                });
+                return parseJsonResponse(response);
+            }
+            case 'analyzeFingerprint': {
+                const { base64Image } = params;
+                const response = await ai.models.generateContent({
+                    model: commonConfig.model,
+                    config: { ...commonConfig.config, responseSchema: fingerprintSchema, systemInstruction: getSystemInstruction(operation, language) },
+                    contents: { parts: [
+                        { inlineData: { mimeType: 'image/jpeg', data: base64Image } },
+                        { text: "Analyze the fingerprint in this image. Classify it as 'whorl' or 'loop'." }
+                    ] },
                 });
                 return parseJsonResponse(response);
             }

@@ -393,10 +393,23 @@ export const translations = {
 
     // Hoa Tay (Whorl Reading)
     hoaTayTitle: 'Xem Hoa Tay',
-    hoaTayDesc: 'Ghi lại các vân tay của bạn thông qua màn hình cảm ứng để AI luận giải về tính cách và vận mệnh.',
+    hoaTayDesc: 'Sử dụng camera để AI tự động nhận diện và luận giải vân tay của bạn, khám phá tính cách và vận mệnh tiềm ẩn.',
     hoaTayButton: 'Xem Hoa Tay',
-    hoaTayScanTitle: 'Phân Tích Hoa Tay',
-    hoaTayScanSubtitle: 'Lần lượt làm theo hướng dẫn để ghi lại loại vân tay cho từng ngón. Giữ tâm trí thoải mái để có kết quả chính xác nhất.',
+    hoaTayScanTitle: 'Phân Tích Hoa Tay', // Old key
+    hoaTayScanSubtitle: 'Lần lượt làm theo hướng dẫn để ghi lại loại vân tay cho từng ngón. Giữ tâm trí thoải mái để có kết quả chính xác nhất.', // Old key
+    hoaTayScanAutoTitle: 'Quét Hoa Tay Tự Động',
+    hoaTayScanAutoSubtitle: 'Sử dụng camera của bạn để tự động nhận diện hoa tay. Vui lòng đảm bảo đủ sáng và hình ảnh lấy nét tốt.',
+    hoaTayPlaceFingerPrompt: 'Đặt ngón {{fingerName}} của bạn vào khung ngắm',
+    hoaTayHoldSteady: 'Giữ yên để lấy nét...',
+    hoaTayScanButton: 'Quét Vân Tay',
+    hoaTayAnalyzingFinger: 'Đang phân tích vân tay...',
+    hoaTayRedo: 'Quét Lại',
+    hoaTayScanSuccess: 'Đã nhận diện: {{pattern}}',
+    hoaTayScanError: 'Không thể nhận diện. Vui lòng thử lại ở nơi đủ sáng và lấy nét tốt hơn.',
+    hoaTayAllFingersScanned: 'Đã quét xong tất cả các ngón tay!',
+    hoaTayAnalyzePersonalityButton: 'Xem Luận Giải Tổng Hợp',
+    patternWhorl: 'Hoa Tay',
+    patternLoop: 'Lưu Vân',
     hoaTayScanAnalyze: 'Phân Tích Hoa Tay',
     hoaTayResultTitle: 'Kết Quả Phân Tích Hoa Tay',
     hoaTayTryAgain: 'Thử Lại',
@@ -404,11 +417,11 @@ export const translations = {
     hoaTaySectionRightHand: 'Luận Giải Bàn Tay Phải ({{count}} Hoa Tay)',
     hoaTaySectionOverall: 'Luận Giải Tổng Hợp ({{count}} Hoa Tay)',
     hoaTaySectionAdvice: 'Lời Khuyên & Định Hướng',
-    hoaTayPrompt: 'Hãy chọn loại vân tay cho',
-    hoaTayPromptFinger: 'Ngón {{fingerName}}',
-    hoaTayTypeWhorl: 'Hoa Tay (Xoáy)',
-    hoaTayTypeLoop: 'Lưu Vân (Móc)',
-    fingerLeftThumb: 'tay trái',
+    hoaTayPrompt: 'Hãy chọn loại vân tay cho', // Old key
+    hoaTayPromptFinger: 'Ngón {{fingerName}}', // Old key
+    hoaTayTypeWhorl: 'Hoa Tay (Xoáy)', // Old key
+    hoaTayTypeLoop: 'Lưu Vân (Móc)', // Old key
+    fingerLeftThumb: 'cái trái',
     fingerLeftIndex: 'trỏ trái',
     fingerLeftMiddle: 'giữa trái',
     fingerLeftRing: 'áp út trái',
@@ -419,9 +432,9 @@ export const translations = {
     fingerRightRing: 'áp út phải',
     fingerRightPinky: 'út phải',
     hoaTayResultSummary: 'Kết quả của bạn: {{leftCount}} hoa tay trái, {{rightCount}} hoa tay phải. Tổng cộng {{totalCount}} hoa tay.',
-    hoaTayPlaceFinger: 'Đặt ngón {{fingerName}} của bạn lên máy quét',
-    hoaTayScanning: 'Đang quét...',
-    hoaTaySelectType: 'Vân tay của bạn thuộc loại nào?',
+    hoaTayPlaceFinger: 'Đặt ngón {{fingerName}} của bạn lên máy quét', // Old key
+    hoaTayScanning: 'Đang quét...', // Old key
+    hoaTaySelectType: 'Vân tay của bạn thuộc loại nào?', // Old key
     hoaTayReset: 'Làm Lại Từ Đầu',
 
     // Zodiac Hour Finder
@@ -890,6 +903,32 @@ export const translations = {
     fengShuiResultBadPoints: 'Inauspicious Points',
     fengShuiResultSolutions: 'Solutions & Cures',
     spinnerFengShui: 'The AI is analyzing the energy flow, determining directions, and interpreting the Feng Shui of your space...',
+
+    // Hoa Tay
+    hoaTayScanAutoTitle: "Automatic Whorl Scan",
+    hoaTayScanAutoSubtitle: "Use your camera to automatically detect your fingerprints. Please ensure good lighting and a clear focus.",
+    hoaTayPlaceFingerPrompt: "Place your {{fingerName}} in the frame",
+    hoaTayHoldSteady: "Hold steady for focus...",
+    hoaTayScanButton: "Scan Fingerprint",
+    hoaTayAnalyzingFinger: "Analyzing fingerprint...",
+    hoaTayRedo: "Rescan",
+    hoaTayScanSuccess: "Detected: {{pattern}}",
+    hoaTayScanError: "Could not detect. Please try again with better lighting and focus.",
+    hoaTayAllFingersScanned: "All fingers have been scanned!",
+    hoaTayAnalyzePersonalityButton: "View Full Analysis",
+    patternWhorl: "Whorl",
+    patternLoop: "Loop",
+    fingerLeftThumb: 'left thumb',
+    fingerLeftIndex: 'left index',
+    fingerLeftMiddle: 'left middle',
+    fingerLeftRing: 'left ring',
+    fingerLeftPinky: 'left pinky',
+    fingerRightThumb: 'right thumb',
+    fingerRightIndex: 'right index',
+    fingerRightMiddle: 'right middle',
+    fingerRightRing: 'right ring',
+    fingerRightPinky: 'right pinky',
+    hoaTayReset: 'Reset',
 
     // Admin & Password
     passwordIncorrect: 'Incorrect password. Please try again.',
