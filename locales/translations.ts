@@ -413,6 +413,10 @@ export const translations = {
     fingerRightRing: 'áp út phải',
     fingerRightPinky: 'út phải',
     hoaTayResultSummary: 'Kết quả của bạn: {{leftCount}} hoa tay trái, {{rightCount}} hoa tay phải. Tổng cộng {{totalCount}} hoa tay.',
+    hoaTayPlaceFinger: 'Đặt ngón {{fingerName}} của bạn lên máy quét',
+    hoaTayScanning: 'Đang quét...',
+    hoaTaySelectType: 'Vân tay của bạn thuộc loại nào?',
+    hoaTayReset: 'Làm Lại Từ Đầu',
 
     // Zodiac Hour Finder
     zodiacFinderTitle: 'Giờ Hoàng Đạo Trong Ngày',
@@ -1097,6 +1101,10 @@ export const translations = {
     fingerRightRing: 'Right Ring',
     fingerRightPinky: 'Right Pinky',
     hoaTayResultSummary: 'Your results: {{leftCount}} left-hand whorls, {{rightCount}} right-hand whorls. Totaling {{totalCount}} whorls.',
+    hoaTayPlaceFinger: 'Place your {{fingerName}} finger on the scanner',
+    hoaTayScanning: 'Scanning...',
+    hoaTaySelectType: 'What type of print is it?',
+    hoaTayReset: 'Start Over',
 
 
     // Admin & Password
