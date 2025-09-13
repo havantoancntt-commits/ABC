@@ -2,6 +2,7 @@ import React from 'react';
 import Card from './Card';
 import Button from './Button';
 import { useLocalization } from '../hooks/useLocalization';
+import MysticalHero from './MysticalHero';
 
 interface Props {
     onStartAstrology: () => void;
@@ -113,6 +114,9 @@ const Home: React.FC<Props> = (props) => {
                     {t('homeSubtitle')}
                 </p>
             </div>
+            
+            <MysticalHero />
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
                 {features.map((feature, index) => (
                     <div key={feature.title} className="animate-fade-in" style={{ animationDelay: `${0.1 + index * 0.05}s` }}>
