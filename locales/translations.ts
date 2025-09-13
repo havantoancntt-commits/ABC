@@ -395,8 +395,6 @@ export const translations = {
     hoaTayTitle: 'Xem Hoa Tay',
     hoaTayDesc: 'Sử dụng camera để AI tự động nhận diện và luận giải vân tay của bạn, khám phá tính cách và vận mệnh tiềm ẩn.',
     hoaTayButton: 'Xem Hoa Tay',
-    hoaTayScanTitle: 'Phân Tích Hoa Tay', // Old key
-    hoaTayScanSubtitle: 'Lần lượt làm theo hướng dẫn để ghi lại loại vân tay cho từng ngón. Giữ tâm trí thoải mái để có kết quả chính xác nhất.', // Old key
     hoaTayScanAutoTitle: 'Quét Hoa Tay Tự Động',
     hoaTayScanAutoSubtitle: 'Sử dụng camera của bạn để tự động nhận diện hoa tay. Vui lòng đảm bảo đủ sáng và hình ảnh lấy nét tốt.',
     hoaTayPlaceFingerPrompt: 'Đặt ngón {{fingerName}} của bạn vào khung ngắm',
@@ -417,10 +415,6 @@ export const translations = {
     hoaTaySectionRightHand: 'Luận Giải Bàn Tay Phải ({{count}} Hoa Tay)',
     hoaTaySectionOverall: 'Luận Giải Tổng Hợp ({{count}} Hoa Tay)',
     hoaTaySectionAdvice: 'Lời Khuyên & Định Hướng',
-    hoaTayPrompt: 'Hãy chọn loại vân tay cho', // Old key
-    hoaTayPromptFinger: 'Ngón {{fingerName}}', // Old key
-    hoaTayTypeWhorl: 'Hoa Tay (Xoáy)', // Old key
-    hoaTayTypeLoop: 'Lưu Vân (Móc)', // Old key
     fingerLeftThumb: 'cái trái',
     fingerLeftIndex: 'trỏ trái',
     fingerLeftMiddle: 'giữa trái',
@@ -432,9 +426,6 @@ export const translations = {
     fingerRightRing: 'áp út phải',
     fingerRightPinky: 'út phải',
     hoaTayResultSummary: 'Kết quả của bạn: {{leftCount}} hoa tay trái, {{rightCount}} hoa tay phải. Tổng cộng {{totalCount}} hoa tay.',
-    hoaTayPlaceFinger: 'Đặt ngón {{fingerName}} của bạn lên máy quét', // Old key
-    hoaTayScanning: 'Đang quét...', // Old key
-    hoaTaySelectType: 'Vân tay của bạn thuộc loại nào?', // Old key
     hoaTayReset: 'Làm Lại Từ Đầu',
 
     // Zodiac Hour Finder
@@ -955,30 +946,3 @@ export const translations = {
     adminTabCustomers: 'Customers',
     adminStatsTitle: 'Usage Statistics',
     adminFeatureUsage: 'Feature Usage Counts',
-    adminNotAvailable: 'No data available',
-    adminActionsTitle: 'Quick Actions',
-    adminClearCharts: 'Clear All Saved Charts (Guest)',
-    adminClearHistory: 'Clear Admin History',
-    adminUnlockFeatures: 'Unlock Features (Local)',
-    adminUnlockAstrology: 'Zi Wei Astrology (10k)',
-    adminUnlockCareer: 'Career Advisor (20k)',
-    adminLock: 'Lock',
-    adminLoginTitle: 'Admin Login',
-    adminHistoryLog: 'Activity Log',
-    adminSearchPlaceholder: 'Search logs...',
-    adminLogTimestamp: 'Timestamp',
-    adminLogUser: 'User',
-    adminLogAction: 'Action',
-    adminLogDetails: 'Details',
-    addCustomerTitle: 'Add New Customer',
-    customerNameLabel: 'Full Name',
-    customerEmailLabel: 'Email',
-    customerPhoneLabel: 'Phone Number',
-    saveCustomerButton: 'Save Customer',
-    customerListTitle: 'Customer List',
-    customerSearchPlaceholder: 'Search customers...',
-    noCustomersFound: 'No customers found.',
-    confirmDeleteCustomerTitle: 'Confirm Customer Deletion',
-    confirmDeleteCustomerMessage: 'Are you sure you want to delete the customer "{{name}}"?',
-  }
-}
