@@ -144,7 +144,7 @@ export const translations = {
 
     // Face Scan
     faceScanTitle: 'Xem Nhân Tướng Qua Khuôn Mặt',
-    faceScanSubtitle: 'Sử dụng camera hoặc tải ảnh lên để AI phân tích các đặc điểm trên khuôn mặt bạn. Đảm bảo ảnh rõ nét, chính diện và đủ sáng.',
+    faceScanSubtitle: 'Chụp ảnh chân dung hoặc quay một video ngắn để AI phân tích. Đảm bảo hình ảnh rõ nét, chính diện và đủ sáng để có kết quả tốt nhất.',
     faceScanInitial: 'Căn chỉnh khuôn mặt của bạn vào trong khung hình',
     faceScanOpenCamera: 'Mở Camera',
     faceScanUpload: 'Hoặc tải ảnh lên',
@@ -163,6 +163,15 @@ export const translations = {
     errorFileInvalid: 'Vui lòng chọn một tệp ảnh hợp lệ.',
     cameraSwitch: 'Chuyển camera',
     cameraSwitchAria: 'Chuyển đổi giữa camera trước và sau',
+    faceScanModePhoto: 'Chụp Ảnh',
+    faceScanModeVideo: 'Quay Video',
+    faceScanRecord: 'Bắt đầu Quay',
+    faceScanStopRecord: 'Dừng Quay',
+    faceScanRecording: 'Đang quay... {{time}}s',
+    faceScanVideoRetake: 'Quay Lại',
+    faceScanCaptureFrame: 'Chọn Khung Hình Tốt Nhất',
+    faceScanVideoInstruction: 'Quay một đoạn video ngắn (tối đa 30s) để có thể chọn được khoảnh khắc thần thái nhất.',
+    faceScanVideoPreview: 'Xem lại video và chọn khung hình bạn ưng ý nhất để phân tích.',
 
     // Result pages "Try Again" buttons
     astrologyTryAgain: 'Lập Lá Số Khác',
@@ -658,7 +667,7 @@ export const translations = {
 
     // Face Scan
     faceScanTitle: 'Physiognomy Reading via Face Scan',
-    faceScanSubtitle: 'Use your camera or upload a photo for AI to analyze your facial features. Ensure the photo is clear, front-facing, and well-lit.',
+    faceScanSubtitle: 'Take a portrait photo or record a short video for AI analysis. Ensure the image is clear, front-facing, and well-lit for the best results.',
     faceScanInitial: 'Align your face within the frame',
     faceScanOpenCamera: 'Open Camera',
     faceScanUpload: 'Or upload a photo',
@@ -677,6 +686,15 @@ export const translations = {
     errorFileInvalid: 'Please select a valid image file.',
     cameraSwitch: 'Switch Camera',
     cameraSwitchAria: 'Switch between front and back camera',
+    faceScanModePhoto: 'Photo',
+    faceScanModeVideo: 'Video',
+    faceScanRecord: 'Record',
+    faceScanStopRecord: 'Stop',
+    faceScanRecording: 'Recording... {{time}}s',
+    faceScanVideoRetake: 'Retake Video',
+    faceScanCaptureFrame: 'Capture Best Frame',
+    faceScanVideoInstruction: 'Record a short video (max 30s) to capture your best expression.',
+    faceScanVideoPreview: 'Review your video and pause at the frame you want to analyze.',
 
     // Result pages "Try Again" buttons
     astrologyTryAgain: 'Create Another Chart',
