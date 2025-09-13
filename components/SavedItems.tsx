@@ -36,6 +36,8 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
                 return t('itemDescBioEnergy', { name: payload.info.name });
             case 'godOfWealth':
                 return t('itemDescGodOfWealth', { name: payload.info.name });
+            case 'prayer':
+                return t('itemDescPrayer', { occasion: payload.info.occasion });
             case 'physiognomy':
                 return t('itemDescPhysiognomy', { date });
             case 'palmReading':
@@ -53,8 +55,8 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
             case 'numerology': return payload.info.fullName;
             case 'flowAstrology': return payload.info.name;
             case 'bioEnergy': return payload.info.name;
-            // FIX: Added case for 'godOfWealth' to provide correct ARIA label name.
             case 'godOfWealth': return payload.info.name;
+            case 'prayer': return payload.info.occasion;
             default: return getTitle();
         }
     }

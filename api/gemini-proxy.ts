@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
-import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo, TalismanInfo, AuspiciousNamingInfo, BioEnergyInfo, BioEnergyCard, FortuneStickInfo, GodOfWealthInfo } from '../lib/types';
+import type { BirthInfo, CastResult, NumerologyInfo, TarotCard, FlowAstrologyInfo, AuspiciousDayInfo, CareerInfo, TalismanInfo, AuspiciousNamingInfo, BioEnergyInfo, BioEnergyCard, FortuneStickInfo, GodOfWealthInfo, PrayerRequestInfo } from '../lib/types';
 
 // Initialize the Gemini client. Ensure API_KEY is set in Vercel environment variables.
 if (!process.env.API_KEY) {
@@ -325,6 +325,16 @@ const godOfWealthSchema = {
     required: ['luckyNumber', 'blessingMessage', 'interpretation']
 };
 
+const prayerSchema = {
+    type: Type.OBJECT,
+    properties: {
+        title: { type: Type.STRING, description: "Tiêu đề của bài văn khấn (ví dụ: 'Văn khấn Thần Tài ngày mùng 1')." },
+        prayerText: { type: Type.STRING, description: "Toàn bộ nội dung bài văn khấn, viết theo văn phong cổ, trang trọng, có đầy đủ các phần." },
+        interpretation: { type: Type.STRING, description: "Giải thích ngắn gọn về ý nghĩa, các lễ vật cần chuẩn bị và những lưu ý khi thực hiện bài khấn này." }
+    },
+    required: ['title', 'prayerText', 'interpretation']
+};
+
 
 // --- Helper Functions ---
 function getSystemInstruction(operation: string, language: string): string {
@@ -347,7 +357,8 @@ function getSystemInstruction(operation: string, language: string): string {
         generateAuspiciousName: "Bạn là một chuyên gia đặt tên hợp phong thủy. Hãy phân tích Tứ Trụ, Ngũ Hành của bé và gợi ý những cái tên tốt đẹp.",
         generateBioEnergyReading: "Bạn là một nhà ngoại cảm có khả năng đọc năng lượng sinh học. Hãy luận giải sự kết hợp giữa màu sắc năng lượng, lá bài và ngày sinh.",
         getFortuneStickInterpretation: "Bạn là một bậc thầy uyên bác tại một ngôi chùa cổ, chuyên giải quẻ xăm. Hãy luận giải lá xăm với giọng văn trang trọng, cổ xưa nhưng dễ hiểu.",
-        getGodOfWealthBlessing: "Bạn là Hoàng Thần Tài, vị thần cai quản tài lộc. Hãy ban phước cho người cầu xin dựa trên tên và mong muốn của họ. Lời lẽ phải uy nghiêm, linh thiêng và mang lại hy vọng."
+        getGodOfWealthBlessing: "Bạn là Hoàng Thần Tài, vị thần cai quản tài lộc. Hãy ban phước cho người cầu xin dựa trên tên và mong muốn của họ. Lời lẽ phải uy nghiêm, linh thiêng và mang lại hy vọng.",
+        generatePrayer: "Bạn là một chuyên gia về văn hóa và tín ngưỡng dân gian Việt Nam. Hãy soạn một bài văn khấn trang trọng, đúng nghi lễ dựa trên thông tin người dùng cung cấp. Giọng văn phải thành kính, cổ xưa nhưng vẫn dễ đọc."
     };
     return `${instructions[operation]} ${langInstruction}`;
 }
@@ -544,6 +555,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: godOfWealthSchema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: `Tên người cầu xin: ${info.name}. Mong muốn: "${info.wish || 'Cầu xin tài lộc, kinh doanh thuận lợi'}". Hãy ban cho họ một con số lộc và lời chúc phúc.`,
+                });
+                return parseJsonResponse(response);
+            }
+            case 'generatePrayer': {
+                const info: PrayerRequestInfo = params.info;
+                const response = await ai.models.generateContent({
+                    model: commonConfig.model,
+                    config: { ...commonConfig.config, responseSchema: prayerSchema, systemInstruction: getSystemInstruction(operation, language) },
+                    contents: `Soạn bài văn khấn cho: Tên tín chủ: ${info.name}. Dịp: ${info.occasion}. Đối tượng khấn: ${info.deity}.`,
                 });
                 return parseJsonResponse(response);
             }

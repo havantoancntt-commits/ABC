@@ -1,4 +1,4 @@
-import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, BioEnergyInfo, BioEnergyCard, BioEnergyData, FortuneStickInfo, FortuneStickData, GodOfWealthInfo, GodOfWealthData } from './types';
+import type { BirthInfo, AstrologyChartData, PhysiognomyData, CastResult, IChingInterpretation, NumerologyInfo, NumerologyData, PalmReadingData, TarotCard, TarotReadingData, FlowAstrologyInfo, FlowAstrologyData, AuspiciousDayInfo, AuspiciousDayData, HandwritingData, CareerInfo, CareerAdviceData, TalismanInfo, TalismanData, AuspiciousNamingInfo, AuspiciousNamingData, BioEnergyInfo, BioEnergyCard, BioEnergyData, FortuneStickInfo, FortuneStickData, GodOfWealthInfo, GodOfWealthData, PrayerRequestInfo, PrayerData } from './types';
 
 async function callProxy(operation: string, payload: object): Promise<any> {
     const response = await fetch('/api/gemini-proxy', {
@@ -82,4 +82,8 @@ export const getFortuneStickInterpretation = (info: FortuneStickInfo, language: 
 
 export const getGodOfWealthBlessing = (info: GodOfWealthInfo, language: string): Promise<GodOfWealthData> => {
     return callProxy('getGodOfWealthBlessing', { info, language });
+};
+
+export const generatePrayer = (info: PrayerRequestInfo, language: string): Promise<PrayerData> => {
+    return callProxy('generatePrayer', { info, language });
 };

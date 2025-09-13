@@ -45,6 +45,9 @@ export enum AppState {
   GOD_OF_WEALTH_BLESSING,
   GOD_OF_WEALTH_LOADING,
   GOD_OF_WEALTH_RESULT,
+  PRAYER_GENERATOR_FORM,
+  PRAYER_GENERATOR_LOADING,
+  PRAYER_GENERATOR_RESULT,
 }
 
 export interface AppStateStructure {
@@ -71,6 +74,8 @@ export interface AppStateStructure {
     fortuneStickData: FortuneStickData | null;
     godOfWealthInfo: GodOfWealthInfo | null;
     godOfWealthData: GodOfWealthData | null;
+    prayerRequestInfo: PrayerRequestInfo | null;
+    prayerData: PrayerData | null;
     capturedImage: string | null;
     capturedPalmImage: string | null;
     capturedHandwritingImage: string | null;
@@ -389,6 +394,18 @@ export interface GodOfWealthData {
   interpretation: string;
 }
 
+export interface PrayerRequestInfo {
+    name: string;
+    occasion: string;
+    deity: string;
+}
+
+export interface PrayerData {
+    title: string;
+    prayerText: string;
+    interpretation: string;
+}
+
 
 // --- Saved Item Data Structures ---
 
@@ -451,6 +468,12 @@ export interface SavedGodOfWealthPayload {
     data: GodOfWealthData;
 }
 
+export interface SavedPrayerPayload {
+    type: 'prayer';
+    info: PrayerRequestInfo;
+    data: PrayerData;
+}
+
 export type SavedItemPayload = 
     | SavedAstrologyPayload 
     | SavedPhysiognomyPayload 
@@ -460,7 +483,8 @@ export type SavedItemPayload =
     | SavedFlowAstrologyPayload 
     | SavedAuspiciousNamingPayload
     | SavedBioEnergyPayload
-    | SavedGodOfWealthPayload;
+    | SavedGodOfWealthPayload
+    | SavedPrayerPayload;
 
 export interface SavedItem {
     id: string;
