@@ -220,7 +220,6 @@ const IChingDivination: React.FC<Props> = ({ onOpenDonationModal }) => {
     );
     
     if (isLoading) {
-        // FIX: Changed 'message' prop to 'initialMessageKey' and passed the translation key.
         return <Spinner initialMessageKey='spinnerIChing' />;
     }
     

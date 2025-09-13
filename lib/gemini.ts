@@ -92,6 +92,6 @@ export const analyzeFengShui = (info: FengShuiInfo, videoFrames: string[], langu
     return callProxy('analyzeFengShui', { info, videoFrames, language });
 };
 
-export const analyzeHoaTay = (base64Image: string, language: string): Promise<HoaTayData> => {
-    return callProxy('analyzeHoaTay', { base64Image, language });
+export const analyzeHoaTay = (counts: { leftHandWhorls: number, rightHandWhorls: number }, language: string): Promise<HoaTayData> => {
+    return callProxy('analyzeHoaTay', { counts, language });
 };

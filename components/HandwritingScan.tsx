@@ -152,7 +152,6 @@ const HandwritingScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onReta
         )}
         
         {isCapturing && <div className="absolute inset-0 bg-white animate-shutter-flash" />}
-        {/* FIX: Changed 'message' prop to 'initialMessageKey' and passed the translation key. */}
         {isStartingCamera && <Spinner initialMessageKey='spinnerCamera' />}
         
         {!isCameraOn && !capturedImage && !isStartingCamera && (

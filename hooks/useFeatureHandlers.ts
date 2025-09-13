@@ -113,28 +113,20 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
         }
     }, [state.data.capturedHandwritingImage, language, t, saveItem, dispatch]);
 
-    const handleAnalyzeHoaTay = useCallback(async () => {
-        const { capturedHoaTayImage } = state.data;
-        if (!capturedHoaTayImage) return;
+    const handleAnalyzeHoaTay = useCallback(async (counts: { leftHandWhorls: number, rightHandWhorls: number }) => {
         trackFeatureUsage('hoaTay');
         dispatch({ type: 'SET_VIEW', payload: AppState.HOA_TAY_SCAN_LOADING });
-        const base64Data = capturedHoaTayImage.split(',')[1];
-        if(!base64Data) {
-            dispatch({ type: 'SET_ERROR', payload: t('errorInvalidImageData')});
-            dispatch({ type: 'SET_VIEW', payload: AppState.HOA_TAY_SCAN_CAPTURE });
-            return;
-        }
         try {
-            const data = await analyzeHoaTay(base64Data, language);
+            const data = await analyzeHoaTay(counts, language);
             dispatch({ type: 'SET_DATA', payload: { hoaTayData: data } });
-            saveItem({ type: 'hoaTay', name: t('itemTypeHoaTay'), imageData: capturedHoaTayImage, analysisData: data });
+            saveItem({ type: 'hoaTay', name: t('itemTypeHoaTay'), analysisData: data });
             dispatch({ type: 'SET_VIEW', payload: AppState.HOA_TAY_SCAN_RESULT });
         } catch (err) {
             console.error(err);
             dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
             dispatch({ type: 'SET_VIEW', payload: AppState.HOA_TAY_SCAN_CAPTURE });
         }
-    }, [state.data.capturedHoaTayImage, language, t, saveItem, dispatch]);
+    }, [language, t, saveItem, dispatch]);
 
     const handleGenerateNumerology = useCallback(async (info: NumerologyInfo) => {
         trackFeatureUsage('numerology');
@@ -303,8 +295,6 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
     const handleRetakePalmCapture = useCallback(() => { dispatch({ type: 'SET_DATA', payload: { capturedPalmImage: null } }); dispatch({type: 'SET_ERROR', payload: null}); }, [dispatch]);
     const handleCaptureHandwritingImage = useCallback((imageDataUrl: string) => { dispatch({ type: 'SET_DATA', payload: { capturedHandwritingImage: imageDataUrl } }); }, [dispatch]);
     const handleRetakeHandwritingCapture = useCallback(() => { dispatch({ type: 'SET_DATA', payload: { capturedHandwritingImage: null } }); dispatch({type: 'SET_ERROR', payload: null}); }, [dispatch]);
-    const handleCaptureHoaTayImage = useCallback((imageDataUrl: string) => { dispatch({ type: 'SET_DATA', payload: { capturedHoaTayImage: imageDataUrl } }); }, [dispatch]);
-    const handleRetakeHoaTayCapture = useCallback(() => { dispatch({ type: 'SET_DATA', payload: { capturedHoaTayImage: null } }); dispatch({type: 'SET_ERROR', payload: null}); }, [dispatch]);
     const handleCaptureEnergy = useCallback((color: string) => { dispatch({ type: 'SET_DATA', payload: { capturedEnergyColor: color } }); dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_CARD_DRAW }); }, [dispatch]);
     
     const handleStartBioEnergy = useCallback((info: BioEnergyInfo) => { dispatch({ type: 'SET_DATA', payload: { bioEnergyInfo: info } }); dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_CAPTURE }); }, [dispatch]);
@@ -330,7 +320,7 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
                 dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_RESULT });
                 break;
             case 'hoaTay':
-                dispatch({ type: 'SET_DATA', payload: { capturedHoaTayImage: payload.imageData, hoaTayData: payload.analysisData } });
+                dispatch({ type: 'SET_DATA', payload: { hoaTayData: payload.analysisData } });
                 dispatch({ type: 'SET_VIEW', payload: AppState.HOA_TAY_SCAN_RESULT });
                 break;
             case 'numerology':
@@ -371,7 +361,7 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
         handleGenerateTalisman, handleGenerateAuspiciousName, handleGenerateBioEnergy,
         handleGetFortuneStick, handleGetGodOfWealthBlessing, handleGeneratePrayer, handleAnalyzeFengShui,
         handleCaptureImage, handleRetakeCapture, handleCapturePalmImage, handleRetakePalmCapture,
-        handleCaptureHandwritingImage, handleRetakeHandwritingCapture, handleCaptureHoaTayImage, handleRetakeHoaTayCapture, handleCaptureEnergy,
+        handleCaptureHandwritingImage, handleRetakeHandwritingCapture, handleCaptureEnergy,
         handleStartBioEnergy, handleStartFengShui, handleViewItem
     };
 };

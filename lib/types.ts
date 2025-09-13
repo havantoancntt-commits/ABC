@@ -89,7 +89,6 @@ export interface AppStateStructure {
     capturedImage: string | null;
     capturedPalmImage: string | null;
     capturedHandwritingImage: string | null;
-    capturedHoaTayImage: string | null;
     capturedEnergyColor: string | null;
     drawnBioEnergyCard: BioEnergyCard | null;
     fengShuiThumbnail: string | null;
@@ -479,7 +478,6 @@ export interface SavedHandwritingPayload {
 export interface SavedHoaTayPayload {
     type: 'hoaTay';
     name: string;
-    imageData: string;
     analysisData: HoaTayData;
 }
 

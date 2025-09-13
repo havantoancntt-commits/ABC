@@ -1,239 +1,125 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import Card from './Card';
 import Button from './Button';
-import Spinner from './Spinner';
 import { useLocalization } from '../hooks/useLocalization';
+import type { TranslationKey } from '../hooks/useLocalization';
 
 interface Props {
-  onAnalyze: () => void;
+  onAnalyze: (counts: { leftHandWhorls: number, rightHandWhorls: number }) => void;
   onBack: () => void;
-  onCapture: (imageDataUrl: string) => void;
-  onRetake: () => void;
-  capturedImage: string | null;
 }
 
-const HoaTayScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, capturedImage }) => {
-  const { t } = useLocalization();
-  const [error, setError] = useState<string | null>(null);
-  const [isCameraOn, setIsCameraOn] = useState(false);
-  const [isStartingCamera, setIsStartingCamera] = useState(false);
-  const [isCapturing, setIsCapturing] = useState(false);
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+const FINGER_DATA: { hand: 'left' | 'right'; nameKey: TranslationKey; position: React.CSSProperties }[] = [
+    { hand: 'left', nameKey: 'fingerLeftThumb', position: { top: '65%', right: '0%' } },
+    { hand: 'left', nameKey: 'fingerLeftIndex', position: { top: '30%', right: '32%' } },
+    { hand: 'left', nameKey: 'fingerLeftMiddle', position: { top: '18%', right: '58%' } },
+    { hand: 'left', nameKey: 'fingerLeftRing', position: { top: '28%', right: '82%' } },
+    { hand: 'left', nameKey: 'fingerLeftPinky', position: { top: '48%', right: '100%' } },
+    { hand: 'right', nameKey: 'fingerRightThumb', position: { top: '65%', left: '0%' } },
+    { hand: 'right', nameKey: 'fingerRightIndex', position: { top: '30%', left: '32%' } },
+    { hand: 'right', nameKey: 'fingerRightMiddle', position: { top: '18%', left: '58%' } },
+    { hand: 'right', nameKey: 'fingerRightRing', position: { top: '28%', left: '82%' } },
+    { hand: 'right', nameKey: 'fingerRightPinky', position: { top: '48%', left: '100%' } },
+];
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+const HandSVG: React.FC<{ side: 'left' | 'right' }> = React.memo(({ side }) => (
+    <svg viewBox={side === 'left' ? "-5 0 110 160" : "0 0 110 160"} className={`w-full h-full text-rose-400/20 transition-opacity duration-500`}>
+        <path 
+            transform={side === 'right' ? 'scale(-1, 1) translate(-100, 0)' : ''}
+            stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"
+            d="M 60,100 C 60,120 50,150 40,155 C 30,160 10,140 10,120 L 10,80 C 10,60 15,50 25,50 C 35,50 40,60 40,70 L 40,60 C 40,50 45,40 55,40 C 65,40 70,50 70,60 L 70,55 C 70,45 75,35 85,35 C 95,35 100,45 100,55 L 100,80 C 100,90 95,100 85,100 L 60,100"
+        />
+    </svg>
+));
 
-  const stopCamera = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-  }, []);
+const HoaTayScan: React.FC<Props> = ({ onAnalyze, onBack }) => {
+    const { t } = useLocalization();
+    const [fingerprints, setFingerprints] = useState<( 'whorl' | 'loop' | null)[]>(Array(10).fill(null));
+    const [currentFingerIndex, setCurrentFingerIndex] = useState(0);
 
-  useEffect(() => {
-    if (!isCameraOn) {
-        stopCamera();
-        return;
-    }
+    const leftHandWhorls = useMemo(() => fingerprints.slice(0, 5).filter(f => f === 'whorl').length, [fingerprints]);
+    const rightHandWhorls = useMemo(() => fingerprints.slice(5, 10).filter(f => f === 'whorl').length, [fingerprints]);
+    const totalWhorls = leftHandWhorls + rightHandWhorls;
 
-    let didCancel = false;
-
-    const startStream = async () => {
-        stopCamera();
-        setIsStartingCamera(true);
-        setError(null);
-
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } }
-            });
-            if (didCancel) {
-                stream.getTracks().forEach(track => track.stop());
-                return;
-            }
-            streamRef.current = stream;
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                await videoRef.current.play();
-            }
-        } catch (err) {
-            console.error("Camera error:", err);
-            let message = t('errorCameraUnknown');
-            if (err instanceof Error) {
-                if (err.name === 'NotAllowedError') message = t('errorCameraPermission');
-                else if (err.name === 'NotFoundError') message = t('errorCameraNotFound');
-                else message = t('errorCameraInUse');
-            }
-            setError(message);
-            setIsCameraOn(false);
-        } finally {
-            if (!didCancel) {
-                setIsStartingCamera(false);
-            }
-        }
+    const handleSelect = (type: 'whorl' | 'loop') => {
+        const newFingerprints = [...fingerprints];
+        newFingerprints[currentFingerIndex] = type;
+        setFingerprints(newFingerprints);
+        setCurrentFingerIndex(i => i + 1);
     };
 
-    startStream();
-
-    return () => {
-        didCancel = true;
-        stopCamera();
+    const handleAnalyzeClick = () => {
+        onAnalyze({ leftHandWhorls, rightHandWhorls });
     };
-  }, [isCameraOn, facingMode, stopCamera, t]);
-  
-  const handleManualCapture = useCallback(() => {
-    if (isCapturing || !videoRef.current || !canvasRef.current) return;
 
-    setIsCapturing(true);
+    const handleReset = () => {
+        setFingerprints(Array(10).fill(null));
+        setCurrentFingerIndex(0);
+    };
     
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    if (context) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        onCapture(canvas.toDataURL('image/jpeg'));
-    }
+    const currentFingerData = FINGER_DATA[currentFingerIndex];
+    const isLeftHandActive = currentFingerIndex < 5;
+    const isRightHandActive = currentFingerIndex >= 5 && currentFingerIndex < 10;
     
-    setTimeout(() => {
-      setIsCameraOn(false);
-      setIsCapturing(false);
-    }, 400); 
-  }, [onCapture, isCapturing]);
+    return (
+        <Card className="max-w-4xl mx-auto flex flex-col items-center">
+            <h2 className="text-3xl font-bold text-center mb-2 text-rose-400 font-serif">{t('hoaTayScanTitle')}</h2>
+            <p className="text-center text-gray-400 mb-6 max-w-lg">{currentFingerIndex < 10 ? t('hoaTayScanSubtitle') : t('processing')}</p>
+            
+            <div className="w-full min-h-[350px] flex flex-col justify-center items-center">
+                {currentFingerIndex < 10 ? (
+                    <>
+                        <p className="text-lg text-center text-white mb-4 h-14">
+                           {t('hoaTayPrompt')} <br/>
+                           <strong className="text-2xl font-serif text-rose-300">{t('hoaTayPromptFinger', { fingerName: t(currentFingerData.nameKey) })}</strong>
+                        </p>
+                        <div className="relative w-full max-w-xl h-64 flex justify-center items-center">
+                            {/* Left Hand */}
+                            <div className={`absolute w-40 h-64 top-0 left-1/2 -translate-x-[110%] transition-transform duration-500 ${isLeftHandActive ? 'scale-110' : 'scale-90 opacity-50'}`}>
+                                <HandSVG side="left" />
+                                 {FINGER_DATA.slice(0,5).map((finger, i) => (
+                                    <div key={i} className="absolute w-6 h-6 rounded-full" style={finger.position}>
+                                        {fingerprints[i] === 'whorl' && <span className="text-2xl">🌀</span>}
+                                        {fingerprints[i] === 'loop' && <span className="text-2xl">💧</span>}
+                                    </div>
+                                ))}
+                            </div>
+                            {/* Right Hand */}
+                             <div className={`absolute w-40 h-64 top-0 left-1/2 translate-x-[10%] transition-transform duration-500 ${isRightHandActive ? 'scale-110' : 'scale-90 opacity-50'}`}>
+                                <HandSVG side="right" />
+                                {FINGER_DATA.slice(5,10).map((finger, i) => (
+                                    <div key={i+5} className="absolute w-6 h-6 rounded-full" style={finger.position}>
+                                        {fingerprints[i+5] === 'whorl' && <span className="text-2xl">🌀</span>}
+                                        {fingerprints[i+5] === 'loop' && <span className="text-2xl">💧</span>}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      setIsCameraOn(false);
-      const reader = new FileReader();
-      reader.onload = () => { onCapture(reader.result as string); setError(null); };
-      reader.onerror = () => { setError(t('errorFileRead')); };
-      reader.readAsDataURL(file);
-    } else {
-      setError(t('errorFileInvalid'));
-    }
-  };
-  
-  const handleRetake = useCallback(() => {
-      onRetake();
-      setError(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-  }, [onRetake]);
-  
-  const handleSwitchCamera = () => {
-    if (isStartingCamera) return;
-    setFacingMode(prev => (prev === 'user' ? 'environment' : 'user'));
-  };
-
-  const triggerFileSelect = () => fileInputRef.current?.click();
-  const handleOpenCamera = () => setIsCameraOn(true);
-
-  return (
-    <Card className="max-w-xl mx-auto flex flex-col items-center">
-      <h2 className="text-3xl font-bold text-center mb-4 text-rose-400 font-serif">{t('hoaTayScanTitle')}</h2>
-      <p className="text-center text-gray-400 mb-6 max-w-lg">{t('hoaTayScanSubtitle')}</p>
-      
-      {error && (
-        <div className="my-4 p-4 w-full bg-red-900/50 border border-red-600 rounded-lg text-center">
-          <p className="font-semibold text-red-300">{error}</p>
-        </div>
-      )}
-      
-      <div className="relative w-full max-w-md aspect-[4/3] rounded-2xl overflow-hidden bg-gray-950/80 border-2 border-dashed border-gray-600 flex items-center justify-center text-gray-400 group">
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-        <canvas ref={canvasRef} className="hidden" />
-        
-        {capturedImage && <img src={capturedImage} alt={t('hoaTayResultImageAlt')} className="w-full h-full object-contain" />}
-
-        {!capturedImage && (
-            <video ref={videoRef} autoPlay playsInline muted className={`w-full h-full object-cover ${isCameraOn ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`} />
-        )}
-        
-        {isCameraOn && !capturedImage && (
-            <>
-                 <div className="absolute inset-0" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.7)' }}></div>
-                 <div className="absolute w-[80%] h-[70%] text-white/40 flex flex-col justify-between">
-                    <div className="flex justify-between">
-                        <div className="w-16 h-16 border-l-4 border-t-4 border-white/50 rounded-tl-2xl"></div>
-                        <div className="w-16 h-16 border-r-4 border-t-4 border-white/50 rounded-tr-2xl"></div>
+                        <div className="mt-6 flex gap-4">
+                            <Button onClick={() => handleSelect('whorl')} variant="primary" size="lg">🌀 {t('hoaTayTypeWhorl')}</Button>
+                            <Button onClick={() => handleSelect('loop')} variant="secondary" size="lg">💧 {t('hoaTayTypeLoop')}</Button>
+                        </div>
+                    </>
+                ) : (
+                    <div className="text-center animate-fade-in">
+                        <h3 className="text-2xl font-bold font-serif text-rose-300 mb-4">{t('hoaTayResultSummary', { leftCount: leftHandWhorls, rightCount: rightHandWhorls, totalCount: totalWhorls })}</h3>
+                        <Button onClick={handleAnalyzeClick} variant="hoatay" size="lg" className="animate-pulse-button">
+                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                            {t('hoaTayScanAnalyze')}
+                        </Button>
                     </div>
-                     <div className="flex justify-between">
-                        <div className="w-16 h-16 border-l-4 border-b-4 border-white/50 rounded-bl-2xl"></div>
-                        <div className="w-16 h-16 border-r-4 border-b-4 border-white/50 rounded-br-2xl"></div>
-                    </div>
-                 </div>
-            </>
-        )}
-        
-        {isCapturing && <div className="absolute inset-0 bg-white animate-shutter-flash" />}
-        {isStartingCamera && <Spinner initialMessageKey='spinnerCamera' />}
-        
-        {!isCameraOn && !capturedImage && !isStartingCamera && (
-             <div className="absolute inset-0 flex flex-col items-center justify-center p-4 z-10 bg-gray-950/50">
-                <button
-                    onClick={handleOpenCamera}
-                    className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white shadow-lg shadow-rose-500/30 transition-transform hover:scale-105 focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-400/50 animate-pulse-glow"
-                    style={{ animationDuration: '3s' }}
-                    aria-label={t('faceScanOpenCamera')}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 sm:h-14 sm:h-14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-12h2v4h-2v-4zm0 6h2v2h-2v-2z" /></svg>
-                </button>
-                <button onClick={triggerFileSelect} className="mt-6 text-gray-300 hover:text-white transition-colors flex items-center gap-2 font-semibold">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                    <span>{t('faceScanUpload')}</span>
-                </button>
+                )}
             </div>
-        )}
-
-        {isCameraOn && !capturedImage && !isStartingCamera && (
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent flex justify-center items-center gap-6">
-                <button 
-                    onClick={handleSwitchCamera}
-                    className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-colors"
-                    aria-label={t('cameraSwitchAria')}
-                    title={t('cameraSwitch')}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21H6a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v3m-6 9.5a4.5 4.5 0 110-9 4.5 4.5 0 010 9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 16.5L8 19l2.5 2.5" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m16.5 16.5 2.5 2.5-2.5 2.5" />
-                  </svg>
-                </button>
-                <button
-                    onClick={handleManualCapture}
-                    disabled={isCapturing}
-                    className="w-20 h-20 rounded-full bg-white border-4 border-white/50 p-1 transition-transform hover:scale-105 active:scale-95"
-                    aria-label={t('faceScanManualCapture')}
-                >
-                    <div className="w-full h-full rounded-full bg-white/80"></div>
-                </button>
-                <div className="w-14 h-14"></div>
+            
+            <div className="mt-8 w-full flex justify-between items-center">
+                 <Button onClick={onBack} variant="secondary">{t('back')}</Button>
+                 {currentFingerIndex > 0 && 
+                    <Button onClick={handleReset} variant="secondary">{t('hoaTayTryAgain')}</Button>
+                 }
             </div>
-        )}
-      </div>
-
-      <div className="mt-8 w-full max-w-lg space-y-4">
-        {capturedImage ? (
-            <div className="grid grid-cols-2 gap-4">
-                <Button onClick={handleRetake} variant="secondary" className="w-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5m9-1-9 9-9-9" /></svg>
-                  {t('faceScanRetake')}
-                </Button>
-                <Button onClick={onAnalyze} variant="hoatay" className="text-lg w-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                  {t('hoaTayScanAnalyze')}
-                </Button>
-            </div>
-        ) : !isCameraOn ? (
-            <Button onClick={onBack} variant="secondary" className="w-full">{t('back')}</Button>
-        ): null}
-      </div>
-    </Card>
-  );
+        </Card>
+    );
 };
 
 export default HoaTayScan;

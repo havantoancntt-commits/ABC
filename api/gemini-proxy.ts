@@ -383,7 +383,7 @@ function getSystemInstruction(operation: string, language: string): string {
         analyzePhysiognomy: "Bạn là một Đại sư Nhân Tướng Học. Hãy phân tích hình ảnh khuôn mặt với sự tinh tế và sâu sắc, luận giải về thần khí, cốt cách và các bộ vị một cách toàn diện. Cung cấp những nhận định mang tính xây dựng.",
         analyzePalm: "Bạn là một chuyên gia tướng tay bậc thầy. Phân tích hình ảnh lòng bàn tay, từ các đường chỉ chính đến các gò và dấu hiệu đặc biệt. Luận giải phải sâu sắc, kết nối các yếu tố để đưa ra một cái nhìn tổng thể về vận mệnh và tính cách.",
         analyzeHandwriting: "Bạn là một chuyên gia bút tích học (graphology) hàng đầu. Hãy phân tích mẫu chữ viết để khám phá những tầng sâu trong tính cách, tư duy và nội tâm của người viết. Luận giải cần tinh tế và sâu sắc.",
-        analyzeHoaTay: "Bạn là một chuyên gia xem hoa tay bậc thầy với kiến thức uyên bác. Hãy phân tích hình ảnh các đầu ngón tay, đếm chính xác số lượng hoa tay (vân xoáy) trên mỗi bàn tay. Dựa vào đó, hãy luận giải một cách chi tiết, sâu sắc và đẳng cấp về tính cách, vận mệnh, tình duyên và sự nghiệp. Giọng văn phải chuyên nghiệp, mang tính xây dựng.",
+        analyzeHoaTay: "Bạn là một chuyên gia xem hoa tay bậc thầy với kiến thức uyên bác. Dựa vào số lượng hoa tay trên mỗi bàn tay được cung cấp, hãy luận giải một cách chi tiết, sâu sắc và đẳng cấp về tính cách, vận mệnh, tình duyên và sự nghiệp. Giọng văn phải chuyên nghiệp, mang tính xây dựng.",
         getIChingInterpretation: "Bạn là một học giả Kinh Dịch uyên bác. Hãy luận giải quẻ và các hào động một cách sâu sắc dựa trên câu hỏi của người dùng, kết nối ý nghĩa cổ xưa với bối cảnh hiện đại để đưa ra lời chỉ dẫn rõ ràng, minh triết.",
         generateNumerologyChart: "Bạn là một chuyên gia Thần Số Học Pythagoras. Hãy tính toán và luận giải biểu đồ thần số học một cách chi tiết, chuyên nghiệp. Kết nối ý nghĩa của các con số để vẽ nên một bức tranh toàn cảnh về cuộc đời và sứ mệnh của một người.",
         getTarotReading: "Bạn là một Tarot reader có trực giác nhạy bén và kiến thức sâu rộng. Hãy luận giải trải bài 3 lá (Quá Khứ - Hiện Tại - Tương Lai) một cách sâu sắc, kết nối chúng thành một câu chuyện mạch lạc và đưa ra lời khuyên chiến lược, đầy cảm hứng.",
@@ -475,8 +475,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'analyzePhysiognomy':
             case 'analyzePalm':
-            case 'analyzeHandwriting':
-            case 'analyzeHoaTay': {
+            case 'analyzeHandwriting': {
                  const { base64Image } = params;
                  let schema;
                  let promptText;
@@ -493,16 +492,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                         schema = handwritingSchema;
                         promptText = 'Phân tích chữ viết tay trong ảnh này.';
                         break;
-                    case 'analyzeHoaTay':
-                        schema = hoaTaySchema;
-                        promptText = 'Phân tích hoa tay trong ảnh này. Đếm số lượng vân xoáy trên mỗi bàn tay và luận giải.';
-                        break;
                  }
 
                  const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: schema, systemInstruction: getSystemInstruction(operation, language) },
                     contents: { parts: [{ inlineData: { mimeType: 'image/jpeg', data: base64Image } }, { text: promptText }] },
+                });
+                return parseJsonResponse(response);
+            }
+            case 'analyzeHoaTay': {
+                const { counts } = params as { counts: { leftHandWhorls: number, rightHandWhorls: number } };
+                const response = await ai.models.generateContent({
+                    model: commonConfig.model,
+                    config: { ...commonConfig.config, responseSchema: hoaTaySchema, systemInstruction: getSystemInstruction(operation, language) },
+                    contents: `Luận giải về một người có ${counts.leftHandWhorls} hoa tay ở bàn tay trái và ${counts.rightHandWhorls} hoa tay ở bàn tay phải. Hãy đảm bảo các trường leftHandWhorls, rightHandWhorls, và totalWhorls trong JSON response khớp với các con số này.`,
                 });
                 return parseJsonResponse(response);
             }

@@ -65,7 +65,7 @@ const initialState: AppStateStructure = {
     auspiciousNamingData: null, bioEnergyInfo: null, bioEnergyData: null, fortuneStickInfo: null, fortuneStickData: null,
     godOfWealthInfo: null, godOfWealthData: null, prayerRequestInfo: null, prayerData: null, fengShuiInfo: null, fengShuiData: null,
     hoaTayData: null,
-    capturedImage: null, capturedPalmImage: null, capturedHandwritingImage: null, capturedHoaTayImage: null, capturedEnergyColor: null, drawnBioEnergyCard: null, fengShuiThumbnail: null,
+    capturedImage: null, capturedPalmImage: null, capturedHandwritingImage: null, capturedEnergyColor: null, drawnBioEnergyCard: null, fengShuiThumbnail: null,
   },
   error: null,
 };
@@ -204,7 +204,7 @@ const App: React.FC = () => {
       handleGenerateTalisman, handleGenerateAuspiciousName, handleGenerateBioEnergy,
       handleGetFortuneStick, handleGetGodOfWealthBlessing, handleGeneratePrayer, handleAnalyzeFengShui,
       handleCaptureImage, handleRetakeCapture, handleCapturePalmImage, handleRetakePalmCapture,
-      handleCaptureHandwritingImage, handleRetakeHandwritingCapture, handleCaptureHoaTayImage, handleRetakeHoaTayCapture, handleCaptureEnergy,
+      handleCaptureHandwritingImage, handleRetakeHandwritingCapture, handleCaptureEnergy,
       handleStartBioEnergy, handleStartFengShui, handleViewItem
   } = useFeatureHandlers({ state, dispatch, saveItem, language, t });
 
@@ -314,11 +314,11 @@ const App: React.FC = () => {
       case AppState.HANDWRITING_ANALYSIS_RESULT:
         return state.data.handwritingData && state.data.capturedHandwritingImage && <HandwritingResult analysisData={state.data.handwritingData} imageData={state.data.capturedHandwritingImage} onTryAgain={handleResetHandwriting} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.HOA_TAY_SCAN_CAPTURE:
-        return <HoaTayScan onCapture={handleCaptureHoaTayImage} onAnalyze={handleAnalyzeHoaTay} capturedImage={state.data.capturedHoaTayImage} onRetake={handleRetakeHoaTayCapture} onBack={handleGoHome} />;
+        return <HoaTayScan onAnalyze={handleAnalyzeHoaTay} onBack={handleGoHome} />;
       case AppState.HOA_TAY_SCAN_LOADING:
         return <Spinner initialMessageKey='spinnerHoaTay' />;
       case AppState.HOA_TAY_SCAN_RESULT:
-        return state.data.hoaTayData && state.data.capturedHoaTayImage && <HoaTayResult analysisData={state.data.hoaTayData} imageData={state.data.capturedHoaTayImage} onTryAgain={handleResetHoaTay} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
+        return state.data.hoaTayData && <HoaTayResult analysisData={state.data.hoaTayData} onTryAgain={handleResetHoaTay} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.ZODIAC_HOUR_FINDER:
         return <ZodiacHourFinder />;
       case AppState.ICHING_DIVINATION:

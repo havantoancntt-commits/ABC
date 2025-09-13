@@ -47,7 +47,7 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
             case 'handwriting':
                 return t('itemDescHandwriting', { date });
             case 'hoaTay':
-                return t('itemDescHoaTay', { date });
+                return t('itemDescHoaTay', { count: payload.analysisData.totalWhorls });
             default:
                 return new Intl.DateTimeFormat(t('locale'), { dateStyle: 'full', timeStyle: 'short' }).format(new Date(item.timestamp));
         }
@@ -76,7 +76,7 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
 };
 
 
-const SavedItems: React.FC<Props> = ({ items, onDelete, onView, onCreateNew }) => {
+const SavedItems: React.FC<Props> = ({ items, onView, onDelete, onCreateNew }) => {
   const { t } = useLocalization();
   
   return (

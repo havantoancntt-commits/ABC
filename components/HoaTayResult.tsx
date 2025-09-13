@@ -6,7 +6,6 @@ import { useLocalization } from '../hooks/useLocalization';
 
 interface Props {
   analysisData: HoaTayData;
-  imageData: string;
   onTryAgain: () => void;
   onGoHome: () => void;
   onOpenDonationModal: () => void;
@@ -30,7 +29,7 @@ const AnalysisSection: React.FC<{ title: string; content: string; icon: React.Re
     </Card>
 ));
 
-const HoaTayResult: React.FC<Props> = ({ analysisData, imageData, onTryAgain, onGoHome, onOpenDonationModal }) => {
+const HoaTayResult: React.FC<Props> = ({ analysisData, onTryAgain, onGoHome, onOpenDonationModal }) => {
   const { t } = useLocalization();
   const { leftHandWhorls, rightHandWhorls, totalWhorls, leftHandInterpretation, rightHandInterpretation, overallInterpretation, advice } = analysisData;
   const analysisSections = [
@@ -41,26 +40,16 @@ const HoaTayResult: React.FC<Props> = ({ analysisData, imageData, onTryAgain, on
   ];
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <h2 className="text-4xl font-bold text-center mb-8 text-rose-400 font-serif animate-fade-in-down">{t('hoaTayResultTitle')}</h2>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-1 text-center p-6 bg-gray-900/50 rounded-lg border border-gray-800 lg:sticky lg:top-28">
-          <h3 className="text-2xl font-serif text-rose-300 mb-4">{t('hoaTayResultImageTitle')}</h3>
-          <img 
-            src={imageData} 
-            alt={t('hoaTayResultImageAlt')} 
-            className="rounded-lg shadow-2xl w-full mx-auto border-2 border-rose-500/50"
-          />
-        </div>
-        
-        <div className="lg:col-span-2 space-y-8">
-            {analysisSections.map((section, index) => (
-                <div key={index} className="animate-slide-in-up" style={{ animationDelay: `${index * 150}ms`, opacity: 0 }}>
-                    <AnalysisSection title={section.title} content={section.content} icon={section.icon} />
-                </div>
-            ))}
-        </div>
+    <div className="max-w-4xl mx-auto">
+      <h2 className="text-4xl font-bold text-center mb-4 text-rose-400 font-serif animate-fade-in-down">{t('hoaTayResultTitle')}</h2>
+      <p className="text-center text-gray-300 mb-10">{t('hoaTayResultSummary', { leftCount: leftHandWhorls, rightCount: rightHandWhorls, totalCount: totalWhorls })}</p>
+
+      <div className="space-y-8">
+          {analysisSections.map((section, index) => (
+              <div key={index} className="animate-slide-in-up" style={{ animationDelay: `${index * 150}ms`, opacity: 0 }}>
+                  <AnalysisSection title={section.title} content={section.content} icon={section.icon} />
+              </div>
+          ))}
       </div>
 
       <div className="mt-10 text-center text-amber-100/80 max-w-3xl mx-auto text-sm">

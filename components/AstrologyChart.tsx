@@ -171,7 +171,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onTryAgain, onGoHome
                         </div>
                     ))}
 
-                    <div className="grid-center-cell p-2 sm:p-4 bg-gray-950/70 rounded-lg border border-yellow-500/30 flex flex-col justify-center text-center shadow-[0_0_20px_rgba(250,204,21,0.2)]">
+                    <div className="grid-center-cell p-2 sm:p-4 bg-gray-950/70 rounded-lg border border-yellow-500/30 flex flex-col justify-center text-center shadow-[0_0_20px_rgba(250,204,21,0.2)] bg-[radial-gradient(ellipse_at_center,_var(--color-primary-glow)_0%,_transparent_70%)]">
                         <div className="flex-grow flex flex-col justify-center">
                             <h2 className="text-lg sm:text-2xl font-bold text-yellow-400 font-serif">{birthInfo.name}</h2>
                             <p className="text-gray-300 text-xs sm:text-sm">{t(birthInfo.gender)} - {birthDate}</p>
@@ -199,6 +199,7 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onTryAgain, onGoHome
             <div className="mt-8 text-center text-amber-100/80 max-w-3xl mx-auto text-sm">
                 <p>{t('resultSupportMessage')}</p>
             </div>
+            <p className="mt-4 text-center text-gray-500 text-xs max-w-2xl mx-auto">{t('resultDisclaimer')}</p>
             <div className="mt-6 flex flex-wrap justify-center gap-4">
                 <Button onClick={onGoHome} variant="secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>

@@ -61,25 +61,26 @@ const BioEnergyResult: React.FC<Props> = ({ data, info, color, card, onTryAgain,
                     <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify">{data.colorAnalysis}</p>
                 </Card>
                  <Card>
-                    <h3 className="text-2xl font-bold font-serif mb-3 text-yellow-300">{t('bioEnergyCardAnalysis')}</h3>
+                    <h3 className="text-2xl font-bold font-serif text-yellow-300 mb-3">{t('bioEnergyCardAnalysis')}</h3>
                     <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify">{data.cardAnalysis}</p>
                 </Card>
-                <Card className="border-2 border-green-400/50">
-                    <h3 className="text-2xl font-bold font-serif mb-3 text-green-300">{t('bioEnergyPrediction')}</h3>
+                 <Card>
+                    <h3 className="text-2xl font-bold font-serif text-green-300 mb-3">{t('bioEnergyPrediction')}</h3>
                     <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-justify">{data.synthesizedPrediction}</p>
                 </Card>
             </div>
 
-            <div className="mt-12 text-center text-amber-100/80 max-w-3xl mx-auto text-sm">
+            <div className="mt-10 text-center text-amber-100/80 max-w-3xl mx-auto text-sm">
                 <p>{t('resultSupportMessage')}</p>
             </div>
+            <p className="mt-4 text-center text-gray-500 text-xs max-w-2xl mx-auto">{t('resultDisclaimer')}</p>
             <div className="mt-6 flex flex-wrap justify-center gap-4">
-                <Button onClick={onGoHome} variant="secondary">
+                 <Button onClick={onGoHome} variant="secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
                     {t('home')}
                 </Button>
                 <Button onClick={onTryAgain} variant="secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5m9-1-9 9-9-9" /></svg>
+                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5m9-1-9 9-9-9" /></svg>
                     {t('bioEnergyTryAgain')}
                 </Button>
                 <Button onClick={onOpenDonationModal} variant="primary">
