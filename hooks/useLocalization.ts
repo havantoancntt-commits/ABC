@@ -1,9 +1,9 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, ReactNode } from 'react';
 import { translations } from '../locales/translations';
 
-// FIX: Explicitly define Language type to prevent incorrect type inference.
 export type Language = 'vi' | 'en';
-export type TranslationKey = keyof typeof translations.vi;
+// FIX: Updated TranslationKey to ensure keys exist in both languages, improving type safety.
+export type TranslationKey = keyof typeof translations.vi & keyof typeof translations.en;
 
 interface LanguageContextType {
   language: Language;
@@ -58,6 +58,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const value = { language, setLanguage, t };
   
+  // FIX: Replaced JSX with React.createElement to resolve parsing errors in a .ts file.
   return React.createElement(LanguageContext.Provider, { value: value }, children);
 };
 

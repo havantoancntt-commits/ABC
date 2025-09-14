@@ -9,6 +9,7 @@ if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
+// FIX: Corrected typo from `create_root` to `createRoot`.
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>

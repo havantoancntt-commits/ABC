@@ -33,17 +33,18 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
         dispatch({ type: 'SET_DATA', payload: { birthInfo: info } });
         dispatch({ type: 'SET_VIEW', payload: AppState.LOADING });
         try {
-        // FIX: Always request Vietnamese for the astrology chart as the component has hardcoded VI palace names.
+        // Always request Vietnamese for the astrology chart as the component has hardcoded VI palace names.
         const data = await generateAstrologyChart(info, 'vi');
         dispatch({ type: 'SET_DATA', payload: { chartData: data } });
         saveItem({ type: 'astrology', birthInfo: info, chartData: data });
         dispatch({ type: 'SET_VIEW', payload: AppState.RESULT });
         } catch (err) {
         console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
         dispatch({ type: 'SET_VIEW', payload: AppState.ASTROLOGY_FORM });
         }
-    }, [language, t, saveItem, dispatch]);
+    }, [t, saveItem, dispatch]);
     
     const handleAnalyzeFace = useCallback(async () => {
         const { capturedImage } = state.data;
@@ -63,7 +64,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
         dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_RESULT });
         } catch (err) {
         console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
         dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_CAPTURE });
         }
     }, [state.data.capturedImage, language, t, saveItem, dispatch]);
@@ -86,7 +88,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
         dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_RESULT });
         } catch (err) {
         console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
         dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_CAPTURE });
         }
     }, [state.data.capturedPalmImage, language, t, saveItem, dispatch]);
@@ -109,7 +112,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
         dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_RESULT });
         } catch (err) {
         console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
         dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_CAPTURE });
         }
     }, [state.data.capturedHandwritingImage, language, t, saveItem, dispatch]);
@@ -124,7 +128,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_VIEW', payload: AppState.HOA_TAY_SCAN_RESULT });
         } catch (err) {
             console.error(err);
-            dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
             dispatch({ type: 'SET_VIEW', payload: AppState.HOA_TAY_SCAN_CAPTURE });
         }
     }, [language, t, saveItem, dispatch]);
@@ -140,7 +145,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_RESULT });
         } catch (err) {
             console.error(err);
-            dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
             dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_FORM });
         }
     }, [language, t, saveItem, dispatch]);
@@ -156,7 +162,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_RESULT });
         } catch (err) {
             console.error(err);
-            dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
             dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_FORM });
         }
     }, [language, t, saveItem, dispatch]);
@@ -171,7 +178,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_RESULT });
         } catch (err) {
             console.error(err);
-            dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
             dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_FORM });
         }
     }, [language, t, dispatch]);
@@ -186,7 +194,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_RESULT });
         } catch (err) {
             console.error(err);
-            dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
             dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_GENERATOR });
         }
     }, [language, t, dispatch]);
@@ -202,7 +211,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_RESULT });
         } catch (err) {
             console.error(err);
-            dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
             dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_FORM });
         }
     }, [language, t, saveItem, dispatch]);
@@ -220,7 +230,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
         dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_RESULT });
         } catch (err) {
         console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
         dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_FORM });
         }
     }, [state.data, language, t, saveItem, dispatch]);
@@ -235,7 +246,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_RESULT });
         } catch (err) {
             console.error(err);
-            dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
             dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_SHAKE });
         }
     }, [language, t, dispatch]);
@@ -251,7 +263,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_RESULT });
         } catch (err) {
             console.error(err);
-            dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
             dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_BLESSING });
         }
     }, [language, t, saveItem, dispatch]);
@@ -267,7 +280,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_VIEW', payload: AppState.PRAYER_GENERATOR_RESULT });
         } catch (err) {
             console.error(err);
-            dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
             dispatch({ type: 'SET_VIEW', payload: AppState.PRAYER_GENERATOR_FORM });
         }
     }, [language, t, saveItem, dispatch]);
@@ -285,7 +299,8 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
         dispatch({ type: 'SET_VIEW', payload: AppState.FENG_SHUI_RESULT });
         } catch (err) {
         console.error(err);
-        dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? t(err.message as TranslationKey) || t('errorUnknown') : t('errorUnknown') });
+        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
         dispatch({ type: 'SET_VIEW', payload: AppState.FENG_SHUI_FORM });
         }
     }, [state.data.fengShuiInfo, language, t, saveItem, dispatch]);

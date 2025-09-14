@@ -20,7 +20,6 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
   const [isCapturing, setIsCapturing] = useState(false);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   
-  // --- New state for video recording ---
   const [mode, setMode] = useState<'photo' | 'video'>('photo');
   const [isRecording, setIsRecording] = useState(false);
   const [recordedVideoUrl, setRecordedVideoUrl] = useState<string | null>(null);
@@ -31,7 +30,6 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
   const fileInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // --- Refs for video recording logic ---
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
@@ -69,7 +67,8 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
             }
         } catch (err) {
             console.error("Camera error:", err);
-            let message = t('errorCameraUnknown');
+            // FIX: Replaced invalid translation key 'errorCameraUnknown' with 'errorUnknown'.
+            let message = t('errorUnknown');
             if (err instanceof Error) {
                 if (err.name === 'NotAllowedError') message = t('errorCameraPermission');
                 else if (err.name === 'NotFoundError') message = t('errorCameraNotFound');
@@ -125,18 +124,21 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
   };
   
   const handleRetakePhoto = useCallback(() => {
-      onRetake();
+      onRetake(); // This just nullifies capturedImage
       setError(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
-      setIsCameraOn(true);
-  }, [onRetake]);
+      // If we didn't come from a video, restart the camera.
+      // Otherwise, the component will show the video preview again automatically.
+      if (!recordedVideoUrl) {
+          setIsCameraOn(true);
+      }
+  }, [onRetake, recordedVideoUrl]);
   
   const handleSwitchCamera = () => {
     if (isStartingCamera || isRecording) return;
     setFacingMode(prev => (prev === 'user' ? 'environment' : 'user'));
   };
 
-  // --- Video Recording Logic ---
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
         mediaRecorderRef.current.stop();
@@ -197,7 +199,6 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         canvas.height = video.videoHeight;
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         onCapture(canvas.toDataURL('image/jpeg'));
-        setRecordedVideoUrl(null); // Clean up
     }
   }, [onCapture]);
   
@@ -225,8 +226,8 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
         <canvas ref={canvasRef} className="hidden" />
         
-        {recordedVideoUrl && <video ref={videoPreviewRef} src={recordedVideoUrl} controls className="w-full h-full object-contain" />}
-        {capturedImage && !recordedVideoUrl && <img src={capturedImage} alt={t('faceScanCapturedAlt')} className="w-full h-full object-contain" />}
+        {recordedVideoUrl && !capturedImage && <video ref={videoPreviewRef} src={recordedVideoUrl} controls className="w-full h-full object-contain" />}
+        {capturedImage && <img src={capturedImage} alt={t('faceScanCapturedAlt')} className="w-full h-full object-contain" />}
         {!capturedImage && !recordedVideoUrl && <video ref={videoRef} autoPlay playsInline muted className={`w-full h-full object-cover ${facingMode === 'user' ? '-scale-x-100' : ''} ${isCameraOn ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`} />}
         
         {isCapturing && <div className="absolute inset-0 bg-white animate-shutter-flash" />}
@@ -255,7 +256,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
             </>
         )}
         
-        {recordedVideoUrl && (
+        {recordedVideoUrl && !capturedImage && (
              <div className="absolute top-4 left-4 right-4 p-2 bg-black/60 rounded-lg text-center text-white font-semibold text-sm backdrop-blur-sm border border-white/10">{t('faceScanVideoPreview')}</div>
         )}
 

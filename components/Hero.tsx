@@ -61,23 +61,17 @@ const Shop: React.FC<Props> = ({ onBack }) => {
 
   const features = [
     { 
-      // FIX: Corrected invalid translation key.
       title: t('shopFeature1Title'),
-      // FIX: Corrected invalid translation key.
       description: t('shopFeature1Desc'),
       icon: <svg xmlns="http://www.w3.org/2000/svg" className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg> 
     },
     { 
-      // FIX: Corrected invalid translation key.
       title: t('shopFeature2Title'),
-      // FIX: Corrected invalid translation key.
       description: t('shopFeature2Desc'),
       icon: <svg xmlns="http://www.w3.org/2000/svg" className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0117.657 18.657z" /><path strokeLinecap="round" strokeLinejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" /></svg> 
     },
     { 
-      // FIX: Corrected invalid translation key.
       title: t('shopFeature3Title'),
-      // FIX: Corrected invalid translation key.
       description: t('shopFeature3Desc'),
       icon: <svg xmlns="http://www.w3.org/2000/svg" className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> 
     },
@@ -87,11 +81,9 @@ const Shop: React.FC<Props> = ({ onBack }) => {
     <div className="max-w-5xl mx-auto">
       <div className="text-center mb-12">
         <h1 className="text-5xl md:text-6xl font-bold text-gray-100 font-serif leading-tight animate-fade-in-down">
-          {/* FIX: Corrected invalid translation key. */}
           {t('shopPageTitle')}
         </h1>
         <p className="mt-6 text-lg text-amber-200/80 leading-relaxed max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '200ms' }}>
-          {/* FIX: Corrected invalid translation key. */}
           {t('shopPageSubtitle')}
         </p>
       </div>
@@ -122,11 +114,9 @@ const Shop: React.FC<Props> = ({ onBack }) => {
             {/* Call to Action Section */}
             <div className="text-center animate-slide-in-up" style={{ animationDelay: '800ms' }}>
                 <h3 className="text-2xl font-bold font-serif text-yellow-300 leading-tight">
-                    {/* FIX: Corrected invalid translation key. */}
                     {t('shopCTAHeader')}
                 </h3>
                 <p className="mt-3 mb-6 text-gray-300 max-w-xl mx-auto">
-                    {/* FIX: Corrected invalid translation key. */}
                     {t('shopCTADesc')}
                 </p>
                 <a href={TIKTOK_SHOP_URL} target="_blank" rel="noopener noreferrer" className="inline-block">
@@ -134,7 +124,6 @@ const Shop: React.FC<Props> = ({ onBack }) => {
                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-2.43.05-4.85-.38-6.95-1.91-1.83-1.36-3.17-3.46-3.86-5.71-.02-.08-.03-.16-.05-.24-.1-.38-.21-.77-.28-1.16 1.47.01 2.93-.01 4.4.02.05.78.22 1.54.51 2.25.51 1.25 1.72 2.18 3.11 2.31.65.06 1.3.04 1.94-.04 1.13-.14 2.18-.58 3.01-1.35.69-.62 1.15-1.45 1.39-2.35.09-.34.15-.7.15-1.06.01-2.93-.01-5.85.02-8.77-.02-1.89-1.14-3.58-2.6-4.57-.75-.5-1.6-.78-2.5-.88-1.18-.13-2.38-.04-3.56.09-1.08.11-2.12.39-3.12.82V4.54c1.46-.35 2.94-.52 4.41-.56z"></path>
                       </svg>
-                      {/* FIX: Corrected invalid translation key. */}
                       {t('shopViewOnTiktok')}
                     </Button>
                 </a>

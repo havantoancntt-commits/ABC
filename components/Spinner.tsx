@@ -8,23 +8,35 @@ interface Props {
 }
 
 const ThemedSpinner: React.FC = () => (
-    <div className="relative w-20 h-20 mb-6">
-        <style>{`
-            @keyframes spin-orbit { to { transform: rotate(360deg); } }
-            @keyframes pulse-star { 50% { transform: scale(0.8); } }
-            .orbit { animation: spin-orbit 4s linear infinite; }
-            .orbit-reverse { animation: spin-orbit 6s linear infinite reverse; }
-            .star { animation: pulse-star 2s infinite ease-in-out; }
-        `}</style>
-        <div className="absolute inset-0 border-2 border-yellow-500/30 rounded-full orbit">
-            <div className="absolute top-1/2 -left-1 w-2.5 h-2.5 bg-[var(--color-primary)] rounded-full transform -translate-y-1/2"></div>
-        </div>
-        <div className="absolute inset-2 border-2 border-fuchsia-500/30 rounded-full orbit-reverse">
-            <div className="absolute -top-1 right-1/2 w-2 h-2 bg-[var(--color-secondary)] rounded-full transform translate-x-1/2"></div>
-        </div>
-        <div className="absolute inset-5 flex items-center justify-center">
-            <div className="w-4 h-4 bg-white rounded-full star shadow-[0_0_10px_white]"></div>
-        </div>
+    <div className="w-20 h-20 mb-6" aria-label="Loading content">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <style>{`
+                .yin-yang-path { animation: spin 2.5s linear infinite; transform-origin: center; }
+                .yin-dot { animation: pulse-light 2.5s infinite ease-in-out; }
+                .yang-dot { animation: pulse-dark 2.5s infinite ease-in-out; }
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                @keyframes pulse-light { 50% { fill: var(--color-primary); r: 8; } }
+                @keyframes pulse-dark { 50% { fill: var(--color-background); r: 8; } }
+            `}</style>
+            <defs>
+                <linearGradient id="yin-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#2c2a4a" />
+                    <stop offset="100%" stopColor="#0c0a1a" />
+                </linearGradient>
+                    <linearGradient id="yang-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#f0e6ff" />
+                    <stop offset="100%" stopColor="#eae6ff" />
+                </linearGradient>
+            </defs>
+            <g className="yin-yang-path">
+                <path d="M50,0 A50,50 0 0,0 50,100 Z" fill="url(#yin-grad)" />
+                <path d="M50,0 A50,50 0 0,1 50,100 Z" fill="url(#yang-grad)" />
+                <circle cx="50" cy="25" r="25" fill="url(#yin-grad)" />
+                <circle cx="50" cy="75" r="25" fill="url(#yang-grad)" />
+                <circle cx="50" cy="25" r="6" fill="var(--color-text-primary)" className="yang-dot" />
+                <circle cx="50" cy="75" r="6" fill="#3c3a5a" className="yin-dot" />
+            </g>
+        </svg>
     </div>
 );
 
@@ -38,7 +50,6 @@ const Spinner: React.FC<Props> = ({ initialMessageKey }) => {
         'spinnerMsg1', 'spinnerMsg2', 'spinnerMsg3', 'spinnerMsg4', 'spinnerMsg5'
     ];
     
-    // Set initial message right away
     setCurrentMessage(t(initialMessageKey));
 
     const interval = setInterval(() => {

@@ -60,7 +60,8 @@ const PalmScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
             }
         } catch (err) {
             console.error("Camera error:", err);
-            let message = t('errorCameraUnknown');
+            // FIX: Replaced invalid translation key 'errorCameraUnknown' with 'errorUnknown'.
+            let message = t('errorUnknown');
             if (err instanceof Error) {
                 if (err.name === 'NotAllowedError') message = t('errorCameraPermission');
                 else if (err.name === 'NotFoundError') message = t('errorCameraNotFound');
