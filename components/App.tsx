@@ -7,6 +7,7 @@ import DonationModal from './PaymentModal';
 import Spinner from './Spinner';
 import ZaloContact from './ZaloContact';
 import ConfirmationModal from './ConfirmationModal';
+import ErrorToast from './ErrorToast';
 import { useLocalization } from '../hooks/useLocalization';
 import type { TranslationKey } from '../hooks/useLocalization';
 import { useFeatureHandlers } from '../hooks/useFeatureHandlers';
@@ -80,7 +81,7 @@ type AppAction =
 function appReducer(state: AppStateStructure, action: AppAction): AppStateStructure {
   switch (action.type) {
     case 'SET_VIEW':
-      return { ...state, currentView: action.payload, error: null };
+      return { ...state, currentView: action.payload };
     case 'SET_DATA':
       return { ...state, data: { ...state.data, ...action.payload } };
     case 'SET_ERROR':
@@ -403,6 +404,7 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       <Header onHomeClick={handleGoHome} />
+      <ErrorToast message={state.error} onClose={() => dispatch({ type: 'SET_ERROR', payload: null })} />
       <main className="app-main container mx-auto px-4 py-8 sm:py-12">
         <Suspense fallback={<Spinner initialMessageKey='processing' />}>
             {renderContent()}

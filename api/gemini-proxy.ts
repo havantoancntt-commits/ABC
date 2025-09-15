@@ -1,3 +1,4 @@
+
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
@@ -22,11 +23,20 @@ const defaultSafetySettings = [
 const palaceSchema = {
   type: Type.OBJECT,
   properties: {
+    key: { 
+        type: Type.STRING, 
+        description: "A stable, language-agnostic key for the palace.",
+        enum: [
+            'menh', 'phuMau', 'phucDuc', 'dienTrach', 'quanLoc', 'noBoc', 
+            'thienDi', 'tatAch', 'taiBach', 'tuTuc', 'phuThe', 'huynhDe'
+        ]
+    },
     name: { type: Type.STRING },
+    branchName: { type: Type.STRING, description: "The name of the earthly branch for this palace (e.g., Tý, Sửu, Dần)." },
     stars: { type: Type.ARRAY, items: { type: Type.STRING } },
     interpretation: { type: Type.STRING },
   },
-  required: ['name', 'stars', 'interpretation']
+  required: ['key', 'name', 'branchName', 'stars', 'interpretation']
 };
 
 const astrologySchema = {
@@ -38,9 +48,16 @@ const astrologySchema = {
         properties: {
             menh: { type: Type.STRING, description: "Luận giải tổng quan về cung Mệnh." },
             than: { type: Type.STRING, description: "Luận giải tổng quan về cung Thân." },
-            thanCungName: { type: Type.STRING, description: "Tên của cung an Thân." },
+            thanCungKey: { 
+                type: Type.STRING, 
+                description: "The stable key of the palace where Thân resides.",
+                enum: [
+                    'menh', 'phuMau', 'phucDuc', 'dienTrach', 'quanLoc', 'noBoc', 
+                    'thienDi', 'tatAch', 'taiBach', 'tuTuc', 'phuThe', 'huynhDe'
+                ]
+            },
         },
-        required: ['menh', 'than', 'thanCungName']
+        required: ['menh', 'than', 'thanCungKey']
     },
     cungMenh: palaceSchema, cungPhuMau: palaceSchema, cungPhucDuc: palaceSchema,
     cungDienTrach: palaceSchema, cungQuanLoc: palaceSchema, cungNoBoc: palaceSchema,
@@ -448,15 +465,24 @@ async function handleRequest(res: VercelResponse, handler: () => Promise<any>) {
 }
 
 async function parseJsonResponse(response: GenerateContentResponse) {
-    const text = response.text?.trim();
+    let text = response.text?.trim();
     if (!text) {
         throw new Error("error_ai_blocked_unknown: Empty response from AI.");
     }
+
+    // Attempt to clean markdown formatting
+    const jsonRegex = /```(json)?\s*([\s\S]*?)\s*```/;
+    const match = text.match(jsonRegex);
+    if (match && match[2]) {
+        text = match[2];
+    }
+    
     try {
         return JSON.parse(text);
     } catch (e) {
         console.error("Failed to parse JSON response from AI:", text);
-        throw new Error(`error_ai_invalid_json: ${e}`);
+        // Add the problematic text to the error for better debugging.
+        throw new Error(`error_ai_invalid_json: Failed to parse the following content: ${text}`);
     }
 }
 

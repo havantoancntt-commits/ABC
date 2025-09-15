@@ -64,7 +64,7 @@ const Spinner: React.FC<Props> = ({ initialMessageKey }) => {
 
 
   return (
-    <div className="flex items-center justify-center min-h-[50vh]">
+    <div className="flex items-center justify-center min-h-[50vh]" role="status">
         <Card className="max-w-2xl text-center flex flex-col items-center">
             <ThemedSpinner />
             <h2 className="text-2xl font-bold font-serif mb-2">{t('processing')}</h2>

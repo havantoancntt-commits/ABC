@@ -117,7 +117,13 @@ const SavedItems: React.FC<Props> = ({ items, onView, onDelete, onCreateNew }) =
           })}
         </div>
       ) : (
-        <p className="text-center text-gray-400 mb-8">{t('savedItemsEmpty')}</p>
+        <div className="text-center text-gray-500 mb-8 py-12 border-2 border-dashed border-gray-700/50 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-16 w-16 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-12v4m-2-2h4m5 4v4m-2-2h4M5 11h14M5 11a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 01-2 2M5 11v2a2 2 0 002 2h10a2 2 0 002-2v-2" />
+            </svg>
+            <h3 className="mt-4 text-xl font-semibold text-gray-300">{t('savedItemsEmpty')}</h3>
+            <p className="mt-2 text-sm">{t('savedItemsEmptyHint')}</p>
+        </div>
       )}
       <Button onClick={onCreateNew} variant="primary" className="w-full text-lg py-3">
         + {t('savedItemsCreateNew')}

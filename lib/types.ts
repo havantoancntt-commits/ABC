@@ -1,3 +1,4 @@
+
 // --- App State Management ---
 export enum AppState {
   HOME,
@@ -113,7 +114,9 @@ export interface BirthInfo {
 }
 
 export interface Palace {
+  key: string;
   name: string;
+  branchName: string;
   stars: string[];
   interpretation: string;
 }
@@ -123,7 +126,7 @@ export interface AstrologyChartData {
   tongQuan: {
     menh: string;
     than: string;
-    thanCungName: string;
+    thanCungKey: string;
   };
   cungMenh: Palace;
   cungPhuMau: Palace;

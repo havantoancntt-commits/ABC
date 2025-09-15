@@ -238,7 +238,9 @@ export const translations = {
     // Saved Items
     savedItemsTitle: 'Các Mục Đã Lưu',
     savedItemsEmpty: 'Bạn chưa có mục nào được lưu.',
-    savedItemsCreateNew: 'Tạo Lá Số Mới',
+    savedItemsEmptyHint: 'Bắt đầu một luận giải mới để lưu kết quả của bạn tại đây.',
+    // FIX: Added missing translation key
+    savedItemsCreateNew: 'Tạo Luận Giải Mới',
     savedItemDob: 'Ngày sinh',
     savedItemViewAria: 'Xem mục của {{name}}',
     savedItemDeleteAria: 'Xóa mục của {{name}}',
@@ -963,7 +965,9 @@ export const translations = {
     // Saved Items
     savedItemsTitle: 'Saved Items',
     savedItemsEmpty: 'You have no saved items.',
-    savedItemsCreateNew: 'Create New Chart',
+    savedItemsEmptyHint: 'Start a new analysis to save your results here.',
+    // FIX: Added missing translation key
+    savedItemsCreateNew: 'Create New Analysis',
     savedItemDob: 'Date of birth',
     savedItemViewAria: 'View item for {{name}}',
     savedItemDeleteAria: 'Delete item for {{name}}',
