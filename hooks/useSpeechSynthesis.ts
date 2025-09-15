@@ -7,19 +7,46 @@ export const useSpeechSynthesis = (text: string, lang: string) => {
     
     const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
     const sentencesRef = useRef<string[]>([]);
+    const sentenceBoundariesRef = useRef<{start: number, end: number}[]>([]);
 
     useEffect(() => {
-        const sentences = text.match(/[^.!?]+[.!?\n]+/g) || [text];
-        sentencesRef.current = sentences.map(s => s.trim()).filter(s => s.length > 0);
+        // This regex aims to split text into sentences, including their delimiters and the end of the string.
+        const sentenceRegex = /[^.!?\n]+(?:[.!?\n]|$)+/g;
+        const matches = [...text.matchAll(sentenceRegex)];
+
+        const newSentences: string[] = [];
+        const newBoundaries: {start: number, end: number}[] = [];
+
+        for (const match of matches) {
+            const sentenceText = match[0].trim();
+            if (sentenceText.length > 0) {
+                newSentences.push(sentenceText);
+                newBoundaries.push({
+                    start: match.index!,
+                    end: match.index! + match[0].length,
+                });
+            }
+        }
+        
+        sentencesRef.current = newSentences;
+        sentenceBoundariesRef.current = newBoundaries;
     }, [text]);
 
     const handleBoundary = useCallback((event: SpeechSynthesisEvent) => {
-        if (event.name === 'sentence') {
-            const spokenText = text.substring(0, event.charIndex + event.charLength);
-            const completedSentences = (spokenText.match(/[.!?\n]/g) || []).length;
-            setCurrentSentenceIndex(Math.max(0, completedSentences -1));
+        // Use 'word' boundary as 'sentence' is not widely supported.
+        if (event.name === 'word') {
+            const charIndex = event.charIndex;
+            
+            const sentenceIndex = sentenceBoundariesRef.current.findIndex(
+                boundary => charIndex >= boundary.start && charIndex < boundary.end
+            );
+
+            // Avoid unnecessary re-renders if the sentence index hasn't changed.
+            if (sentenceIndex !== -1 && sentenceIndex !== currentSentenceIndex) {
+                 setCurrentSentenceIndex(sentenceIndex);
+            }
         }
-    }, [text]);
+    }, [currentSentenceIndex]);
 
     const handleEnd = useCallback(() => {
         setIsSpeaking(false);
@@ -31,6 +58,7 @@ export const useSpeechSynthesis = (text: string, lang: string) => {
         const synth = window.speechSynthesis;
         const utterance = new SpeechSynthesisUtterance(text);
         
+        // Use 'word' boundary event for better compatibility.
         utterance.onboundary = handleBoundary;
         utterance.onend = handleEnd;
         

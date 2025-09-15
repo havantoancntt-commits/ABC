@@ -21,7 +21,7 @@ const PrayerResult: React.FC<Props> = ({ data, info, onTryAgain, onGoHome, onOpe
         <div className="max-w-4xl mx-auto">
             <div className="text-center mb-10 animate-fade-in">
                 <h2 className="text-4xl font-bold text-amber-300 font-serif">{data.title}</h2>
-                <p className="mt-2 text-lg text-gray-300">Dành cho tín chủ: {info.name}</p>
+                <p className="mt-2 text-lg text-gray-300">{t('prayerResultForDevotee', { name: info.name })}</p>
             </div>
             
             <Card>
