@@ -18,6 +18,9 @@ const FortuneSticksResult: React.FC<Props> = ({ data, onTryAgain, onGoHome, onOp
         <div className="max-w-4xl mx-auto">
             <div className="text-center mb-8">
                 <h2 className="text-4xl font-bold text-amber-300 font-serif">{t('fortuneSticksResultTitle')}</h2>
+                <p className="mt-4 text-md text-gray-400 font-semibold tracking-wide">
+                    {data.gregorianDate} • {t('lunarDate')}: {data.lunarDate}
+                </p>
             </div>
             <Card>
                 <div className="text-center mb-8">

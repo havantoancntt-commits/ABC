@@ -1,4 +1,5 @@
 
+
 // --- App State Management ---
 export enum AppState {
   HOME,
@@ -412,6 +413,8 @@ export interface FortuneStickData {
     poem: string;
     interpretation: string;
     summary: string;
+    gregorianDate: string;
+    lunarDate: string;
 }
 
 export interface GodOfWealthInfo {

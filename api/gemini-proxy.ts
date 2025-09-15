@@ -359,9 +359,11 @@ const fortuneStickSchema = {
         stickNumber: { type: Type.INTEGER, description: "Số của quẻ xăm được gieo." },
         poem: { type: Type.STRING, description: "Một bài thơ cổ (lục bát hoặc song thất lục bát) chứa đựng ý nghĩa của quẻ xăm." },
         interpretation: { type: Type.STRING, description: "Luận giải chi tiết ý nghĩa của bài thơ và quẻ xăm, áp dụng vào các khía cạnh: Gia đạo, Công danh, Tình duyên, Sức khỏe." },
-        summary: { type: Type.STRING, description: "Một câu tổng kết ngắn gọn, súc tích về điềm báo của quẻ xăm (Cát, Hung, Bình)." }
+        summary: { type: Type.STRING, description: "Một câu tổng kết ngắn gọn, súc tích về điềm báo của quẻ xăm (Cát, Hung, Bình)." },
+        gregorianDate: { type: Type.STRING, description: "Ngày dương lịch gieo quẻ. Định dạng phải là 'Ngày DD tháng MM năm YYYY'."},
+        lunarDate: { type: Type.STRING, description: "Ngày âm lịch gieo quẻ. Định dạng phải là 'Ngày DD tháng MM năm CAN CHI'."}
     },
-    required: ['stickNumber', 'poem', 'interpretation', 'summary']
+    required: ['stickNumber', 'poem', 'interpretation', 'summary', 'gregorianDate', 'lunarDate']
 };
 
 const godOfWealthSchema = {
@@ -671,10 +673,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
             case 'getFortuneStickInterpretation': {
                 const { info } = params as { info: FortuneStickInfo };
+                const today = new Date();
+                const gregorianDateString = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
                 const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: fortuneStickSchema, systemInstruction: getSystemInstruction(operation, language) },
-                    contents: `Hãy luận giải lá xăm số ${info.stickNumber} cho câu hỏi: "${info.question || 'Vấn đề chung'}".`,
+                    contents: `Hôm nay là ngày dương lịch ${gregorianDateString}. Hãy luận giải lá xăm số ${info.stickNumber} cho câu hỏi: "${info.question || 'Vấn đề chung'}". Bạn PHẢI tự tính và điền ngày tháng năm cả dương lịch và âm lịch (bao gồm can chi năm) vào trong kết quả JSON theo đúng định dạng đã yêu cầu trong schema.`,
                 });
                 return parseJsonResponse(response);
             }
