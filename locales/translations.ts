@@ -37,6 +37,8 @@ export const translations = {
     pause: 'Tạm dừng',
     resume: 'Tiếp tục',
     stop: 'Dừng',
+    downloadReportPdf: 'Tải Báo Cáo (PDF)',
+    errorPdf: 'Đã xảy ra lỗi khi tạo file PDF. Vui lòng thử lại.',
 
     // View Titles (for document.title)
     viewTitleHOME: 'Trang Chủ',
@@ -477,7 +479,6 @@ export const translations = {
     numerologyWeaknessArrows: 'Các Mũi Tên Trống (Điểm Yếu)',
     numerologySummary: 'Tổng Kết & Lời Khuyên',
     numerologyDownloadPdf: 'Tải Báo Cáo (PDF)',
-    errorPdf: 'Đã xảy ra lỗi khi tạo file PDF. Vui lòng thử lại.',
 
     // Tarot Reading
     tarotReadingTitle: 'Gieo Bài Tarot',
@@ -760,6 +761,8 @@ export const translations = {
     pause: 'Pause',
     resume: 'Resume',
     stop: 'Stop',
+    downloadReportPdf: 'Download Report (PDF)',
+    errorPdf: 'An error occurred while creating the PDF file. Please try again.',
 
     // View Titles (for document.title)
     viewTitleHOME: 'Homepage',
@@ -1200,7 +1203,6 @@ export const translations = {
     numerologyWeaknessArrows: 'Empty Arrows (Weaknesses)',
     numerologySummary: 'Summary & Advice',
     numerologyDownloadPdf: 'Download Report (PDF)',
-    errorPdf: 'An error occurred while creating the PDF file. Please try again.',
     
     // Tarot Reading
     tarotReadingTitle: 'Tarot Reading',

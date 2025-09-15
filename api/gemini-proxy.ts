@@ -61,10 +61,10 @@ const physiognomySchema = {
         tongQuan: { type: Type.STRING, description: 'Luận giải tổng quan về thần thái, khí sắc.' },
         tamDinh: { type: Type.STRING, description: 'Phân tích chi tiết về Tam Đình (Thượng, Trung, Hạ).' },
         nguQuan: { type: Type.STRING, description: 'Phân tích chi tiết về Ngũ Quan (Mắt, Mũi, Miệng, Tai, Lông mày).' },
-        notRuoiVaTanNhang: { type: Type.STRING, description: 'Phân tích chi tiết về vị trí, hình dáng, màu sắc của các nốt ruồi và tàn nhang trên khuôn mặt và luận giải ý nghĩa của chúng.' },
+        notRuoiVaTanNhang: { type: Type.STRING, description: 'Phân tích chi tiết về vị trí, hình dáng, màu sắc của các nốt ruồi và tàn nhang (nếu có) trên khuôn mặt và luận giải ý nghĩa của chúng. Nếu không có, có thể bỏ qua.' },
         loiKhuyen: { type: Type.STRING, description: 'Đưa ra lời khuyên hữu ích, mang tính xây dựng.' },
     },
-    required: ['tongQuan', 'tamDinh', 'nguQuan', 'notRuoiVaTanNhang', 'loiKhuyen']
+    required: ['tongQuan', 'tamDinh', 'nguQuan', 'loiKhuyen']
 };
 
 const palmReadingSchema = {

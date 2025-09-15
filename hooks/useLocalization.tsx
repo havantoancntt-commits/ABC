@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect, useCallback, Rea
 import { translations } from '../locales/translations';
 
 export type Language = 'vi' | 'en';
-export type TranslationKey = keyof typeof translations.vi;
+export type TranslationKey = keyof typeof translations.vi & keyof typeof translations.en;
 
 interface LanguageContextType {
   language: Language;

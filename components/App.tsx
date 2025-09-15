@@ -13,7 +13,7 @@ import { useFeatureHandlers } from '../hooks/useFeatureHandlers';
 
 // --- Lazy Load Components for Performance ---
 const Home = lazy(() => import('./Home'));
-const SavedItems = lazy(() => import('./SavedItems'));
+const SavedItems = lazy(() => import('./SavedCharts'));
 const BirthInfoForm = lazy(() => import('./BirthInfoForm'));
 const AstrologyChart = lazy(() => import('./AstrologyChart'));
 const FaceScan = lazy(() => import('./FaceScan'));
