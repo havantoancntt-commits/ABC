@@ -485,16 +485,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         switch (operation) {
             case 'generateAstrologyChart': {
                 const info: BirthInfo = params.info;
-                
-                // FIX: Translate gender to Vietnamese to match the hardcoded Vietnamese prompt.
-                // The AI prompt is in Vietnamese but was receiving English gender values ('male'/'female'),
-                // which likely caused parsing or logic errors. This ensures the entire prompt is consistent.
                 const genderInVietnamese = info.gender === 'male' ? 'Nam' : 'Nữ';
 
                 const response = await ai.models.generateContent({
                     model: commonConfig.model,
                     config: { ...commonConfig.config, responseSchema: astrologySchema, systemInstruction: getSystemInstruction(operation, language) },
-                    contents: `Hãy lập lá số tử vi cho: Tên: ${info.name}, Giới tính: ${genderInVietnamese}, Năm sinh: ${info.year}, Tháng: ${info.month}, Ngày: ${info.day}, Giờ: ${info.hour === -1 ? 'Không rõ' : info.hour}.`,
+                    contents: `Hãy lập lá số tử vi cho một người có thông tin sinh theo LỊCH DƯƠNG (Gregorian calendar) như sau. Bạn phải tự chuyển đổi ngày này sang LỊCH ÂM (Lunar calendar) để tính toán lá số cho chính xác. Tên: ${info.name}, Giới tính: ${genderInVietnamese}, Năm sinh: ${info.year}, Tháng: ${info.month}, Ngày: ${info.day}, Giờ: ${info.hour === -1 ? 'Không rõ' : info.hour}.`,
                 });
                 return parseJsonResponse(response);
             }
