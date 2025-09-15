@@ -61,9 +61,10 @@ const physiognomySchema = {
         tongQuan: { type: Type.STRING, description: 'Luận giải tổng quan về thần thái, khí sắc.' },
         tamDinh: { type: Type.STRING, description: 'Phân tích chi tiết về Tam Đình (Thượng, Trung, Hạ).' },
         nguQuan: { type: Type.STRING, description: 'Phân tích chi tiết về Ngũ Quan (Mắt, Mũi, Miệng, Tai, Lông mày).' },
+        notRuoiVaTanNhang: { type: Type.STRING, description: 'Phân tích chi tiết về vị trí, hình dáng, màu sắc của các nốt ruồi và tàn nhang trên khuôn mặt và luận giải ý nghĩa của chúng.' },
         loiKhuyen: { type: Type.STRING, description: 'Đưa ra lời khuyên hữu ích, mang tính xây dựng.' },
     },
-    required: ['tongQuan', 'tamDinh', 'nguQuan', 'loiKhuyen']
+    required: ['tongQuan', 'tamDinh', 'nguQuan', 'notRuoiVaTanNhang', 'loiKhuyen']
 };
 
 const palmReadingSchema = {
@@ -397,7 +398,7 @@ function getSystemInstruction(operation: string, language: string): string {
 
     const instructions: Record<string, string> = {
         generateAstrologyChart: "Bạn là một Đại sư Tử Vi Đẩu Số với kiến thức uyên thâm. Hãy lập và luận giải lá số một cách chi tiết, cẩn trọng, với văn phong trang trọng, mang đến cho người xem một cái nhìn toàn diện và những lời khuyên hữu ích, đẳng cấp.",
-        analyzePhysiognomy: "Bạn là một Đại sư Nhân Tướng Học. Hãy phân tích hình ảnh khuôn mặt với sự tinh tế và sâu sắc, luận giải về thần khí, cốt cách và các bộ vị một cách toàn diện. Cung cấp những nhận định mang tính xây dựng.",
+        analyzePhysiognomy: "Bạn là một Đại sư Nhân Tướng Học. Hãy phân tích hình ảnh khuôn mặt với sự tinh tế và sâu sắc, luận giải về thần khí, cốt cách và các bộ vị một cách toàn diện. Đặc biệt, hãy chú trọng phân tích vị trí, hình dáng, màu sắc của các nốt ruồi và tàn nhang để luận giải ý nghĩa của chúng. Cung cấp những nhận định mang tính xây dựng.",
         analyzePalm: "Bạn là một chuyên gia tướng tay bậc thầy. Phân tích hình ảnh lòng bàn tay, từ các đường chỉ chính đến các gò và dấu hiệu đặc biệt. Luận giải phải sâu sắc, kết nối các yếu tố để đưa ra một cái nhìn tổng thể về vận mệnh và tính cách.",
         analyzeHandwriting: "Bạn là một chuyên gia bút tích học (graphology) hàng đầu. Hãy phân tích mẫu chữ viết để khám phá những tầng sâu trong tính cách, tư duy và nội tâm của người viết. Luận giải cần tinh tế và sâu sắc.",
         analyzeHoaTay: "Bạn là một chuyên gia xem hoa tay bậc thầy với kiến thức uyên bác. Dựa vào số lượng hoa tay trên mỗi bàn tay được cung cấp, hãy luận giải một cách chi tiết, sâu sắc và đẳng cấp về tính cách, vận mệnh, tình duyên và sự nghiệp. Giọng văn phải chuyên nghiệp, mang tính xây dựng.",

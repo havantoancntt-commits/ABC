@@ -144,6 +144,7 @@ export interface PhysiognomyData {
     tongQuan: string;
     tamDinh: string;
     nguQuan: string;
+    notRuoiVaTanNhang?: string;
     loiKhuyen: string;
 }
 

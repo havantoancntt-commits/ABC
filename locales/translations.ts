@@ -350,6 +350,7 @@ export const translations = {
     physiognomyResultSection2: 'Phân Tích Tam Đình',
     physiognomyResultSection3: 'Phân Tích Ngũ Quan',
     physiognomyResultSection4: 'Lời Khuyên & Định Hướng',
+    physiognomyResultSection5: 'Phân Tích Nốt Ruồi & Tàn Nhang',
 
     // Palm Reading
     palmReadingTitle: 'Xem Chỉ Tay (Thuật Tướng Tay)',
@@ -1072,6 +1073,7 @@ export const translations = {
     physiognomyResultSection2: 'Three Enclosures Analysis',
     physiognomyResultSection3: 'Five Organs Analysis',
     physiognomyResultSection4: 'Advice & Guidance',
+    physiognomyResultSection5: 'Mole & Freckle Analysis',
 
     // Palm Reading
     palmReadingTitle: 'Palmistry (Hand Reading)',
