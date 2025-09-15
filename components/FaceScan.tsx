@@ -12,6 +12,39 @@ interface Props {
   capturedImage: string | null;
 }
 
+const ScannerOverlay: React.FC = () => (
+  <div className="absolute inset-0 pointer-events-none">
+    <svg width="100%" height="100%" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <mask id="face-mask">
+          <rect width="100%" height="100%" fill="white" />
+          <ellipse cx="150" cy="200" rx="90" ry="120" fill="black" />
+        </mask>
+        <linearGradient id="scanner-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0" />
+            <stop offset="50%" stopColor="var(--color-accent)" stopOpacity="1" />
+            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      
+      <rect width="100%" height="100%" fill="rgba(0,0,0,0.7)" mask="url(#face-mask)" />
+      
+      <ellipse cx="150" cy="200" rx="90" ry="120" stroke="var(--color-accent)" strokeWidth="1.5" strokeOpacity="0.5" fill="none" />
+      <ellipse cx="150" cy="200" rx="95" ry="125" stroke="var(--color-accent)" strokeWidth="0.5" strokeOpacity="0.3" fill="none" />
+
+      <rect x="60" y="80" width="180" height="2" fill="url(#scanner-grad)" className="scanner-line" />
+      
+      <g stroke="var(--color-accent)" strokeWidth="2" strokeOpacity="0.8">
+        <path d="M 60 100 V 80 H 80" fill="none" />
+        <path d="M 240 100 V 80 H 220" fill="none" />
+        <path d="M 60 300 V 320 H 80" fill="none" />
+        <path d="M 240 300 V 320 H 220" fill="none" />
+      </g>
+    </svg>
+  </div>
+);
+
+
 const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, capturedImage }) => {
   const { t } = useLocalization();
   const [error, setError] = useState<string | null>(null);
@@ -247,7 +280,7 @@ const FaceScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
 
         {isCameraOn && !capturedImage && (
             <>
-                <div className="absolute inset-0" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.7)', maskImage: 'radial-gradient(ellipse 50% 60% at center, white 50%, transparent 100%)' }}></div>
+                <ScannerOverlay />
                 <div className="absolute top-14 left-4 right-4 p-2 bg-black/60 rounded-lg text-center text-white font-semibold text-sm backdrop-blur-sm border border-white/10">
                     {mode === 'photo' ? t('faceScanInitial') : t('faceScanVideoInstruction')}
                 </div>

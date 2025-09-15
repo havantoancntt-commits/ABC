@@ -158,8 +158,27 @@ const AstrologyChart: React.FC<Props> = ({ data, birthInfo, onTryAgain, onGoHome
 
     return (
         <div className="max-w-7xl mx-auto">
-            <div id="laso-print-area" className="p-2 sm:p-4 bg-gray-900/30 rounded-lg">
-                <div className="astrology-grid grid grid-cols-4 grid-rows-4 gap-1 sm:gap-2" style={{aspectRatio: '1 / 1'}}>
+            <div id="laso-print-area" className="relative p-2 sm:p-4 bg-gray-900/30 rounded-lg overflow-hidden">
+                <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
+                    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.5"/>
+                                <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0"/>
+                            </radialGradient>
+                             <radialGradient id="grad2" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stopColor="var(--color-secondary)" stopOpacity="0.4"/>
+                                <stop offset="100%" stopColor="var(--color-secondary)" stopOpacity="0"/>
+                            </radialGradient>
+                        </defs>
+                        <circle cx="50%" cy="50%" r="45%" stroke="var(--color-primary)" strokeWidth="0.5" fill="none" strokeDasharray="5 10"/>
+                        <circle cx="50%" cy="50%" r="30%" stroke="var(--color-secondary)" strokeWidth="0.2" fill="none"/>
+                        <circle cx="20%" cy="20%" r="10%" fill="url(#grad1)"/>
+                        <circle cx="80%" cy="80%" r="15%" fill="url(#grad2)"/>
+                    </svg>
+                </div>
+
+                <div className="relative z-10 astrology-grid grid grid-cols-4 grid-rows-4 gap-1 sm:gap-2" style={{aspectRatio: '1 / 1'}}>
                     {allPalaces.map(palace => (
                          <div key={palace.name} style={{ gridArea: palaceToGridArea[palace.name] }}>
                             <PalaceCard 

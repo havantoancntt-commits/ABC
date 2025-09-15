@@ -12,6 +12,28 @@ interface Props {
   capturedImage: string | null;
 }
 
+const PalmScannerOverlay: React.FC = () => (
+    <div className="absolute inset-0 pointer-events-none">
+        <svg width="100%" height="100%" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice">
+             <defs>
+                <mask id="palm-mask">
+                    <rect width="100%" height="100%" fill="white" />
+                    <path d="M100,350 C 40,300 50,150 100,100 C 120,80 140,80 150,100 L 150,150 C 150,160 160,160 170,150 L 170,100 C 180,80 200,80 220,100 C 250,150 260,300 200,350 Z" fill="black" />
+                </mask>
+                 <linearGradient id="scanner-grad-palm" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0" />
+                    <stop offset="50%" stopColor="var(--color-accent)" stopOpacity="1" />
+                    <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
+                </linearGradient>
+            </defs>
+            <rect width="100%" height="100%" fill="rgba(0,0,0,0.7)" mask="url(#palm-mask)" />
+            <path d="M100,350 C 40,300 50,150 100,100 C 120,80 140,80 150,100 L 150,150 C 150,160 160,160 170,150 L 170,100 C 180,80 200,80 220,100 C 250,150 260,300 200,350 Z" stroke="var(--color-accent)" strokeWidth="1.5" strokeOpacity="0.5" fill="none" />
+            <rect x="50" y="100" width="200" height="2" fill="url(#scanner-grad-palm)" className="scanner-line" />
+        </svg>
+    </div>
+);
+
+
 const PalmScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, capturedImage }) => {
   const { t } = useLocalization();
   const [error, setError] = useState<string | null>(null);
@@ -165,14 +187,7 @@ const PalmScan: React.FC<Props> = ({ onAnalyze, onBack, onCapture, onRetake, cap
         
         {isCameraOn && !capturedImage && (
             <>
-                 <div className="absolute inset-0" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.7)' }}></div>
-                 <svg viewBox="0 0 24 24" className="absolute w-[65%] h-[65%] text-white/40 drop-shadow-lg" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 12.5V10a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2.5" />
-                    <path d="M14 12.5V8a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4.5" />
-                    <path d="M10 12.5V9a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v3.5" />
-                    <path d="M6 12.5V9a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2.5" />
-                    <path d="M21 12.5V10a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2.5" />
-                 </svg>
+                 <PalmScannerOverlay />
                  <div className="absolute top-4 left-4 right-4 p-2 bg-black/60 rounded-lg text-center text-white font-semibold text-sm backdrop-blur-sm border border-white/10">
                     {t('palmScanInitial')}
                 </div>

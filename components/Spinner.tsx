@@ -8,34 +8,36 @@ interface Props {
 }
 
 const ThemedSpinner: React.FC = () => (
-    <div className="w-20 h-20 mb-6" aria-label="Loading content">
+    <div className="w-24 h-24 mb-6" aria-label="Loading content">
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <style>{`
-                .yin-yang-path { animation: spin 2.5s linear infinite; transform-origin: center; }
-                .yin-dot { animation: pulse-light 2.5s infinite ease-in-out; }
-                .yang-dot { animation: pulse-dark 2.5s infinite ease-in-out; }
-                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                @keyframes pulse-light { 50% { fill: var(--color-primary); r: 8; } }
-                @keyframes pulse-dark { 50% { fill: var(--color-background); r: 8; } }
-            `}</style>
             <defs>
-                <linearGradient id="yin-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#2c2a4a" />
-                    <stop offset="100%" stopColor="#0c0a1a" />
+                <linearGradient id="spinner-grad" gradientTransform="rotate(45)">
+                    <stop offset="0%" stopColor="var(--color-primary)" />
+                    <stop offset="100%" stopColor="var(--color-secondary)" />
                 </linearGradient>
-                    <linearGradient id="yang-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#f0e6ff" />
-                    <stop offset="100%" stopColor="#eae6ff" />
-                </linearGradient>
+                <filter id="spinner-glow">
+                    <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
             </defs>
-            <g className="yin-yang-path">
-                <path d="M50,0 A50,50 0 0,0 50,100 Z" fill="url(#yin-grad)" />
-                <path d="M50,0 A50,50 0 0,1 50,100 Z" fill="url(#yang-grad)" />
-                <circle cx="50" cy="25" r="25" fill="url(#yin-grad)" />
-                <circle cx="50" cy="75" r="25" fill="url(#yang-grad)" />
-                <circle cx="50" cy="25" r="6" fill="var(--color-text-primary)" className="yang-dot" />
-                <circle cx="50" cy="75" r="6" fill="#3c3a5a" className="yin-dot" />
+            <g filter="url(#spinner-glow)" style={{ transformOrigin: '50% 50%' }}>
+                <path d="M 50,50 m -45,0 a 45,45 0 1,0 90,0 a 45,45 0 1,0 -90,0" fill="none" stroke="var(--color-card-border)" strokeWidth="2"/>
+                <path d="M 50,50 m -35,0 a 35,35 0 1,0 70,0 a 35,35 0 1,0 -70,0" fill="none" stroke="url(#spinner-grad)" strokeWidth="3" strokeDasharray="100 220"
+                    style={{ animation: 'spin 2s linear infinite' }} />
+                <circle cx="50" cy="15" r="3" fill="url(#spinner-grad)" style={{ animation: 'spin 2s linear infinite' }}/>
+                
+                <g style={{ animation: 'spin-reverse 10s linear infinite', transformOrigin: '50% 50%' }}>
+                    <circle cx="50" cy="50" r="10" fill="none" stroke="var(--color-primary)" strokeWidth="1" strokeDasharray="2 4" />
+                    <text x="50" y="55" textAnchor="middle" fontSize="12" fill="var(--color-primary)" className="font-serif">☯</text>
+                </g>
             </g>
+             <style>{`
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                @keyframes spin-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+            `}</style>
         </svg>
     </div>
 );

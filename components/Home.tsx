@@ -62,7 +62,8 @@ const FeatureCard: React.FC<{
 }> = ({ title, description, buttonText, icon, onClick, buttonVariant }) => (
     <div className="group relative h-full">
         <div className={`absolute -inset-0.5 bg-gradient-to-r ${buttonVariantGradients[buttonVariant]} rounded-2xl blur opacity-0 group-hover:opacity-75 transition duration-500 group-hover:duration-300`}></div>
-        <Card className="relative flex flex-col text-center items-center h-full transition-all duration-300 group-hover:-translate-y-1 group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:shadow-black/50">
+        <Card className="relative flex flex-col text-center items-center h-full transition-all duration-300 group-hover:-translate-y-2 group-hover:scale-[1.03] group-hover:shadow-2xl group-hover:shadow-black/50 overflow-hidden">
+            <div className="animate-shine"></div>
             <div className="p-4 bg-gray-900/50 rounded-full mb-4 border border-gray-700 transition-all duration-300 group-hover:scale-110 group-hover:bg-gray-900 group-hover:border-yellow-400/50">
                 {icon}
             </div>

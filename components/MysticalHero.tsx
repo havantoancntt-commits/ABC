@@ -25,6 +25,12 @@ const MysticalHero: React.FC = () => {
                              <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.3" />
                             <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0" />
                         </radialGradient>
+                         <style>{`
+                            @keyframes rotate-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                            @keyframes rotate-fast { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+                            .ring-1 { animation: rotate-slow 40s linear infinite; transform-origin: center; }
+                            .ring-2 { animation: rotate-fast 60s linear infinite; transform-origin: center; }
+                        `}</style>
                     </defs>
                     
                     {/* Background Gradients */}
@@ -46,10 +52,12 @@ const MysticalHero: React.FC = () => {
                     </g>
 
                     {/* Central Astrology Symbol */}
-                    <g transform="translate(200 87.5)" stroke="var(--color-primary)" strokeWidth="1" fill="none" filter="url(#hero-glow)">
-                        <circle r="60" opacity="0.2" />
-                        <circle r="50" strokeDasharray="4 4" opacity="0.4" />
-                        <circle r="40" />
+                    <g transform="translate(200 87.5)" stroke="var(--color-primary)" strokeWidth="0.5" fill="none" filter="url(#hero-glow)">
+                        <circle r="70" opacity="0.3" strokeDasharray="2 6" className="ring-1" />
+                        <circle r="80" opacity="0.2" strokeDasharray="1 10" className="ring-2" />
+                        <circle r="60" opacity="0.2" strokeWidth="1"/>
+                        <circle r="50" strokeDasharray="4 4" opacity="0.4" strokeWidth="1"/>
+                        <circle r="40" strokeWidth="1"/>
                         
                         <g opacity="0.7">
                             <line x1="0" y1="-40" x2="0" y2="40" />
