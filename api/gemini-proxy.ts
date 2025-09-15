@@ -414,7 +414,7 @@ function getSystemInstruction(operation: string, language: string): string {
         : "Always respond in English. The tone should be scholarly, profound, with an Eastern mysticism flavor, yet clear, understandable, and constructive. The analysis must be detailed, professional, and sophisticated.";
 
     const instructions: Record<string, string> = {
-        generateAstrologyChart: "Bạn là một Đại sư Tử Vi Đẩu Số với kiến thức uyên thâm. Hãy lập và luận giải lá số một cách chi tiết, cẩn trọng, với văn phong trang trọng, mang đến cho người xem một cái nhìn toàn diện và những lời khuyên hữu ích, đẳng cấp.",
+        generateAstrologyChart: "Bạn là một Đại sư Tử Vi Đẩu Số với kiến thức uyên thâm. Hãy lập và luận giải lá số một cách chi tiết, cẩn trọng, với văn phong trang trọng, mang đến cho người xem một cái nhìn toàn diện và những lời khuyên hữu ích, đẳng cấp. QUAN TRỌNG: Để đảm bảo phản hồi nhanh, hãy giữ mỗi phần luận giải (Mệnh, Thân, các cung, tổng kết) súc tích, chỉ khoảng 100-150 từ mỗi phần.",
         analyzePhysiognomy: "Bạn là một Đại sư Nhân Tướng Học. Hãy phân tích hình ảnh khuôn mặt với sự tinh tế và sâu sắc, luận giải về thần khí, cốt cách và các bộ vị một cách toàn diện. Đặc biệt, hãy chú trọng phân tích vị trí, hình dáng, màu sắc của các nốt ruồi và tàn nhang để luận giải ý nghĩa của chúng. Cung cấp những nhận định mang tính xây dựng.",
         analyzePalm: "Bạn là một chuyên gia tướng tay bậc thầy. Phân tích hình ảnh lòng bàn tay, từ các đường chỉ chính đến các gò và dấu hiệu đặc biệt. Luận giải phải sâu sắc, kết nối các yếu tố để đưa ra một cái nhìn tổng thể về vận mệnh và tính cách.",
         analyzeHandwriting: "Bạn là một chuyên gia bút tích học (graphology) hàng đầu. Hãy phân tích mẫu chữ viết để khám phá những tầng sâu trong tính cách, tư duy và nội tâm của người viết. Luận giải cần tinh tế và sâu sắc.",
@@ -515,7 +515,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
                 const response = await ai.models.generateContent({
                     model: commonConfig.model,
-                    config: { ...commonConfig.config, responseSchema: astrologySchema, systemInstruction: getSystemInstruction(operation, language) },
+                    config: { 
+                        ...commonConfig.config, 
+                        responseSchema: astrologySchema, 
+                        systemInstruction: getSystemInstruction(operation, language),
+                        thinkingConfig: { thinkingBudget: 0 } 
+                    },
                     contents: `Hãy lập lá số tử vi cho một người có thông tin sinh theo LỊCH DƯƠNG (Gregorian calendar) như sau. Bạn phải tự chuyển đổi ngày này sang LỊCH ÂM (Lunar calendar) để tính toán lá số cho chính xác. Tên: ${info.name}, Giới tính: ${genderInVietnamese}, Năm sinh: ${info.year}, Tháng: ${info.month}, Ngày: ${info.day}, Giờ: ${info.hour === -1 ? 'Không rõ' : info.hour}.`,
                 });
                 return parseJsonResponse(response);

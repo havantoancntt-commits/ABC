@@ -8,6 +8,10 @@ async function callProxy(operation: string, payload: object): Promise<any> {
     });
 
     if (!response.ok) {
+        if (response.status === 504) {
+            // Throw a specific key for timeout errors that can be translated on the frontend.
+            throw new Error('error_server_timeout');
+        }
         let errorMsg = 'An unknown server error occurred.';
         try {
             const errorData = await response.json();

@@ -104,6 +104,7 @@ export const translations = {
     error_ai_blocked_safety: 'Yêu cầu của bạn đã bị chặn vì lý do an toàn. Vui lòng thử lại với thông tin khác.',
     error_ai_invalid_json: 'Hệ thống AI đã trả về một định dạng dữ liệu không hợp lệ. Đây có thể là sự cố tạm thời, vui lòng thử lại.',
     error_ai_blocked_unknown: 'Không thể tạo nội dung. Phản hồi từ AI trống hoặc đã bị chặn.',
+    error_server_timeout: 'Máy chủ mất quá nhiều thời gian để phản hồi (Gateway Timeout). Điều này có thể do yêu cầu phức tạp hoặc máy chủ đang tải cao. Vui lòng thử lại trong giây lát.',
     
     // Home
     homeTitle: 'Khám Phá Huyền Học Cổ Đại',
@@ -831,6 +832,7 @@ export const translations = {
     error_ai_blocked_safety: 'Your request was blocked for safety reasons. Please try again with different information.',
     error_ai_invalid_json: 'The AI system returned an invalid data format. This may be a temporary issue, please try again.',
     error_ai_blocked_unknown: 'Could not generate content. The response from the AI was empty or blocked.',
+    error_server_timeout: 'The server took too long to respond (Gateway Timeout). This might be due to a complex request or high server load. Please try again in a moment.',
 
     // Home
     homeTitle: 'Explore Ancient Mysticism',
