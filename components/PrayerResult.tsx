@@ -15,7 +15,7 @@ interface Props {
 
 const PrayerResult: React.FC<Props> = ({ data, info, onTryAgain, onGoHome, onOpenDonationModal }) => {
     const { t, language } = useLocalization();
-    const { isSpeaking, isPaused, currentSentenceIndex, sentences, play, pause, cancel } = useSpeechSynthesis(data.prayerText, language);
+    const { isSpeaking, isPaused, currentSentenceIndex, sentences, play, pause, cancel } = useSpeechSynthesis(data.prayerText || '', language);
 
     return (
         <div className="max-w-4xl mx-auto">

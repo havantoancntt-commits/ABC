@@ -658,7 +658,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 const info: PrayerRequestInfo = params.info;
                 const response = await ai.models.generateContent({
                     model: commonConfig.model,
-                    config: { ...commonConfig.config, responseSchema: prayerSchema, systemInstruction: getSystemInstruction(operation, language) },
+                    config: {
+                        ...commonConfig.config,
+                        responseSchema: prayerSchema,
+                        systemInstruction: getSystemInstruction(operation, language),
+                        thinkingConfig: { thinkingBudget: 0 },
+                    },
                     contents: `Soạn bài văn khấn cho: Tên tín chủ: ${info.name}. Dịp: ${info.occasion}. Đối tượng khấn: ${info.deity}.`,
                 });
                 return parseJsonResponse(response);
