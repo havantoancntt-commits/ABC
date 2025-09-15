@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import type { PrayerData, PrayerRequestInfo } from '../lib/types';
 import Button from './Button';
 import Card from './Card';
@@ -16,6 +16,17 @@ interface Props {
 const PrayerResult: React.FC<Props> = ({ data, info, onTryAgain, onGoHome, onOpenDonationModal }) => {
     const { t, language } = useLocalization();
     const { isSpeaking, isPaused, currentSentenceIndex, sentences, play, pause, cancel } = useSpeechSynthesis(data.prayerText || '', language);
+    const sentenceRefs = useRef<(HTMLSpanElement | null)[]>([]);
+
+    useEffect(() => {
+        if (isSpeaking && currentSentenceIndex > -1 && sentenceRefs.current[currentSentenceIndex]) {
+            sentenceRefs.current[currentSentenceIndex]?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'nearest'
+            });
+        }
+    }, [currentSentenceIndex, isSpeaking]);
 
     return (
         <div className="max-w-4xl mx-auto">
@@ -54,7 +65,14 @@ const PrayerResult: React.FC<Props> = ({ data, info, onTryAgain, onGoHome, onOpe
                     <h3 className="text-2xl font-bold font-serif text-emerald-300 mb-4">{t('prayerTextTitle')}</h3>
                     <div className="text-gray-200 text-lg leading-loose whitespace-pre-wrap font-serif">
                          {sentences.map((sentence, index) => (
-                            <span key={index} className={`transition-all duration-300 ${currentSentenceIndex === index ? 'bg-yellow-500/20 text-yellow-200' : 'text-gray-300'}`}>
+                            <span
+                                key={index}
+                                // FIX: The ref callback function must return void or a cleanup function.
+                                // The original code was an assignment expression which returns the assigned value.
+                                // Wrapping the assignment in curly braces makes the function implicitly return undefined.
+                                ref={el => { sentenceRefs.current[index] = el; }}
+                                className={`transition-all duration-300 ${currentSentenceIndex === index ? 'bg-yellow-500/20 text-yellow-200' : 'text-gray-300'}`}
+                            >
                                 {sentence}
                             </span>
                         ))}

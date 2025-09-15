@@ -16,7 +16,7 @@ interface Props {
 const NumberCard: React.FC<{ title: string; numberInfo: NumerologyNumber, color: string }> = ({ title, numberInfo, color }) => (
     <div className="flex flex-col items-center text-center">
         <div className={`relative w-28 h-28 sm:w-32 sm:h-32 rounded-full flex items-center justify-center border-4 ${color} shadow-lg mb-4`}>
-            <div className={`absolute inset-0 rounded-full ${color.replace('border-', 'bg-').replace('cyan', 'blue')} opacity-10`}></div>
+            <div className={`absolute inset-0 rounded-full ${color.replace('border-', 'bg-')} opacity-10`}></div>
             <span className="text-5xl font-bold text-white font-serif">{numberInfo.number}</span>
         </div>
         <h3 className={`text-xl font-semibold ${color.replace('border-', 'text-')}`}>{title}</h3>
