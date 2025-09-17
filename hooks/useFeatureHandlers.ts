@@ -26,25 +26,58 @@ const trackFeatureUsage = (feature: string) => {
     }
 };
 
+const createApiHandler = <P, R>(
+    dispatch: Dispatch,
+    t: TFunction,
+    apiFunction: (params: P, lang: string) => Promise<R>,
+    featureName: string,
+    loadingState: AppState,
+    successState: AppState,
+    errorState: AppState,
+    saveItem: (payload: SavedItemPayload) => void
+) => {
+    return async (params: P, getSavePayload: (params: P, data: R) => SavedItemPayload) => {
+        trackFeatureUsage(featureName);
+        dispatch({ type: 'SET_VIEW', payload: loadingState });
+        try {
+            const data = await apiFunction(params, t('locale').startsWith('en') ? 'en' : 'vi');
+            const savePayload = getSavePayload(params, data);
+            saveItem(savePayload);
+            dispatch({ type: 'SET_DATA', payload: { [`${featureName}Data`]: data } });
+            dispatch({ type: 'SET_VIEW', payload: successState });
+        } catch (err) {
+            console.error(err);
+            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey, { name: '' }) || t('errorUnknown') });
+            dispatch({ type: 'SET_VIEW', payload: errorState });
+        }
+    };
+};
+
+
 export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: HookParams) => {
+
+    const handleApiError = useCallback((err: unknown, errorView: AppState) => {
+        console.error(err);
+        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
+        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey, { name: '' }) || t('errorUnknown') });
+        dispatch({ type: 'SET_VIEW', payload: errorView });
+    }, [dispatch, t]);
 
     const handleGenerateChart = useCallback(async (info: BirthInfo) => {
         trackFeatureUsage('astrologyChart');
         dispatch({ type: 'SET_DATA', payload: { birthInfo: info } });
         dispatch({ type: 'SET_VIEW', payload: AppState.LOADING });
         try {
-        // Always request Vietnamese for the astrology chart as the component has hardcoded VI palace names.
-        const data = await generateAstrologyChart(info, 'vi');
-        dispatch({ type: 'SET_DATA', payload: { chartData: data } });
-        saveItem({ type: 'astrology', birthInfo: info, chartData: data });
-        dispatch({ type: 'SET_VIEW', payload: AppState.RESULT });
+            // Astrology chart component relies on Vietnamese branch names for its grid layout, so we always request 'vi'.
+            const data = await generateAstrologyChart(info, 'vi');
+            dispatch({ type: 'SET_DATA', payload: { chartData: data } });
+            saveItem({ type: 'astrology', birthInfo: info, chartData: data });
+            dispatch({ type: 'SET_VIEW', payload: AppState.RESULT });
         } catch (err) {
-        console.error(err);
-        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.ASTROLOGY_FORM });
+            handleApiError(err, AppState.ASTROLOGY_FORM);
         }
-    }, [t, saveItem, dispatch]);
+    }, [saveItem, dispatch, handleApiError]);
     
     const handleAnalyzeFace = useCallback(async () => {
         const { capturedImage } = state.data;
@@ -58,17 +91,14 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             return;
         }
         try {
-        const data = await analyzePhysiognomy(base64Data, language);
-        dispatch({ type: 'SET_DATA', payload: { physiognomyData: data } });
-        saveItem({ type: 'physiognomy', name: t('itemTypePhysiognomy'), imageData: capturedImage, analysisData: data });
-        dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_RESULT });
+            const data = await analyzePhysiognomy(base64Data, language);
+            dispatch({ type: 'SET_DATA', payload: { physiognomyData: data } });
+            saveItem({ type: 'physiognomy', name: t('itemTypePhysiognomy'), imageData: capturedImage, analysisData: data });
+            dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_RESULT });
         } catch (err) {
-        console.error(err);
-        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_CAPTURE });
+            handleApiError(err, AppState.FACE_SCAN_CAPTURE);
         }
-    }, [state.data.capturedImage, language, t, saveItem, dispatch]);
+    }, [state.data.capturedImage, language, t, saveItem, dispatch, handleApiError]);
 
     const handleAnalyzePalm = useCallback(async () => {
         const { capturedPalmImage } = state.data;
@@ -82,17 +112,14 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             return;
         }
         try {
-        const data = await analyzePalm(base64Data, language);
-        dispatch({ type: 'SET_DATA', payload: { palmReadingData: data } });
-        saveItem({ type: 'palmReading', name: t('itemTypePalmReading'), imageData: capturedPalmImage, analysisData: data });
-        dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_RESULT });
+            const data = await analyzePalm(base64Data, language);
+            dispatch({ type: 'SET_DATA', payload: { palmReadingData: data } });
+            saveItem({ type: 'palmReading', name: t('itemTypePalmReading'), imageData: capturedPalmImage, analysisData: data });
+            dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_RESULT });
         } catch (err) {
-        console.error(err);
-        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.PALM_SCAN_CAPTURE });
+            handleApiError(err, AppState.PALM_SCAN_CAPTURE);
         }
-    }, [state.data.capturedPalmImage, language, t, saveItem, dispatch]);
+    }, [state.data.capturedPalmImage, language, t, saveItem, dispatch, handleApiError]);
 
     const handleAnalyzeHandwriting = useCallback(async () => {
         const { capturedHandwritingImage } = state.data;
@@ -106,17 +133,14 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             return;
         }
         try {
-        const data = await analyzeHandwriting(base64Data, language);
-        dispatch({ type: 'SET_DATA', payload: { handwritingData: data } });
-        saveItem({ type: 'handwriting', name: t('itemTypeHandwriting'), imageData: capturedHandwritingImage, analysisData: data });
-        dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_RESULT });
+            const data = await analyzeHandwriting(base64Data, language);
+            dispatch({ type: 'SET_DATA', payload: { handwritingData: data } });
+            saveItem({ type: 'handwriting', name: t('itemTypeHandwriting'), imageData: capturedHandwritingImage, analysisData: data });
+            dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_RESULT });
         } catch (err) {
-        console.error(err);
-        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.HANDWRITING_ANALYSIS_CAPTURE });
+            handleApiError(err, AppState.HANDWRITING_ANALYSIS_CAPTURE);
         }
-    }, [state.data.capturedHandwritingImage, language, t, saveItem, dispatch]);
+    }, [state.data.capturedHandwritingImage, language, t, saveItem, dispatch, handleApiError]);
 
     const handleAnalyzeHoaTay = useCallback(async (counts: { leftHandWhorls: number, rightHandWhorls: number }) => {
         trackFeatureUsage('hoaTay');
@@ -127,12 +151,9 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             saveItem({ type: 'hoaTay', name: t('itemTypeHoaTay'), analysisData: data });
             dispatch({ type: 'SET_VIEW', payload: AppState.HOA_TAY_SCAN_RESULT });
         } catch (err) {
-            console.error(err);
-            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-            dispatch({ type: 'SET_VIEW', payload: AppState.HOA_TAY_SCAN_CAPTURE });
+            handleApiError(err, AppState.HOA_TAY_SCAN_CAPTURE);
         }
-    }, [language, t, saveItem, dispatch]);
+    }, [language, t, saveItem, dispatch, handleApiError]);
 
     const handleGenerateNumerology = useCallback(async (info: NumerologyInfo) => {
         trackFeatureUsage('numerology');
@@ -144,12 +165,9 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             saveItem({ type: 'numerology', info, data });
             dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_RESULT });
         } catch (err) {
-            console.error(err);
-            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-            dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_FORM });
+            handleApiError(err, AppState.NUMEROLOGY_FORM);
         }
-    }, [language, t, saveItem, dispatch]);
+    }, [language, saveItem, dispatch, handleApiError]);
 
     const handleGenerateFlowAstrology = useCallback(async (info: FlowAstrologyInfo) => {
         trackFeatureUsage('flowAstrology');
@@ -161,12 +179,9 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             saveItem({ type: 'flowAstrology', info, data });
             dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_RESULT });
         } catch (err) {
-            console.error(err);
-            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-            dispatch({ type: 'SET_VIEW', payload: AppState.FLOW_ASTROLOGY_FORM });
+            handleApiError(err, AppState.FLOW_ASTROLOGY_FORM);
         }
-    }, [language, t, saveItem, dispatch]);
+    }, [language, saveItem, dispatch, handleApiError]);
 
     const handleGenerateCareerAdvice = useCallback(async (info: CareerInfo) => {
         trackFeatureUsage('careerAdvisor');
@@ -177,12 +192,9 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_DATA', payload: { careerAdviceData: data } });
             dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_RESULT });
         } catch (err) {
-            console.error(err);
-            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-            dispatch({ type: 'SET_VIEW', payload: AppState.CAREER_ADVISOR_FORM });
+            handleApiError(err, AppState.CAREER_ADVISOR_FORM);
         }
-    }, [language, t, dispatch]);
+    }, [language, dispatch, handleApiError]);
 
     const handleGenerateTalisman = useCallback(async (info: TalismanInfo) => {
         trackFeatureUsage('talisman');
@@ -193,12 +205,9 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_DATA', payload: { talismanData: data } });
             dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_RESULT });
         } catch (err) {
-            console.error(err);
-            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-            dispatch({ type: 'SET_VIEW', payload: AppState.TALISMAN_GENERATOR });
+            handleApiError(err, AppState.TALISMAN_GENERATOR);
         }
-    }, [language, t, dispatch]);
+    }, [language, dispatch, handleApiError]);
 
     const handleGenerateAuspiciousName = useCallback(async (info: AuspiciousNamingInfo) => {
         trackFeatureUsage('auspiciousNaming');
@@ -210,12 +219,9 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             saveItem({ type: 'auspiciousNaming', info, data });
             dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_RESULT });
         } catch (err) {
-            console.error(err);
-            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-            dispatch({ type: 'SET_VIEW', payload: AppState.AUSPICIOUS_NAMING_FORM });
+            handleApiError(err, AppState.AUSPICIOUS_NAMING_FORM);
         }
-    }, [language, t, saveItem, dispatch]);
+    }, [language, saveItem, dispatch, handleApiError]);
     
     const handleGenerateBioEnergy = useCallback(async (card: BioEnergyCard) => {
         const { bioEnergyInfo, capturedEnergyColor } = state.data;
@@ -229,12 +235,9 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
         saveItem({ type: 'bioEnergy', info: bioEnergyInfo, color: capturedEnergyColor, card, data });
         dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_RESULT });
         } catch (err) {
-        console.error(err);
-        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.BIO_ENERGY_FORM });
+            handleApiError(err, AppState.BIO_ENERGY_FORM);
         }
-    }, [state.data, language, t, saveItem, dispatch]);
+    }, [state.data, language, saveItem, dispatch, handleApiError]);
 
     const handleGetFortuneStick = useCallback(async (info: FortuneStickInfo) => {
         trackFeatureUsage('fortuneSticks');
@@ -245,12 +248,9 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_DATA', payload: { fortuneStickData: data } });
             dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_RESULT });
         } catch (err) {
-            console.error(err);
-            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-            dispatch({ type: 'SET_VIEW', payload: AppState.FORTUNE_STICKS_SHAKE });
+            handleApiError(err, AppState.FORTUNE_STICKS_SHAKE);
         }
-    }, [language, t, dispatch]);
+    }, [language, dispatch, handleApiError]);
 
     const handleGetGodOfWealthBlessing = useCallback(async (info: GodOfWealthInfo) => {
         trackFeatureUsage('godOfWealth');
@@ -262,12 +262,9 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             saveItem({ type: 'godOfWealth', info, data });
             dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_RESULT });
         } catch (err) {
-            console.error(err);
-            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-            dispatch({ type: 'SET_VIEW', payload: AppState.GOD_OF_WEALTH_BLESSING });
+            handleApiError(err, AppState.GOD_OF_WEALTH_BLESSING);
         }
-    }, [language, t, saveItem, dispatch]);
+    }, [language, saveItem, dispatch, handleApiError]);
 
     const handleGeneratePrayer = useCallback(async (info: PrayerRequestInfo) => {
         trackFeatureUsage('prayer');
@@ -279,12 +276,9 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             saveItem({ type: 'prayer', info, data });
             dispatch({ type: 'SET_VIEW', payload: AppState.PRAYER_GENERATOR_RESULT });
         } catch (err) {
-            console.error(err);
-            const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-            dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-            dispatch({ type: 'SET_VIEW', payload: AppState.PRAYER_GENERATOR_FORM });
+            handleApiError(err, AppState.PRAYER_GENERATOR_FORM);
         }
-    }, [language, t, saveItem, dispatch]);
+    }, [language, saveItem, dispatch, handleApiError]);
 
     const handleAnalyzeFengShui = useCallback(async (frames: string[], thumbnail: string) => {
         const { fengShuiInfo } = state.data;
@@ -298,12 +292,9 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
         saveItem({ type: 'fengShui', info: fengShuiInfo, data, thumbnail });
         dispatch({ type: 'SET_VIEW', payload: AppState.FENG_SHUI_RESULT });
         } catch (err) {
-        console.error(err);
-        const errorMessage = err instanceof Error ? err.message : 'error_server_generic';
-        dispatch({ type: 'SET_ERROR', payload: t(errorMessage as TranslationKey) || t('errorUnknown') });
-        dispatch({ type: 'SET_VIEW', payload: AppState.FENG_SHUI_FORM });
+            handleApiError(err, AppState.FENG_SHUI_FORM);
         }
-    }, [state.data.fengShuiInfo, language, t, saveItem, dispatch]);
+    }, [state.data.fengShuiInfo, language, saveItem, dispatch, handleApiError]);
 
     const handleCaptureImage = useCallback((imageDataUrl: string) => { dispatch({ type: 'SET_DATA', payload: { capturedImage: imageDataUrl } }); }, [dispatch]);
     const handleRetakeCapture = useCallback(() => { dispatch({ type: 'SET_DATA', payload: { capturedImage: null } }); dispatch({type: 'SET_ERROR', payload: null}); }, [dispatch]);
@@ -318,6 +309,7 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
 
      const handleViewItem = useCallback((item: SavedItem) => {
         const { payload } = item;
+        dispatch({ type: 'RESET_FEATURE_DATA' }); // Clear previous feature data before loading new one
         switch (payload.type) {
             case 'astrology':
                 dispatch({ type: 'SET_DATA', payload: { birthInfo: payload.birthInfo, chartData: payload.chartData } });

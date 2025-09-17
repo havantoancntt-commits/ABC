@@ -11,17 +11,6 @@ export const SUPPORT_INFO = {
   paypalUrl: 'https://www.paypal.me/TOANVAIO',
 };
 
-// This function reads the Google Client ID from a meta tag in the HTML.
-// It is called from the useGoogleAuth hook to avoid a potential race condition
-// where this module could be evaluated before the DOM (and the meta tag) is ready.
-export const getGoogleClientId = (): string | null => {
-  if (typeof document !== 'undefined') {
-    const meta = document.querySelector('meta[name="google-client-id"]');
-    return meta ? meta.getAttribute('content') : null;
-  }
-  return null;
-};
-
 
 export const TAROT_CARDS_MAJOR_ARCANA: readonly TarotCard[] = [
   { id: 0, name: { vi: 'The Fool', en: 'The Fool' } },
@@ -47,3 +36,11 @@ export const TAROT_CARDS_MAJOR_ARCANA: readonly TarotCard[] = [
   { id: 20, name: { vi: 'Judgement', en: 'Judgement' } },
   { id: 21, name: { vi: 'The World', en: 'The World' } },
 ];
+
+// FIX: Added missing getGoogleClientId function to resolve import errors.
+export const getGoogleClientId = (): string | undefined => {
+  // This function retrieves the Google Client ID from environment variables.
+  // The specific variable name depends on the build tool (e.g., Vite, Create React App, Next.js).
+  // Ensure the appropriate environment variable is set in your Vercel project settings.
+  return process.env.REACT_APP_GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID;
+};

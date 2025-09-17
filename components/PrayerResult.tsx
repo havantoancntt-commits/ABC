@@ -67,9 +67,6 @@ const PrayerResult: React.FC<Props> = ({ data, info, onTryAgain, onGoHome, onOpe
                          {sentences.map((sentence, index) => (
                             <span
                                 key={index}
-                                // FIX: The ref callback function must return void or a cleanup function.
-                                // The original code was an assignment expression which returns the assigned value.
-                                // Wrapping the assignment in curly braces makes the function implicitly return undefined.
                                 ref={el => { sentenceRefs.current[index] = el; }}
                                 className={`transition-all duration-300 ${currentSentenceIndex === index ? 'bg-yellow-500/20 text-yellow-200' : 'text-gray-300'}`}
                             >

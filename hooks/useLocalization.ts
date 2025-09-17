@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect, useCallback, Rea
 import { translations } from '../locales/translations';
 
 export type Language = 'vi' | 'en';
-// FIX: Updated TranslationKey to ensure keys exist in both languages, improving type safety.
+// By using an intersection type, we ensure at compile time that a key exists in BOTH languages.
 export type TranslationKey = keyof typeof translations.vi & keyof typeof translations.en;
 
 interface LanguageContextType {
@@ -57,7 +57,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, [language]);
 
   const value = { language, setLanguage, t };
-  
+
   // FIX: Replaced JSX with React.createElement to resolve parsing errors in a .ts file.
   return React.createElement(LanguageContext.Provider, { value: value }, children);
 };

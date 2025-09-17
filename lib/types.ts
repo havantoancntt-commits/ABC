@@ -148,7 +148,7 @@ export interface PhysiognomyData {
     tongQuan: string;
     tamDinh: string;
     nguQuan: string;
-    notRuoiVaTanNhang?: string;
+    notRuoiVaTanNhang?: string; // Optional field for moles & freckles
     loiKhuyen: string;
 }
 

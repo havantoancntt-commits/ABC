@@ -12,16 +12,16 @@ async function callProxy(operation: string, payload: object): Promise<any> {
             // Throw a specific key for timeout errors that can be translated on the frontend.
             throw new Error('error_server_timeout');
         }
-        let errorMsg = 'An unknown server error occurred.';
+        let errorMsg = 'error_server_generic';
         try {
             const errorData = await response.json();
             // The error key (e.g., 'error_ai_overloaded') will be used for translation on the frontend
             errorMsg = errorData.error || `Server Error: ${response.status}`;
         } catch (e) {
             // This catches cases where the response is not JSON, e.g., a Vercel 500 HTML page.
-             errorMsg = `Server returned a non-JSON response (Status: ${response.status}).`;
+             errorMsg = `Server returned a non-JSON response (Status: ${response.status}). Please check the function logs.`;
         }
-        // Throw the error message directly, which will be caught by the UI component
+        // Throw the error key directly, which will be caught by the UI component for translation
         throw new Error(errorMsg);
     }
 
