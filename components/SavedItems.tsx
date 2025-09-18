@@ -48,6 +48,8 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
                 return t('itemDescHandwriting', { date });
             case 'hoaTay':
                 return t('itemDescHoaTay', { count: payload.analysisData.totalWhorls });
+            case 'nhatMenh':
+                return t('itemDescNhatMenh', { date: new Intl.DateTimeFormat(t('locale'), { dateStyle: 'medium' }).format(new Date(payload.info.year, payload.info.month - 1, payload.info.day)) });
             default:
                 return new Intl.DateTimeFormat(t('locale'), { dateStyle: 'full', timeStyle: 'short' }).format(new Date(item.timestamp));
         }
@@ -63,6 +65,7 @@ const ItemDetails: React.FC<{ item: SavedItem }> = ({ item }) => {
             case 'prayer': return payload.info.occasion;
             case 'fengShui': return payload.info.spaceType;
             case 'hoaTay': return getTitle();
+            case 'nhatMenh': return getTitle();
             default: return getTitle();
         }
     }
@@ -85,7 +88,7 @@ const SavedItems: React.FC<Props> = ({ items, onView, onDelete, onCreateNew }) =
       {items.length > 0 ? (
         <div className="space-y-4 mb-8">
           {items.map((item, index) => {
-            const nameForAria = item.payload.type === 'astrology' ? item.payload.birthInfo.name : t(`itemType${item.payload.type.charAt(0).toUpperCase() + item.payload.type.slice(1)}` as TranslationKey);
+            const nameForAria = item.payload.type === 'astrology' ? item.payload.birthInfo.name : t(`itemType${item.payload.type.charAt(0).toUpperCase() + item.payload.type.slice(1)}` as TranslationKey, {name: ''});
             return (
                 <div 
                   key={item.id} 

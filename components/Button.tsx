@@ -1,6 +1,6 @@
 import React from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'special' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology' | 'career' | 'talisman' | 'naming' | 'bioenergy' | 'fortune' | 'wealth' | 'prayer' | 'fengshui' | 'hoatay';
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'special' | 'iching' | 'shop' | 'numerology' | 'palm' | 'tarot' | 'flow' | 'dayselection' | 'graphology' | 'career' | 'talisman' | 'naming' | 'bioenergy' | 'fortune' | 'wealth' | 'prayer' | 'fengshui' | 'hoatay' | 'nhatmenh';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -41,6 +41,7 @@ const Button: React.FC<Props> = ({
     prayer: 'bg-gradient-to-r from-emerald-600 to-yellow-600 text-white hover:brightness-110 focus-visible:ring-emerald-400 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40',
     fengshui: 'bg-gradient-to-r from-green-600 to-emerald-700 text-white hover:brightness-110 focus-visible:ring-green-400 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40',
     hoatay: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white hover:brightness-110 focus-visible:ring-pink-400 shadow-lg shadow-pink-500/30 hover:shadow-xl hover:shadow-pink-500/40',
+    nhatmenh: 'bg-gradient-to-br from-purple-600 via-blue-500 to-cyan-400 text-white hover:brightness-110 focus-visible:ring-purple-400 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40',
   };
 
   const sizeClasses: Record<ButtonSize, string> = {

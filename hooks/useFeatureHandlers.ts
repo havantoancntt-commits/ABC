@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
-import type { AppStateStructure, BirthInfo, NumerologyInfo, FlowAstrologyInfo, CareerInfo, TalismanInfo, AuspiciousNamingInfo, BioEnergyInfo, BioEnergyCard, FortuneStickInfo, GodOfWealthInfo, PrayerRequestInfo, FengShuiInfo, SavedItemPayload, SavedItem } from '../types';
+import type { AppStateStructure, BirthInfo, NumerologyInfo, FlowAstrologyInfo, CareerInfo, TalismanInfo, AuspiciousNamingInfo, BioEnergyInfo, BioEnergyCard, FortuneStickInfo, GodOfWealthInfo, PrayerRequestInfo, FengShuiInfo, SavedItemPayload, SavedItem, NhatMenhInfo } from '../types';
 import { AppState } from '../types';
-import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName, generateBioEnergyReading, getFortuneStickInterpretation, getGodOfWealthBlessing, generatePrayer, analyzeFengShui, analyzeHoaTay } from '../lib/gemini';
+import { generateAstrologyChart, analyzePhysiognomy, generateNumerologyChart, analyzePalm, generateFlowAstrology, analyzeHandwriting, getCareerAdvice, generateTalisman, generateAuspiciousName, generateBioEnergyReading, getFortuneStickInterpretation, getGodOfWealthBlessing, generatePrayer, analyzeFengShui, analyzeHoaTay, getNhatMenhReading } from '../lib/gemini';
 import type { TranslationKey } from './useLocalization';
 
 type Dispatch = React.Dispatch<any>;
@@ -166,6 +166,20 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
             dispatch({ type: 'SET_VIEW', payload: AppState.NUMEROLOGY_RESULT });
         } catch (err) {
             handleApiError(err, AppState.NUMEROLOGY_FORM);
+        }
+    }, [language, saveItem, dispatch, handleApiError]);
+
+    const handleGetNhatMenhReading = useCallback(async (info: NhatMenhInfo) => {
+        trackFeatureUsage('nhatMenh');
+        dispatch({ type: 'SET_DATA', payload: { nhatMenhInfo: info } });
+        dispatch({ type: 'SET_VIEW', payload: AppState.NHAT_MENH_LOADING });
+        try {
+            const data = await getNhatMenhReading(info, language);
+            dispatch({ type: 'SET_DATA', payload: { nhatMenhData: data } });
+            saveItem({ type: 'nhatMenh', info, data });
+            dispatch({ type: 'SET_VIEW', payload: AppState.NHAT_MENH_RESULT });
+        } catch (err) {
+            handleApiError(err, AppState.NHAT_MENH_FORM);
         }
     }, [language, saveItem, dispatch, handleApiError]);
 
@@ -359,13 +373,17 @@ export const useFeatureHandlers = ({ state, dispatch, saveItem, language, t }: H
                 dispatch({ type: 'SET_DATA', payload: { fengShuiInfo: payload.info, fengShuiData: payload.data, fengShuiThumbnail: payload.thumbnail } });
                 dispatch({ type: 'SET_VIEW', payload: AppState.FENG_SHUI_RESULT });
                 break;
+            case 'nhatMenh':
+                dispatch({ type: 'SET_DATA', payload: { nhatMenhInfo: payload.info, nhatMenhData: payload.data } });
+                dispatch({ type: 'SET_VIEW', payload: AppState.NHAT_MENH_RESULT });
+                break;
             default: break;
         }
     }, [dispatch]);
 
     return {
         handleGenerateChart, handleAnalyzeFace, handleAnalyzePalm, handleAnalyzeHandwriting, handleAnalyzeHoaTay,
-        handleGenerateNumerology, handleGenerateFlowAstrology, handleGenerateCareerAdvice,
+        handleGenerateNumerology, handleGenerateFlowAstrology, handleGenerateCareerAdvice, handleGetNhatMenhReading,
         handleGenerateTalisman, handleGenerateAuspiciousName, handleGenerateBioEnergy,
         handleGetFortuneStick, handleGetGodOfWealthBlessing, handleGeneratePrayer, handleAnalyzeFengShui,
         handleCaptureImage, handleRetakeCapture, handleCapturePalmImage, handleRetakePalmCapture,

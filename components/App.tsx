@@ -14,6 +14,7 @@ import { useFeatureHandlers } from '../hooks/useFeatureHandlers';
 
 // --- Lazy Load Components for Performance ---
 const Home = lazy(() => import('./Home'));
+const AllFeatures = lazy(() => import('./AllFeatures'));
 const SavedItems = lazy(() => import('./SavedItems'));
 const BirthInfoForm = lazy(() => import('./BirthInfoForm'));
 const AstrologyChart = lazy(() => import('./AstrologyChart'));
@@ -27,7 +28,7 @@ const ZodiacHourFinder = lazy(() => import('./ZodiacHourFinder'));
 const AuspiciousDayFinder = lazy(() => import('./AuspiciousDayFinder'));
 const IChingDivination = lazy(() => import('./IChingDivination'));
 const TarotReading = lazy(() => import('./TarotReading'));
-const Shop = lazy(() => import('./Hero'));
+const Shop = lazy(() => import('./Shop'));
 const NumerologyForm = lazy(() => import('./NumerologyForm'));
 const NumerologyChart = lazy(() => import('./NumerologyChart'));
 const FlowAstrologyForm = lazy(() => import('./FlowAstrologyForm'));
@@ -53,6 +54,8 @@ const FengShuiCapture = lazy(() => import('./FengShuiCapture'));
 const FengShuiResult = lazy(() => import('./FengShuiResult'));
 const HoaTayScan = lazy(() => import('./HoaTayScan'));
 const HoaTayResult = lazy(() => import('./HoaTayResult'));
+const NhatMenhForm = lazy(() => import('./NhatMenhForm'));
+const NhatMenhResult = lazy(() => import('./NhatMenhResult'));
 
 
 // --- State Management with useReducer ---
@@ -65,7 +68,7 @@ const initialState: AppStateStructure = {
     careerInfo: null, careerAdviceData: null, talismanInfo: null, talismanData: null, auspiciousNamingInfo: null,
     auspiciousNamingData: null, bioEnergyInfo: null, bioEnergyData: null, fortuneStickInfo: null, fortuneStickData: null,
     godOfWealthInfo: null, godOfWealthData: null, prayerRequestInfo: null, prayerData: null, fengShuiInfo: null, fengShuiData: null,
-    hoaTayData: null,
+    hoaTayData: null, nhatMenhInfo: null, nhatMenhData: null,
     capturedImage: null, capturedPalmImage: null, capturedHandwritingImage: null, capturedEnergyColor: null, drawnBioEnergyCard: null, fengShuiThumbnail: null,
   },
   error: null,
@@ -178,6 +181,7 @@ const App: React.FC = () => {
     const createDeterministicId = (...args: (string | number)[]) => args.join('-').trim().replace(/\s+/g, '_');
 
     switch (payload.type) {
+        case 'nhatMenh': id = `nhatmenh-${createDeterministicId(payload.info.year, payload.info.month, payload.info.day, payload.info.spiritualMark)}`; isUpdate = true; break;
         case 'astrology': id = `astrology-${createDeterministicId(payload.birthInfo.name, payload.birthInfo.gender, payload.birthInfo.year, payload.birthInfo.month, payload.birthInfo.day, payload.birthInfo.hour)}`; isUpdate = true; break;
         case 'numerology': id = `numerology-${createDeterministicId(payload.info.fullName, payload.info.year, payload.info.month, payload.info.day)}`; isUpdate = true; break;
         case 'flowAstrology': id = `flow-${createDeterministicId(payload.info.name, payload.info.year, payload.info.month, payload.info.day)}`; isUpdate = true; break;
@@ -201,7 +205,7 @@ const App: React.FC = () => {
   
   const {
       handleGenerateChart, handleAnalyzeFace, handleAnalyzePalm, handleAnalyzeHandwriting, handleAnalyzeHoaTay,
-      handleGenerateNumerology, handleGenerateFlowAstrology, handleGenerateCareerAdvice,
+      handleGenerateNumerology, handleGenerateFlowAstrology, handleGenerateCareerAdvice, handleGetNhatMenhReading,
       handleGenerateTalisman, handleGenerateAuspiciousName, handleGenerateBioEnergy,
       handleGetFortuneStick, handleGetGodOfWealthBlessing, handleGeneratePrayer, handleAnalyzeFengShui,
       handleCaptureImage, handleRetakeCapture, handleCapturePalmImage, handleRetakePalmCapture,
@@ -225,7 +229,12 @@ const App: React.FC = () => {
 
 
   const handleDeleteItem = (itemToDelete: SavedItem) => {
-      const name = itemToDelete.payload.type === 'astrology' ? itemToDelete.payload.birthInfo.name : t(`itemType${itemToDelete.payload.type.charAt(0).toUpperCase() + itemToDelete.payload.type.slice(1)}` as TranslationKey);
+      let name: string;
+      switch (itemToDelete.payload.type) {
+        case 'astrology': name = itemToDelete.payload.birthInfo.name; break;
+        case 'nhatMenh': name = t('itemTypeNhatMenh'); break;
+        default: name = t(`itemType${itemToDelete.payload.type.charAt(0).toUpperCase() + itemToDelete.payload.type.slice(1)}` as TranslationKey); break;
+      }
       setModalState({ type: 'deleteItem', item: itemToDelete, title: t('confirmDeleteTitle'), message: t('confirmDeleteMessageWithName', { name }) });
   };
   
@@ -262,11 +271,17 @@ const App: React.FC = () => {
   const handleResetGodOfWealth = createResetHandler(AppState.GOD_OF_WEALTH_BLESSING);
   const handleResetPrayer = createResetHandler(AppState.PRAYER_GENERATOR_FORM);
   const handleResetFengShui = createResetHandler(AppState.FENG_SHUI_FORM);
+  const handleResetNhatMenh = createResetHandler(AppState.NHAT_MENH_FORM);
 
   const renderContent = () => {
     switch (state.currentView) {
       case AppState.HOME:
         return <Home 
+            onStartNhatMenh={() => dispatch({ type: 'SET_VIEW', payload: AppState.NHAT_MENH_FORM })} 
+            onViewAllFeatures={() => dispatch({ type: 'SET_VIEW', payload: AppState.ALL_FEATURES })}
+        />;
+      case AppState.ALL_FEATURES:
+        return <AllFeatures 
             onStartAstrology={() => dispatch({ type: 'SET_VIEW', payload: AppState.ASTROLOGY_FORM })} 
             onStartPhysiognomy={() => dispatch({ type: 'SET_VIEW', payload: AppState.FACE_SCAN_CAPTURE })}
             onStartZodiacFinder={() => dispatch({ type: 'SET_VIEW', payload: AppState.ZODIAC_HOUR_FINDER })}
@@ -288,6 +303,12 @@ const App: React.FC = () => {
             onStartFengShui={() => dispatch({ type: 'SET_VIEW', payload: AppState.FENG_SHUI_FORM })}
             onStartHoaTay={() => dispatch({ type: 'SET_VIEW', payload: AppState.HOA_TAY_SCAN_CAPTURE })}
         />;
+      case AppState.NHAT_MENH_FORM:
+        return <NhatMenhForm onSubmit={handleGetNhatMenhReading} />;
+      case AppState.NHAT_MENH_LOADING:
+        return <Spinner initialMessageKey='spinnerNhatMenh' />;
+      case AppState.NHAT_MENH_RESULT:
+        return state.data.nhatMenhData && state.data.nhatMenhInfo && <NhatMenhResult data={state.data.nhatMenhData} info={state.data.nhatMenhInfo} onTryAgain={handleResetNhatMenh} onGoHome={handleGoHome} onOpenDonationModal={() => setIsDonationModalOpen(true)} />;
       case AppState.SAVED_ITEMS:
         return <SavedItems items={savedItems} onView={handleViewItem} onDelete={handleDeleteItem} onCreateNew={handleGoHome} />;
       case AppState.ASTROLOGY_FORM:

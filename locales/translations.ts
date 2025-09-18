@@ -96,6 +96,12 @@ export const translations = {
     viewTitleHOA_TAY_SCAN_CAPTURE: 'Xem Hoa Tay',
     viewTitleHOA_TAY_SCAN_LOADING: 'Đang Phân Tích Hoa Tay',
     viewTitleHOA_TAY_SCAN_RESULT: 'Kết Quả Xem Hoa Tay',
+    // FIX: Added missing translation key
+    viewTitleNHAT_MENH_FORM: "Luận Giải Nhật Mệnh",
+    // FIX: Added missing translation key
+    viewTitleNHAT_MENH_LOADING: "Đang Luận Giải Nhật Mệnh",
+    // FIX: Added missing translation key
+    viewTitleNHAT_MENH_RESULT: "Kết Quả Nhật Mệnh",
 
     // Backend Errors
     error_ai_overloaded: 'Hệ thống AI hiện đang quá tải hoặc đã hết tài nguyên. Vui lòng thử lại sau ít phút.',
@@ -726,6 +732,30 @@ export const translations = {
     noCustomersFound: 'Không tìm thấy khách hàng.',
     confirmDeleteCustomerTitle: 'Xác Nhận Xóa Khách Hàng',
     confirmDeleteCustomerMessage: 'Bạn có chắc chắn muốn xóa khách hàng "{{name}}"?',
+
+    // Nhat Menh
+    nhatMenhAppName: "Nhật Mệnh",
+    nhatMenhAppSubtitle: "Khám phá thông điệp và năng lượng của ngày hôm nay dành riêng cho bạn.",
+    nhatMenhCtaButton: "Xem Luận Giải Nhật Mệnh",
+    nhatMenhViewOtherTools: "Xem Các Công Cụ Khác",
+    itemTypeNhatMenh: "Luận Giải Nhật Mệnh",
+    itemDescNhatMenh: "Luận giải cho ngày {{date}}",
+    spinnerNhatMenh: "AI đang phân tích Nhật Mệnh, kết nối với năng lượng của ngày...",
+    nhatMenhFormTitle: "Luận Giải Nhật Mệnh",
+    nhatMenhFormSubtitle: "Chọn ngày bạn muốn xem và một Dấu Ấn Tâm Linh để nhận thông điệp dành riêng cho mình.",
+    nhatMenhFormDateLabel: "Chọn Ngày Cần Xem",
+    nhatMenhFormSpiritualMarkLabel: "Chọn Dấu Ấn Tâm Linh Của Bạn",
+    nhatMenhResultTitle: "Thông Điệp Nhật Mệnh",
+    nhatMenhCardTitle: "Thẻ Nhật Mệnh",
+    nhatMenhDestinyNumber: "Con Số Của Ngày",
+    nhatMenhDominantElement: "Ngũ Hành Chủ Đạo",
+    nhatMenhLuckyColor: "Màu May Mắn",
+    nhatMenhLuckyZodiac: "Quý Nhân",
+    nhatMenhUnluckyZodiac: "Cần Lưu Ý",
+    nhatMenhOverallReading: "Luận Giải Tổng Quan",
+    nhatMenhSpiritualMark: "Thông Điệp Dấu Ấn Tâm Linh",
+    nhatMenhDailyMessage: "Thông Điệp Trong Ngày",
+    nhatMenhTryAgain: "Xem Ngày Khác",
   },
   en: {
     // Common
@@ -824,6 +854,12 @@ export const translations = {
     viewTitleHOA_TAY_SCAN_CAPTURE: 'Whorl Reading',
     viewTitleHOA_TAY_SCAN_LOADING: 'Analyzing Whorls',
     viewTitleHOA_TAY_SCAN_RESULT: 'Whorl Reading Result',
+    // FIX: Added missing translation key
+    viewTitleNHAT_MENH_FORM: "Daily Destiny Reading",
+    // FIX: Added missing translation key
+    viewTitleNHAT_MENH_LOADING: "Analyzing Daily Destiny",
+    // FIX: Added missing translation key
+    viewTitleNHAT_MENH_RESULT: "Daily Destiny Result",
 
     // Backend Errors
     error_ai_overloaded: 'The AI system is currently overloaded or out of resources. Please try again in a few moments.',
@@ -1454,5 +1490,29 @@ export const translations = {
     noCustomersFound: 'No customers found.',
     confirmDeleteCustomerTitle: 'Confirm Customer Deletion',
     confirmDeleteCustomerMessage: 'Are you sure you want to delete the customer "{{name}}"?',
+
+    // Nhat Menh
+    nhatMenhAppName: "Daily Destiny",
+    nhatMenhAppSubtitle: "Discover today's message and energy, personalized just for you.",
+    nhatMenhCtaButton: "View Daily Destiny Reading",
+    nhatMenhViewOtherTools: "View Other Tools",
+    itemTypeNhatMenh: "Daily Destiny Reading",
+    itemDescNhatMenh: "Reading for {{date}}",
+    spinnerNhatMenh: "AI is analyzing the day's destiny, connecting with its unique energy...",
+    nhatMenhFormTitle: "Daily Destiny Reading",
+    nhatMenhFormSubtitle: "Select the day you wish to view and a Spiritual Mark to receive your unique message.",
+    nhatMenhFormDateLabel: "Select Date to View",
+    nhatMenhFormSpiritualMarkLabel: "Choose Your Spiritual Mark",
+    nhatMenhResultTitle: "Daily Destiny Message",
+    nhatMenhCardTitle: "Destiny Card",
+    nhatMenhDestinyNumber: "Day's Number",
+    nhatMenhDominantElement: "Dominant Element",
+    nhatMenhLuckyColor: "Lucky Color",
+    nhatMenhLuckyZodiac: "Helpful Zodiac",
+    nhatMenhUnluckyZodiac: "Be Mindful Of",
+    nhatMenhOverallReading: "Overall Reading",
+    nhatMenhSpiritualMark: "Spiritual Mark Message",
+    nhatMenhDailyMessage: "Message for the Day",
+    nhatMenhTryAgain: "View Another Day",
   }
 };

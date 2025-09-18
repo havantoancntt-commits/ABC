@@ -1,8 +1,7 @@
-
-
 // --- App State Management ---
 export enum AppState {
   HOME,
+  ALL_FEATURES,
   SAVED_ITEMS,
   ASTROLOGY_FORM,
   LOADING,
@@ -57,6 +56,9 @@ export enum AppState {
   HOA_TAY_SCAN_CAPTURE,
   HOA_TAY_SCAN_LOADING,
   HOA_TAY_SCAN_RESULT,
+  NHAT_MENH_FORM,
+  NHAT_MENH_LOADING,
+  NHAT_MENH_RESULT,
 }
 
 export interface AppStateStructure {
@@ -88,6 +90,8 @@ export interface AppStateStructure {
     fengShuiInfo: FengShuiInfo | null;
     fengShuiData: FengShuiData | null;
     hoaTayData: HoaTayData | null;
+    nhatMenhInfo: NhatMenhInfo | null;
+    nhatMenhData: NhatMenhData | null;
     capturedImage: string | null;
     capturedPalmImage: string | null;
     capturedHandwritingImage: string | null;
@@ -104,6 +108,26 @@ export type ConfirmationModalState =
 
 
 // --- Feature-Specific Types ---
+
+export interface NhatMenhInfo {
+  day: number;
+  month: number;
+  year: number;
+  hour?: number;
+  spiritualMark: string;
+}
+
+export interface NhatMenhData {
+  destinyNumber: number;
+  dominantElement: 'Kim' | 'Mộc' | 'Thủy' | 'Hỏa' | 'Thổ';
+  overallReading: string;
+  luckyZodiac: string;
+  unluckyZodiac: string;
+  luckyColorName: string;
+  luckyColorHex: string;
+  dailyMessage: string;
+  spiritualMarkInterpretation: string;
+}
 
 export interface BirthInfo {
   name: string;
@@ -539,6 +563,12 @@ export interface SavedFengShuiPayload {
     thumbnail: string;
 }
 
+export interface SavedNhatMenhPayload {
+    type: 'nhatMenh';
+    info: NhatMenhInfo;
+    data: NhatMenhData;
+}
+
 export type SavedItemPayload = 
     | SavedAstrologyPayload 
     | SavedPhysiognomyPayload 
@@ -551,7 +581,8 @@ export type SavedItemPayload =
     | SavedBioEnergyPayload
     | SavedGodOfWealthPayload
     | SavedPrayerPayload
-    | SavedFengShuiPayload;
+    | SavedFengShuiPayload
+    | SavedNhatMenhPayload;
 
 export interface SavedItem {
     id: string;
